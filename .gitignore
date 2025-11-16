@@ -1,0 +1,44 @@
+﻿# Dependencies
+/node_modules
+
+# Build/Distribution
+# Thư mục chứa kết quả build của Vite/Webpack
+/dist
+/dist-ssr
+/build
+*.local
+
+# Logs
+# Các thư mục và tệp log chung của dự án và các công cụ quản lý gói
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Environment files
+# Chứa các biến môi trường nhạy cảm
+.env
+.env.local
+.env.*.local
+
+# Editor/OS Files
+.DS_Store
+Thumbs.db
+.idea
+.vscode/
+.vs/
+
+# EXCEPT for VS Code extensions file (quy tắc phủ định)
+!.vscode/extensions.json 
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ❌ Custom Exclusion (Theo yêu cầu của bạn)
+# Loại trừ toàn bộ thư mục 'src' và mọi thứ bên trong nó
+/src/
