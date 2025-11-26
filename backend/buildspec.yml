@@ -1,0 +1,54 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo Installing dependencies...
+      - cd backend
+      - npm ci
+
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Running tests...
+      - npm test || true
+
+      - echo Building Lambda package...
+      # Create deployment package
+      - mkdir -p dist
+      - cp -r src/* dist/
+      - cp package*.json dist/
+      - cd dist
+      - npm ci --production
+
+      # Create zip file
+      - zip -r ../lambda-deployment.zip .
+      - cd ..
+
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Updating Lambda function...
+
+      # Update Lambda function code
+      - |
+        aws lambda update-function-code \
+          --function-name $LAMBDA_FUNCTION_NAME \
+          --zip-file fileb://lambda-deployment.zip
+
+      # Wait for function update to complete
+      - |
+        aws lambda wait function-updated \
+          --function-name $LAMBDA_FUNCTION_NAME
+
+      - echo Deployment completed successfully
+
+artifacts:
+  files:
+    - lambda-deployment.zip
+  base-directory: backend
+  name: backend-build
+
+cache:
+  paths:
+    - 'backend/node_modules/**/*'
