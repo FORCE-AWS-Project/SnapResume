@@ -1,0 +1,32 @@
+.layout {
+  background: var(--color-dark-bg);
+  min-height: 100vh;
+  display: flex;
+  align-items: stretch;
+}
+
+.content {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl);
+}
+
+.formContainer {
+  width: 100%;
+  max-width: 450px;
+  color: var(--color-text-primary);
+}
+
+.activeTab {
+  font-size: var(--font-size-lg);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.inactiveTab {
+  font-size: var(--font-size-lg);
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
