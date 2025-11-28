@@ -39,6 +39,3 @@ Thumbs.db
 *.sln
 *.sw?
 
-# ❌ Custom Exclusion (Theo yêu cầu của bạn)
-# Loại trừ toàn bộ thư mục 'src' và mọi thứ bên trong nó
-/src/
