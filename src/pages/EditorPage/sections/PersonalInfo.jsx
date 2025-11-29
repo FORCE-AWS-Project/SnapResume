@@ -1,8 +1,8 @@
 import { Form, Input, Button, Upload, Checkbox, Tooltip, Space, message } from 'antd'
-import { 
-  UserOutlined, 
-  MailOutlined, 
-  PhoneOutlined, 
+import {
+  UserOutlined,
+  MailOutlined,
+  PhoneOutlined,
   EnvironmentOutlined,
   LinkedinOutlined,
   GithubOutlined,
@@ -61,7 +61,7 @@ export default function PersonalInfo({ data, onInputChange }) {
         />
       </Form.Item>
 
-      <Form.Item 
+      <Form.Item
         label={
           <span>
             Role Title{' '}
@@ -107,7 +107,7 @@ export default function PersonalInfo({ data, onInputChange }) {
         </Form.Item>
       </Space.Compact>
 
-      <Form.Item 
+      <Form.Item
         label={
           <span>
             Location{' '}
@@ -163,7 +163,7 @@ export default function PersonalInfo({ data, onInputChange }) {
         </Space>
       </Form.Item>
 
-      <Form.Item 
+      <Form.Item
         label={
           <span>
             Professional Summary{' '}
@@ -204,7 +204,7 @@ export default function PersonalInfo({ data, onInputChange }) {
           Show photo on resume
         </Checkbox>
         <div style={{ marginTop: 8, fontSize: 12, color: '#fa8c16', backgroundColor: '#fff7e6', padding: 8, borderRadius: 4 }}>
-          <InfoCircleOutlined /> <strong>Regional Note:</strong> Photos are standard in Europe/Asia/LatAm 
+          <InfoCircleOutlined /> <strong>Regional Note:</strong> Photos are standard in Europe/Asia/LatAm
           but discouraged in US/UK/Canada due to anti-discrimination laws.
         </div>
       </Form.Item>

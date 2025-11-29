@@ -1,7 +1,7 @@
 import { Card, Divider, Space, Empty, Tag } from 'antd'
-import { 
-  MailOutlined, 
-  PhoneOutlined, 
+import {
+  MailOutlined,
+  PhoneOutlined,
   EnvironmentOutlined,
   LinkedinOutlined,
   GithubOutlined,
@@ -69,7 +69,7 @@ export default function PreviewPanel({ data, templateId = 1, zoom = 100, section
             </div>
           </>
         )
-      
+
       case 'education':
         return data.education?.length > 0 && (
           <>
@@ -104,7 +104,7 @@ export default function PreviewPanel({ data, templateId = 1, zoom = 100, section
             </div>
           </>
         )
-      
+
       case 'skills':
         return data.skills?.categories?.length > 0 && (
           <>
@@ -124,7 +124,7 @@ export default function PreviewPanel({ data, templateId = 1, zoom = 100, section
             </div>
           </>
         )
-      
+
       case 'projects':
         return data.projects?.length > 0 && (
           <>
@@ -165,7 +165,7 @@ export default function PreviewPanel({ data, templateId = 1, zoom = 100, section
             </div>
           </>
         )
-      
+
       case 'certifications':
         return data.certifications?.length > 0 && (
           <>
@@ -199,7 +199,7 @@ export default function PreviewPanel({ data, templateId = 1, zoom = 100, section
             </div>
           </>
         )
-      
+
       case 'languages':
         return data.languages?.length > 0 && (
           <>
@@ -216,7 +216,7 @@ export default function PreviewPanel({ data, templateId = 1, zoom = 100, section
             </div>
           </>
         )
-      
+
       case 'volunteering':
         return data.volunteering?.length > 0 && (
           <>
@@ -251,7 +251,7 @@ export default function PreviewPanel({ data, templateId = 1, zoom = 100, section
             </div>
           </>
         )
-      
+
       case 'publications':
         return data.publications?.length > 0 && (
           <>
@@ -284,7 +284,7 @@ export default function PreviewPanel({ data, templateId = 1, zoom = 100, section
             </div>
           </>
         )
-      
+
       default:
         return null
     }

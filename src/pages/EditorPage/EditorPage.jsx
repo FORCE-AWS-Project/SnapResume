@@ -1,10 +1,10 @@
 ﻿import { useState, useEffect } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { Layout, Button, Space, Dropdown, InputNumber, Tooltip, message } from 'antd'
-import { 
-  SaveOutlined, 
-  DownloadOutlined, 
-  SettingOutlined, 
+import {
+  SaveOutlined,
+  DownloadOutlined,
+  SettingOutlined,
   ZoomInOutlined,
   ZoomOutOutlined,
   BackwardOutlined,
@@ -28,7 +28,7 @@ export default function EditorPage() {
   const [templateId, setTemplateId] = useState(1)
   const [sectionOrder, setSectionOrder] = useState([
     'experience',
-    'education', 
+    'education',
     'skills',
     'projects',
     'certifications',
@@ -36,7 +36,7 @@ export default function EditorPage() {
     'volunteering',
     'publications'
   ])
-  
+
   const [resumeData, setResumeData] = useState({
     personalInfo: {
       fullName: '',
@@ -103,13 +103,13 @@ export default function EditorPage() {
     if (validation.issues.length > 0) {
       const warningCount = validation.issues.filter(i => i.severity === 'warning').length
       const errorCount = validation.issues.length - warningCount
-      
+
       if (errorCount > 0) {
         message.warning(`Resume saved with ${errorCount} ATS issue(s). Check the console for details.`)
         console.warn('ATS Issues:', validation.issues)
       }
     }
-    
+
     message.success('Resume saved successfully!')
     console.log('Saved resume:', { resumeName, resumeData, templateId })
   }
@@ -176,8 +176,8 @@ export default function EditorPage() {
       <Header className={styles.header}>
         <div className={styles.headerLeft}>
           <Tooltip title="Back to templates">
-            <Button 
-              type="text" 
+            <Button
+              type="text"
               icon={<BackwardOutlined />}
               onClick={() => navigate('/templates')}
               className={styles.backBtn}
@@ -224,8 +224,8 @@ export default function EditorPage() {
       <div className={styles.toolbar}>
         <Space>
           <span className={styles.zoomLabel}>Zoom:</span>
-          <Button 
-            icon={<ZoomOutOutlined />} 
+          <Button
+            icon={<ZoomOutOutlined />}
             onClick={() => handleZoom(zoom - 10)}
             disabled={zoom <= 50}
           />
@@ -238,8 +238,8 @@ export default function EditorPage() {
             className={styles.zoomInput}
           />
           <span>{zoom}%</span>
-          <Button 
-            icon={<ZoomInOutlined />} 
+          <Button
+            icon={<ZoomInOutlined />}
             onClick={() => handleZoom(zoom + 10)}
             disabled={zoom >= 200}
           />
@@ -249,13 +249,13 @@ export default function EditorPage() {
 
       {/* Content */}
       <Content className={styles.content}>
-        <FormPanel 
-          data={resumeData} 
+        <FormPanel
+          data={resumeData}
           onInputChange={handleInputChange}
           sectionOrder={sectionOrder}
         />
-        <PreviewPanel 
-          data={resumeData} 
+        <PreviewPanel
+          data={resumeData}
           templateId={templateId}
           zoom={zoom}
           sectionOrder={sectionOrder}

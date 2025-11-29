@@ -1,8 +1,8 @@
 import { Collapse } from 'antd'
-import { 
-  UserOutlined, 
-  ShopOutlined, 
-  BookFilled, 
+import {
+  UserOutlined,
+  ShopOutlined,
+  BookFilled,
   ToolOutlined,
   SafetyCertificateOutlined,
   FolderOutlined,
@@ -103,8 +103,8 @@ export default function FormPanel({ data, onInputChange, sectionOrder }) {
   return (
     <aside className={styles.sidebar}>
       <div className={styles.content}>
-        <Collapse 
-          defaultActiveKey={['personal', 'experience']} 
+        <Collapse
+          defaultActiveKey={['personal', 'experience']}
           items={collapseItems}
           className={styles.collapse}
         />
