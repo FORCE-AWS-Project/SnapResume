@@ -1,17 +1,21 @@
 ﻿import { useState, useEffect } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { Layout, Button, Space, Dropdown, InputNumber, Tooltip, message } from 'antd'
-import { 
-  SaveOutlined, 
-  DownloadOutlined, 
-  SettingOutlined, 
+import {
+  SaveOutlined,
+  DownloadOutlined,
+  SettingOutlined,
   ZoomInOutlined,
   ZoomOutOutlined,
   BackwardOutlined,
-  PrinterOutlined
+  PrinterOutlined,
+  FileTextOutlined,
+  FilePdfOutlined,
+  FileWordOutlined
 } from '@ant-design/icons'
 import FormPanel from './components/FormPanel'
 import PreviewPanel from './components/PreviewPanel'
+import { downloadJSON, exportToPDF, exportToDOCX, validateATS } from '../../utils/exportResume'
 import styles from './EditorPage.module.css'
 
 const { Header, Content } = Layout
@@ -22,20 +26,49 @@ export default function EditorPage() {
   const [zoom, setZoom] = useState(100)
   const [resumeName, setResumeName] = useState('My Resume')
   const [templateId, setTemplateId] = useState(1)
+  const [sectionOrder, setSectionOrder] = useState([
+    'experience',
+    'education',
+    'skills',
+    'projects',
+    'certifications',
+    'languages',
+    'volunteering',
+    'publications'
+  ])
+
   const [resumeData, setResumeData] = useState({
     personalInfo: {
       fullName: '',
+      roleTitle: '',
+      pronouns: '',
       email: '',
       phone: '',
-      location: '',
+      location: {
+        city: '',
+        state: '',
+        country: '',
+      },
+      links: {
+        linkedin: '',
+        github: '',
+        portfolio: '',
+        website: '',
+      },
       summary: '',
       photoUrl: '',
+      showPhoto: false,
     },
     experience: [],
     education: [],
-    skills: [],
+    skills: {
+      categories: [],
+    },
     certifications: [],
     projects: [],
+    languages: [],
+    volunteering: [],
+    publications: [],
   })
 
   useEffect(() => {
@@ -46,23 +79,79 @@ export default function EditorPage() {
   }, [searchParams])
 
   const handleInputChange = (section, field, value) => {
-    setResumeData(prev => ({
-      ...prev,
-      [section]: {
-        ...prev[section],
-        [field]: value,
-      },
-    }))
+    if (field === null) {
+      // For array sections (experience, education, etc.)
+      setResumeData(prev => ({
+        ...prev,
+        [section]: value,
+      }))
+    } else {
+      // For nested object sections (personalInfo)
+      setResumeData(prev => ({
+        ...prev,
+        [section]: {
+          ...prev[section],
+          [field]: value,
+        },
+      }))
+    }
   }
 
   const handleSave = () => {
+    // Validate ATS compliance
+    const validation = validateATS(resumeData)
+    if (validation.issues.length > 0) {
+      const warningCount = validation.issues.filter(i => i.severity === 'warning').length
+      const errorCount = validation.issues.length - warningCount
+
+      if (errorCount > 0) {
+        message.warning(`Resume saved with ${errorCount} ATS issue(s). Check the console for details.`)
+        console.warn('ATS Issues:', validation.issues)
+      }
+    }
+
     message.success('Resume saved successfully!')
     console.log('Saved resume:', { resumeName, resumeData, templateId })
   }
 
-  const handleDownload = () => {
-    message.info('Download feature coming soon!')
+  const handleDownload = (format) => {
+    switch (format) {
+      case 'pdf':
+        exportToPDF()
+        message.success('Opening print dialog for PDF export...')
+        break
+      case 'json':
+        downloadJSON(resumeData, `${resumeName.replace(/\s+/g, '_')}.json`)
+        message.success('Resume downloaded as JSON!')
+        break
+      case 'docx':
+        exportToDOCX(resumeData)
+        break
+      default:
+        message.info('Please select a format')
+    }
   }
+
+  const downloadMenuItems = [
+    {
+      key: 'pdf',
+      label: 'Export as PDF',
+      icon: <FilePdfOutlined />,
+      onClick: () => handleDownload('pdf'),
+    },
+    {
+      key: 'json',
+      label: 'Export as JSON',
+      icon: <FileTextOutlined />,
+      onClick: () => handleDownload('json'),
+    },
+    {
+      key: 'docx',
+      label: 'Export as DOCX',
+      icon: <FileWordOutlined />,
+      onClick: () => handleDownload('docx'),
+    },
+  ]
 
   const handlePrint = () => {
     window.print()
@@ -87,8 +176,8 @@ export default function EditorPage() {
       <Header className={styles.header}>
         <div className={styles.headerLeft}>
           <Tooltip title="Back to templates">
-            <Button 
-              type="text" 
+            <Button
+              type="text"
               icon={<BackwardOutlined />}
               onClick={() => navigate('/templates')}
               className={styles.backBtn}
@@ -115,9 +204,11 @@ export default function EditorPage() {
           <Button type="primary" icon={<SaveOutlined />} onClick={handleSave}>
             Save
           </Button>
-          <Button icon={<DownloadOutlined />} onClick={handleDownload}>
-            Download
-          </Button>
+          <Dropdown menu={{ items: downloadMenuItems }}>
+            <Button icon={<DownloadOutlined />}>
+              Download
+            </Button>
+          </Dropdown>
           <Button icon={<PrinterOutlined />} onClick={handlePrint}>
             Print
           </Button>
@@ -133,8 +224,8 @@ export default function EditorPage() {
       <div className={styles.toolbar}>
         <Space>
           <span className={styles.zoomLabel}>Zoom:</span>
-          <Button 
-            icon={<ZoomOutOutlined />} 
+          <Button
+            icon={<ZoomOutOutlined />}
             onClick={() => handleZoom(zoom - 10)}
             disabled={zoom <= 50}
           />
@@ -147,8 +238,8 @@ export default function EditorPage() {
             className={styles.zoomInput}
           />
           <span>{zoom}%</span>
-          <Button 
-            icon={<ZoomInOutlined />} 
+          <Button
+            icon={<ZoomInOutlined />}
             onClick={() => handleZoom(zoom + 10)}
             disabled={zoom >= 200}
           />
@@ -158,11 +249,16 @@ export default function EditorPage() {
 
       {/* Content */}
       <Content className={styles.content}>
-        <FormPanel data={resumeData} onInputChange={handleInputChange} />
-        <PreviewPanel 
-          data={resumeData} 
+        <FormPanel
+          data={resumeData}
+          onInputChange={handleInputChange}
+          sectionOrder={sectionOrder}
+        />
+        <PreviewPanel
+          data={resumeData}
           templateId={templateId}
           zoom={zoom}
+          sectionOrder={sectionOrder}
         />
       </Content>
     </Layout>
