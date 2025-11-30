@@ -1,19 +1,55 @@
 {
-  "name": "backend",
-  "version": "0.0.0",
-  "private": true,
+  "name": "snapresume-backend",
+  "version": "1.0.0",
+  "description": "SnapResume Lambda backend API with Express",
+  "main": "dist/index.js",
   "scripts": {
-    "start": "node ./bin/www"
+    "build": "tsc",
+    "watch": "ts-node-dev --respawn --transpile-only --ignore-watch node_modules src/server.ts",
+    "clean": "rm -rf dist",
+    "prebuild": "npm run clean",
+    "package": "npm run build && cd dist && npm install --production && cp -r ../node_modules/@aws-sdk . && zip -r ../lambda-function.zip . && cd ..",
+    "deploy": "npm run package && aws lambda update-function-code --function-name ${FUNCTION_NAME:-snapresume-dev-api} --zip-file fileb://lambda-function.zip",
+    "dev": "npm run watch",
+    "start": "node dist/server.js",
+    "lint": "eslint src --ext .ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "author": "",
+  "license": "ISC",
   "dependencies": {
-    "cookie-parser": "~1.4.4",
-    "debug": "~2.6.9",
-    "express": "~4.16.1",
-    "http-errors": "~1.6.3",
-    "jade": "~1.11.0",
-    "morgan": "~1.9.1"
+    "@aws-sdk/client-bedrock-runtime": "^3.600.0",
+    "@aws-sdk/client-cognito-identity-provider": "^3.940.0",
+    "@aws-sdk/client-dynamodb": "^3.600.0",
+    "@aws-sdk/client-s3": "^3.940.0",
+    "@aws-sdk/lib-dynamodb": "^3.600.0",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui-express": "^4.1.8",
+    "aws-jwt-verify": "^5.1.1",
+    "class-transformer": "^0.5.1",
+    "dotenv": "^17.2.3",
+    "express": "^4.18.2",
+    "joi": "^18.0.2",
+    "multer": "^2.0.2",
+    "reflect-metadata": "^0.2.2",
+    "serverless-http": "^3.2.0",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
-    "@types/node": "^24.10.1"
+    "@types/aws-lambda": "^8.10.131",
+    "@types/dotenv": "^6.1.1",
+    "@types/express": "^4.17.21",
+    "@types/joi": "^17.2.2",
+    "@types/multer": "^2.0.0",
+    "@types/node": "^20.19.25",
+    "@types/uuid": "^9.0.7",
+    "@typescript-eslint/eslint-plugin": "^6.19.0",
+    "@typescript-eslint/parser": "^6.19.0",
+    "eslint": "^8.56.0",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.3.3"
   }
 }

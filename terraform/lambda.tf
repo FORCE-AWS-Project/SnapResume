@@ -3,8 +3,8 @@ resource "aws_lambda_function" "api" {
   filename      = "lambda-placeholder.zip"
   function_name = "${var.project_name}-${var.environment}-api"
   role          = aws_iam_role.lambda_exec.arn
-  handler       = "index.handler"
-  runtime       = var.lambda_runtime
+  handler       = "index.lambdaHandler"
+  runtime       = "nodejs20.x"
   timeout       = 30
   memory_size   = 512
 
@@ -17,7 +17,8 @@ resource "aws_lambda_function" "api" {
       DYNAMODB_RESUMES_TABLE   = aws_dynamodb_table.resumes.name
       DYNAMODB_TEMPLATES_TABLE = aws_dynamodb_table.templates.name
       DYNAMODB_SESSIONS_TABLE  = aws_dynamodb_table.sessions.name
-      COGNITO_USER_POOL        = aws_cognito_user_pool.main.id
+      COGNITO_USER_POOL_ID     = aws_cognito_user_pool.main.id
+      COGNITO_CLIENT_ID        = aws_cognito_user_pool_client.web.id
       REGION                   = var.aws_region
       S3_BUCKET                = aws_s3_bucket.user_uploads.bucket
     }
@@ -34,8 +35,7 @@ resource "aws_lambda_function" "api" {
   lifecycle {
     ignore_changes = [
       filename,
-      source_code_hash,
-      last_modified
+      source_code_hash
     ]
   }
 }

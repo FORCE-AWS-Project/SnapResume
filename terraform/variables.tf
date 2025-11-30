@@ -40,10 +40,16 @@ variable "github_token_secret_arn" {
   default     = ""
 }
 
+variable "github_codestar_connection_arn" {
+  description = "ARN of the AWS CodeStar connection to GitHub"
+  type        = string
+  default     = ""
+}
+
 variable "lambda_runtime" {
   description = "Lambda runtime"
   type        = string
-  default     = "nodejs18.x"
+  default     = "nodejs24.x"
 }
 
 variable "dynamodb_billing_mode" {

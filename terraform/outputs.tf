@@ -218,6 +218,7 @@ output "backend_env_config" {
     DYNAMODB_TEMPLATES_TABLE = aws_dynamodb_table.templates.name
     DYNAMODB_SESSIONS_TABLE  = aws_dynamodb_table.sessions.name
     COGNITO_USER_POOL_ID     = aws_cognito_user_pool.main.id
+    COGNITO_CLIENT_ID        = aws_cognito_user_pool_client.web.id
     REGION                   = var.aws_region
     S3_BUCKET                = aws_s3_bucket.user_uploads.bucket
   }

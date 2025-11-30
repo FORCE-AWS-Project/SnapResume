@@ -30,7 +30,7 @@ fi
 cd "$LAMBDA_DIR"
 
 echo -e "${YELLOW}Step 1: Installing dependencies...${NC}"
-npm install --production
+npm install
 
 if [ $? -ne 0 ]; then
   echo -e "${RED}Error: Failed to install dependencies${NC}"
@@ -39,18 +39,30 @@ fi
 
 echo -e "${GREEN}✓ Dependencies installed${NC}"
 
-echo -e "${YELLOW}Step 2: Creating deployment package...${NC}"
+echo -e "${YELLOW}Step 2: Building TypeScript...${NC}"
+
+npm run build
+
+if [ $? -ne 0 ]; then
+  echo -e "${RED}Error: Failed to build TypeScript${NC}"
+  exit 1
+fi
+
+echo -e "${GREEN}✓ TypeScript build completed${NC}"
+
+echo -e "${YELLOW}Step 3: Creating deployment package...${NC}"
 
 # Remove old zip if exists
 rm -f "$ZIP_FILE"
 
-# Create zip file
-zip -r "$ZIP_FILE" . \
+# Navigate to dist folder and create zip with node_modules
+cd dist
+npm install --production --no-save
+zip -r "../$ZIP_FILE" . \
   -x "*.git*" \
   -x "node_modules/.cache/*" \
-  -x "test/*" \
-  -x "*.md" \
-  -x ".gitignore"
+  -x "test/*"
+cd ..
 
 if [ $? -ne 0 ]; then
   echo -e "${RED}Error: Failed to create zip file${NC}"
@@ -63,7 +75,7 @@ echo -e "${GREEN}✓ Deployment package created: $ZIP_FILE${NC}"
 ZIP_SIZE=$(du -h "$ZIP_FILE" | cut -f1)
 echo -e "Package size: ${GREEN}$ZIP_SIZE${NC}"
 
-echo -e "${YELLOW}Step 3: Deploying to AWS Lambda...${NC}"
+echo -e "${YELLOW}Step 4: Deploying to AWS Lambda...${NC}"
 
 # Deploy to Lambda
 aws lambda update-function-code \
@@ -80,7 +92,7 @@ fi
 echo -e "${GREEN}✓ Lambda function deployed successfully${NC}"
 
 # Wait for function to be active
-echo -e "${YELLOW}Step 4: Waiting for function to be active...${NC}"
+echo -e "${YELLOW}Step 5: Waiting for function to be active...${NC}"
 
 aws lambda wait function-updated \
   --function-name "$FUNCTION_NAME" \
@@ -89,7 +101,7 @@ aws lambda wait function-updated \
 echo -e "${GREEN}✓ Function is active${NC}"
 
 # Get function info
-echo -e "${YELLOW}Step 5: Verifying deployment...${NC}"
+echo -e "${YELLOW}Step 6: Verifying deployment...${NC}"
 
 FUNCTION_INFO=$(aws lambda get-function \
   --function-name "$FUNCTION_NAME" \

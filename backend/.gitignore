@@ -1,1 +1,27 @@
-node_modules
+# Dependencies
+node_modules/
+package-lock.json
+
+# Build artifacts
+lambda-function.zip
+*.zip
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment
+.env
+.env.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+dist

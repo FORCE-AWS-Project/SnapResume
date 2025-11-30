@@ -302,16 +302,15 @@ resource "aws_codepipeline" "main" {
     action {
       name             = "Source"
       category         = "Source"
-      owner            = "ThirdParty"
-      provider         = "GitHub"
+      owner            = "AWS"
+      provider         = "CodeStarSourceConnection"
       version          = "1"
       output_artifacts = ["source_output"]
 
       configuration = {
-        Owner      = split("/", var.github_repo)[0]
-        Repo       = split("/", var.github_repo)[1]
-        Branch     = var.github_branch
-        OAuthToken = var.github_token_secret_arn != "" ? "{{resolve:secretsmanager:${var.github_token_secret_arn}}}" : ""
+        ConnectionArn    = var.github_codestar_connection_arn != "" ? var.github_codestar_connection_arn : aws_codestarconnections_connection.github[0].arn
+        FullRepositoryId = var.github_repo
+        BranchName       = var.github_branch
       }
     }
   }
@@ -373,5 +372,19 @@ resource "aws_cloudwatch_log_group" "codebuild_backend" {
 
   tags = {
     Name = "${var.project_name}-${var.environment}-backend-build-logs"
+  }
+}
+
+# CodeStar Connection to GitHub (only created if no external connection ARN provided)
+resource "aws_codestarconnections_connection" "github" {
+  count = var.github_codestar_connection_arn == "" ? 1 : 0
+
+  name          = "${var.project_name}-${var.environment}-github-connection"
+  provider_type = "GitHub"
+
+  tags = {
+    Name        = "${var.project_name}-${var.environment}-github-connection"
+    Environment = var.environment
+    Project     = var.project_name
   }
 }

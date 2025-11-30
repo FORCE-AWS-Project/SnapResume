@@ -251,7 +251,7 @@ resource "aws_cloudwatch_metric_alarm" "cloudfront_5xx_errors" {
   alarm_actions       = [aws_sns_topic.alarms[0].arn]
 
   dimensions = {
-    DistributionId = aws_cloudfront_distribution.main.id
+    DistributionId = aws_cloudfront_distribution.static_assets.id
   }
 }
 
