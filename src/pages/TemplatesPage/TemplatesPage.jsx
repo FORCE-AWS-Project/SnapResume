@@ -92,11 +92,21 @@ export default function TemplatesPage() {
 
   // 2. USEMEMO: Optimizes filtering performance
   const filteredTemplates = useMemo(() => {
-    const lowerQuery = searchQuery.toLowerCase()
+    const lowerQuery = searchQuery.toLowerCase().trim()
+    
+    if (!lowerQuery && selectedFilter === 'all') {
+      return TEMPLATES
+    }
+    
     return TEMPLATES.filter(template => {
-      const matchesSearch = template.name.toLowerCase().includes(lowerQuery) ||
-                            template.description.toLowerCase().includes(lowerQuery)
+      const matchesSearch = !lowerQuery || 
+        template.name.toLowerCase().includes(lowerQuery) ||
+        template.description.toLowerCase().includes(lowerQuery) ||
+        template.category.toLowerCase().includes(lowerQuery) ||
+        template.features.some(feature => feature.toLowerCase().includes(lowerQuery))
+      
       const matchesFilter = selectedFilter === 'all' || template.category === selectedFilter
+      
       return matchesSearch && matchesFilter
     })
   }, [searchQuery, selectedFilter])
@@ -145,10 +155,10 @@ export default function TemplatesPage() {
         {/* Search & Filter Section */}
         <section className={styles.filterSection}>
           <div className={styles.filterContainer}>
-            <Row gutter={[16, 16]}>
+            <Row gutter={[16, 16]} align="middle">
               <Col xs={24} md={16}>
                 <Input
-                  placeholder="Search templates..."
+                  placeholder="Search by name, category, or features..."
                   prefix={<SearchOutlined className={styles.searchIcon} />}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -165,6 +175,7 @@ export default function TemplatesPage() {
                   options={CATEGORIES}
                   size="large"
                   className={styles.filterSelect}
+                  style={{ width: '100%' }}
                 />
               </Col>
             </Row>
