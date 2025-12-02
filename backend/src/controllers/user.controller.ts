@@ -3,7 +3,7 @@
  * Handles HTTP requests for user operations
  */
 
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { UserService } from '../services';
 import { ResponseUtil } from '../utils';
 import { ErrorMessages, SuccessMessages } from '../constants';
@@ -14,9 +14,9 @@ export class UserController {
    * Get user profile
    * GET /users/me
    */
-  static async getUserProfile(req: Request, res: Response): Promise<Response> {
+  static async getUserProfile(req: AuthenticatedRequest, res: Response): Promise<Response> {
     try {
-      const { userId } = req as any as AuthenticatedRequest;
+      const userId = req.user.userId;
 
       const profile = await UserService.getUserProfile(userId);
 
@@ -35,9 +35,9 @@ export class UserController {
    * Update user profile
    * PUT /users/me
    */
-  static async updateUserProfile(req: Request, res: Response): Promise<Response> {
+  static async updateUserProfile(req: AuthenticatedRequest, res: Response): Promise<Response> {
     try {
-      const { userId } = req as any as AuthenticatedRequest;
+      const userId = req.user.userId;
       const body: UpdateUserProfileRequest = req.body;
 
       if (!body.personalInfo) {

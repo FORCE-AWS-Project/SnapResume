@@ -3,7 +3,7 @@
  * Handles HTTP requests for section operations
  */
 
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { SectionService } from '../services';
 import { ResponseUtil } from '../utils';
 import { ErrorMessages, SuccessMessages } from '../constants';
@@ -19,9 +19,9 @@ export class SectionController {
    * List all sections
    * GET /sections
    */
-  static async listSections(req: Request, res: Response): Promise<Response> {
+  static async listSections(req: AuthenticatedRequest, res: Response): Promise<Response> {
     try {
-      const { userId } = req as any as AuthenticatedRequest;
+      const userId = req.user.userId;
       const params: ListSectionsParams = {
         type: req.query.type as string,
         tags: req.query.tags as string,
@@ -40,9 +40,9 @@ export class SectionController {
    * Get section by ID
    * GET /sections/:sectionId
    */
-  static async getSection(req: Request, res: Response): Promise<Response> {
+  static async getSection(req: AuthenticatedRequest, res: Response): Promise<Response> {
     try {
-      const { userId } = req as any as AuthenticatedRequest;
+      const userId = req.user.userId;
       const { sectionId } = req.params;
       const sectionType = req.query.type as string;
 
@@ -63,9 +63,9 @@ export class SectionController {
    * Create section
    * POST /sections
    */
-  static async createSection(req: Request, res: Response): Promise<Response> {
+  static async createSection(req: AuthenticatedRequest, res: Response): Promise<Response> {
     try {
-      const { userId } = req as any as AuthenticatedRequest;
+      const userId = req.user.userId;
       const body: CreateSectionRequest = req.body;
 
       if (!body.sectionType) {
@@ -87,9 +87,9 @@ export class SectionController {
    * Update section
    * PUT /sections/:sectionId
    */
-  static async updateSection(req: Request, res: Response): Promise<Response> {
+  static async updateSection(req: AuthenticatedRequest, res: Response): Promise<Response> {
     try {
-      const { userId } = req as any as AuthenticatedRequest;
+      const userId = req.user.userId;
       const { sectionId } = req.params;
       const body: UpdateSectionRequest = req.body;
 
@@ -108,9 +108,9 @@ export class SectionController {
    * Delete section
    * DELETE /sections/:sectionId
    */
-  static async deleteSection(req: Request, res: Response): Promise<Response> {
+  static async deleteSection(req: AuthenticatedRequest, res: Response): Promise<Response> {
     try {
-      const { userId } = req as any as AuthenticatedRequest;
+      const userId = req.user.userId;
       const { sectionId } = req.params;
 
       await SectionService.deleteSection(userId, sectionId);

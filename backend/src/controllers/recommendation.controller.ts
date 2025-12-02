@@ -3,7 +3,7 @@
  * Handles HTTP requests for AI-powered recommendation operations
  */
 
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { RecommendationService } from '../services';
 import { ResponseUtil } from '../utils';
 import { ErrorMessages } from '../constants';
@@ -14,9 +14,9 @@ export class RecommendationController {
    * Get section recommendations based on job description
    * POST /recommendations/sections
    */
-  static async getRecommendations(req: Request, res: Response): Promise<Response> {
+  static async getRecommendations(req: AuthenticatedRequest, res: Response): Promise<Response> {
     try {
-      const { userId } = req as any as AuthenticatedRequest;
+      const userId = req.user.userId;
       const body: GetRecommendationsRequest = req.body;
 
       if (!body.jobDescription) {

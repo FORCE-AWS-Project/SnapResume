@@ -3,7 +3,7 @@
  * Handles HTTP requests for resume operations
  */
 
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { ResumeService } from '../services';
 import { ResponseUtil } from '../utils';
 import { ErrorMessages, SuccessMessages } from '../constants';
@@ -15,9 +15,9 @@ import {
 } from '../models';
 
 export class ResumeController {
-  static async listResumes(req: Request, res: Response): Promise<Response> {
+  static async listResumes(req: AuthenticatedRequest, res: Response): Promise<Response> {
     try {
-      const { userId } = req as any as AuthenticatedRequest;
+      const userId = req.user.userId;
       const params: ListResumesParams = {
         limit: req.query.limit ? parseInt(req.query.limit as string) : undefined,
         lastKey: req.query.lastKey as string,
@@ -31,9 +31,9 @@ export class ResumeController {
     }
   }
 
-  static async getResume(req: Request, res: Response): Promise<Response> {
+  static async getResume(req: AuthenticatedRequest, res: Response): Promise<Response> {
     try {
-      const { userId } = req as any as AuthenticatedRequest;
+      const userId = req.user.userId;
       const { resumeId } = req.params;
 
       const resume = await ResumeService.getResume(userId, resumeId);
@@ -49,9 +49,9 @@ export class ResumeController {
     }
   }
 
-  static async getFullResume(req: Request, res: Response): Promise<Response> {
+  static async getFullResume(req: AuthenticatedRequest, res: Response): Promise<Response> {
     try {
-      const { userId } = req as any as AuthenticatedRequest;
+      const userId = req.user.userId;
       const { resumeId } = req.params;
 
       const resume = await ResumeService.getFullResume(userId, resumeId);
@@ -67,9 +67,9 @@ export class ResumeController {
     }
   }
 
-  static async createResume(req: Request, res: Response): Promise<Response> {
+  static async createResume(req: AuthenticatedRequest, res: Response): Promise<Response> {
     try {
-      const { userId } = req as any as AuthenticatedRequest;
+      const userId = req.user.userId;
       const body: CreateResumeRequest = req.body;
 
       if (!body.name) {
@@ -88,9 +88,9 @@ export class ResumeController {
     }
   }
 
-  static async updateResume(req: Request, res: Response): Promise<Response> {
+  static async updateResume(req: AuthenticatedRequest, res: Response): Promise<Response> {
     try {
-      const { userId } = req as any as AuthenticatedRequest;
+      const userId = req.user.userId;
       const { resumeId } = req.params;
       const body: UpdateResumeRequest = req.body;
 
@@ -105,9 +105,9 @@ export class ResumeController {
     }
   }
 
-  static async deleteResume(req: Request, res: Response): Promise<Response> {
+  static async deleteResume(req: AuthenticatedRequest, res: Response): Promise<Response> {
     try {
-      const { userId } = req as any as AuthenticatedRequest;
+      const userId = req.user.userId;
       const { resumeId } = req.params;
 
       await ResumeService.deleteResume(userId, resumeId);

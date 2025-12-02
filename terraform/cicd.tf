@@ -265,8 +265,8 @@ resource "aws_codebuild_project" "backend" {
     }
 
     environment_variable {
-      name  = "DYNAMODB_TABLE"
-      value = aws_dynamodb_table.main.name
+      name  = "DYNAMODB_USERS_TABLE"
+      value = aws_dynamodb_table.users.name
     }
 
     # JWT Authentication Environment Variables
@@ -358,17 +358,15 @@ resource "aws_codepipeline" "main" {
     action {
       name             = "Source"
       category         = "Source"
-      owner            = "ThirdParty"
-      provider         = "GitHub"
-      version          = "2"
+      owner            = "AWS"
+      provider         = "CodeStarSourceConnection"
+      version          = "1"
       output_artifacts = ["source_output"]
 
       configuration = {
-        Owner                = split("/", var.github_repo)[0]
-        Repo                 = split("/", var.github_repo)[1]
-        Branch               = var.github_branch
-        PollForSourceChanges = "true"
-        Token                = "{{resolve:secretsmanager:${var.github_token_secret_arn}:GitHubToken:}}"
+        ConnectionArn    = aws_codestarconnections_connection.github.arn
+        FullRepositoryId = var.github_repo
+        BranchName       = var.github_branch
       }
     }
   }
@@ -430,6 +428,19 @@ resource "aws_cloudwatch_log_group" "codebuild_backend" {
 
   tags = {
     Name = "${var.project_name}-${var.environment}-backend-build-logs"
+  }
+}
+
+# CodeStar Connection for GitHub (Version 2)
+resource "aws_codestarconnections_connection" "github" {
+  name          = "resume-snap-github"
+  provider_type = "GitHub"
+
+  tags = {
+    Name        = "${var.project_name}-${var.environment}-github-connection"
+    Environment = var.environment
+    ManagedBy   = "Terraform"
+    Project     = var.project_name
   }
 }
 

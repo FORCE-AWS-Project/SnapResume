@@ -17,6 +17,7 @@ import {
 } from '@aws-sdk/client-cognito-identity-provider';
 import { AWS_CONFIG } from '../constants';
 import { ErrorMessages, CognitoErrorMap } from '../constants/messages';
+import { AuthenticatedRequest } from '../models/auth.model';
 
 export class AuthService {
   private static cognitoClient = new CognitoIdentityProviderClient({
@@ -283,6 +284,49 @@ export class AuthService {
     } catch (error: any) {
       throw this.handleCognitoError(error);
     }
+  }
+
+  /**
+   * Extract user information from authenticated request
+   */
+  static extractUserFromRequest(req: AuthenticatedRequest): any {
+    return req.user || null;
+  }
+
+  /**
+   * Get user context from request or fetch from DynamoDB if needed
+   */
+  static async getUserContext(req: AuthenticatedRequest): Promise<any> {
+    try {
+      // First, get user info from request (set by CloudFront/auth middleware)
+      const requestUser = req.user;
+      if (requestUser) {
+        return requestUser;
+      }
+
+      // Fallback: try to get user from legacy headers/methods
+      const legacyUserId = (req as any).userId;
+      if (legacyUserId) {
+        return {
+          userId: legacyUserId,
+          email: (req as any).email || '',
+          sub: legacyUserId
+        };
+      }
+
+      return null;
+    } catch (error) {
+      console.error('Error getting user context:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Validate that request has valid user authentication
+   */
+  static validateUserAuthentication(req: AuthenticatedRequest): boolean {
+    const user = req.user || (req as any).userId;
+    return !!user;
   }
 
   /**

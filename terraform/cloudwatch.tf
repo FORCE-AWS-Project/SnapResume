@@ -193,7 +193,7 @@ resource "aws_cloudwatch_metric_alarm" "dynamodb_read_throttle" {
   alarm_actions       = [aws_sns_topic.alarms[0].arn]
 
   dimensions = {
-    TableName = aws_dynamodb_table.main.name
+    TableName = aws_dynamodb_table.users.name
   }
 }
 
@@ -212,7 +212,7 @@ resource "aws_cloudwatch_metric_alarm" "dynamodb_write_throttle" {
   alarm_actions       = [aws_sns_topic.alarms[0].arn]
 
   dimensions = {
-    TableName = aws_dynamodb_table.main.name
+    TableName = aws_dynamodb_table.users.name
   }
 }
 
@@ -231,7 +231,7 @@ resource "aws_cloudwatch_metric_alarm" "dynamodb_user_errors" {
   alarm_actions       = [aws_sns_topic.alarms[0].arn]
 
   dimensions = {
-    TableName = aws_dynamodb_table.main.name
+    TableName = aws_dynamodb_table.users.name
   }
 }
 

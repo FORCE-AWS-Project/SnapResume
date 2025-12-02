@@ -75,7 +75,7 @@ app.use('/api', (req, res, next) => {
   }
 
   // Apply auth middleware for protected routes
-  return authMiddleware(req, res, next);
+  return authMiddleware(req as any, res, next);
 });
 
 // Apply routes

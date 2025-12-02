@@ -2,6 +2,7 @@
  * Auth Model Types
  */
 
+import { Request } from 'express';
 import { PersonalInfo } from './user.model';
 
 export interface RegisterRequest {
@@ -53,4 +54,15 @@ export interface ConfirmForgotPasswordRequest {
 export interface ChangePasswordRequest {
   previousPassword: string;
   newPassword: string;
+}
+
+// Express Request with authenticated user
+export interface AuthenticatedRequest extends Request {
+  user: {
+    userId: string;
+    email: string;
+    name?: string;
+    sub?: string;
+    tokenUse?: 'access' | 'id';
+  };
 }

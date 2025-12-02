@@ -109,15 +109,45 @@ output "lambda_function_url" {
   value       = aws_lambda_function_url.api.function_url
 }
 
-# DynamoDB Outputs
-output "dynamodb_main_table_name" {
-  description = "DynamoDB Main Table Name"
-  value       = aws_dynamodb_table.main.name
+output "lambda_api_function_name" {
+  description = "Main API Lambda Function Name"
+  value       = aws_lambda_function.api.function_name
 }
 
-output "dynamodb_main_table_arn" {
-  description = "DynamoDB Main Table ARN"
-  value       = aws_dynamodb_table.main.arn
+output "lambda_api_function_arn" {
+  description = "Main API Lambda Function ARN"
+  value       = aws_lambda_function.api.arn
+}
+
+output "lambda_cognito_function_name" {
+  description = "Cognito Post-Confirmation Lambda Function Name"
+  value       = aws_lambda_function.cognito_post_confirmation.function_name
+}
+
+output "lambda_cognito_function_arn" {
+  description = "Cognito Post-Confirmation Lambda Function ARN"
+  value       = aws_lambda_function.cognito_post_confirmation.arn
+}
+
+output "codestar_connection_arn" {
+  description = "CodeStar Connection ARN for GitHub"
+  value       = aws_codestarconnections_connection.github.arn
+}
+
+output "codestar_connection_status" {
+  description = "CodeStar Connection Status"
+  value       = aws_codestarconnections_connection.github.connection_status
+}
+
+# DynamoDB Outputs
+output "dynamodb_users_table_name" {
+  description = "DynamoDB Users Table Name"
+  value       = aws_dynamodb_table.users.name
+}
+
+output "dynamodb_users_table_arn" {
+  description = "DynamoDB Users Table ARN"
+  value       = aws_dynamodb_table.users.arn
 }
 
 output "dynamodb_resumes_table_name" {

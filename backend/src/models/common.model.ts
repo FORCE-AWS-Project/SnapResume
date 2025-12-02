@@ -26,8 +26,4 @@ export interface PaginatedResponse<T> {
   lastKey?: string;
 }
 
-// Express Request with authenticated user
-export interface AuthenticatedRequest {
-  userId: string;
-  email?: string;
-}
+// Note: AuthenticatedRequest has been moved to auth.model.ts to avoid duplication
