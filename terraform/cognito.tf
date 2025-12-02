@@ -59,11 +59,10 @@ resource "aws_cognito_user_pool" "main" {
     }
   }
 
-  # Lambda triggers (optional - configure if needed)
-  # lambda_config {
-  #   pre_sign_up = aws_lambda_function.pre_signup.arn
-  #   post_confirmation = aws_lambda_function.post_confirmation.arn
-  # }
+  # Lambda triggers
+  lambda_config {
+    post_confirmation = aws_lambda_function.cognito_post_confirmation.arn
+  }
 
   # Advanced security
   user_pool_add_ons {

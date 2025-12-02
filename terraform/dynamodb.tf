@@ -1,59 +1,89 @@
-# DynamoDB Table - Main Application Data
-resource "aws_dynamodb_table" "main" {
-  name           = "${var.project_name}-${var.environment}-main"
+# DynamoDB Table - User Profiles
+resource "aws_dynamodb_table" "users" {
+  name           = "${var.project_name}-${var.environment}-users"
   billing_mode   = var.dynamodb_billing_mode
-  hash_key       = "PK"
-  range_key      = "SK"
+  hash_key       = "userId"
+  range_key      = "email"
+
+  # If using provisioned mode
+  read_capacity  = var.dynamodb_billing_mode == "PROVISIONED" ? 3 : null
+  write_capacity = var.dynamodb_billing_mode == "PROVISIONED" ? 3 : null
+
+  attribute {
+    name = "userId"
+    type = "S"
+  }
+
+  attribute {
+    name = "email"
+    type = "S"
+  }
+
+  # Enable Point-in-Time Recovery
+  point_in_time_recovery {
+    enabled = true
+  }
+
+  # Server-side encryption
+  server_side_encryption {
+    enabled = true
+  }
+
+  # Stream Configuration (for triggers and replication)
+  stream_enabled   = true
+  stream_view_type = "NEW_AND_OLD_IMAGES"
+
+  tags = {
+    Name = "${var.project_name}-${var.environment}-users-table"
+  }
+}
+
+# DynamoDB Table - Resume Sections
+resource "aws_dynamodb_table" "sections" {
+  name           = "${var.project_name}-${var.environment}-sections"
+  billing_mode   = var.dynamodb_billing_mode
+  hash_key       = "sectionId"
+  range_key      = "userId"
 
   # If using provisioned mode
   read_capacity  = var.dynamodb_billing_mode == "PROVISIONED" ? 5 : null
   write_capacity = var.dynamodb_billing_mode == "PROVISIONED" ? 5 : null
 
   attribute {
-    name = "PK"
+    name = "sectionId"
     type = "S"
   }
 
   attribute {
-    name = "SK"
+    name = "userId"
     type = "S"
   }
 
   attribute {
-    name = "GSI1PK"
+    name = "sectionType"
     type = "S"
   }
 
   attribute {
-    name = "GSI1SK"
-    type = "S"
+    name = "createdAt"
+    type = "N"
   }
 
-  attribute {
-    name = "GSI2PK"
-    type = "S"
-  }
-
-  attribute {
-    name = "GSI2SK"
-    type = "S"
-  }
-
-  # GSI1 for querying sections by user and filtering by tags (AI matching)
+  # GSI1 for querying sections by user and type (e.g., get all experience sections for a user)
   global_secondary_index {
     name            = "GSI1"
-    hash_key        = "GSI1PK"
-    range_key       = "GSI1SK"
+    hash_key        = "userId"
+    range_key       = "sectionType"
     projection_type = "ALL"
     read_capacity   = var.dynamodb_billing_mode == "PROVISIONED" ? 5 : null
     write_capacity  = var.dynamodb_billing_mode == "PROVISIONED" ? 5 : null
   }
 
-  # GSI2 for querying all sections of a specific type (e.g., all experience sections)
+  # GSI2 for querying sections by type and created date (e.g., get most recent experience sections)
   global_secondary_index {
     name            = "GSI2"
-    hash_key        = "GSI2PK"
-    range_key       = "GSI2SK"
+    hash_key        = "sectionType"
+    range_key       = "createdAt"
     projection_type = "ALL"
     read_capacity   = var.dynamodb_billing_mode == "PROVISIONED" ? 5 : null
     write_capacity  = var.dynamodb_billing_mode == "PROVISIONED" ? 5 : null
@@ -69,18 +99,12 @@ resource "aws_dynamodb_table" "main" {
     enabled = true
   }
 
-  # TTL Configuration
-  ttl {
-    attribute_name = "TTL"
-    enabled        = true
-  }
-
   # Stream Configuration (for triggers and replication)
   stream_enabled   = true
   stream_view_type = "NEW_AND_OLD_IMAGES"
 
   tags = {
-    Name = "${var.project_name}-${var.environment}-main-table"
+    Name = "${var.project_name}-${var.environment}-sections-table"
   }
 }
 
@@ -261,25 +285,25 @@ resource "aws_dynamodb_table" "sessions" {
   }
 }
 
-# Auto-scaling for DynamoDB (if using PROVISIONED mode)
-resource "aws_appautoscaling_target" "dynamodb_table_read_target" {
+# Auto-scaling for Users Table (if using PROVISIONED mode)
+resource "aws_appautoscaling_target" "users_table_read_target" {
   count = var.dynamodb_billing_mode == "PROVISIONED" ? 1 : 0
 
-  max_capacity       = 100
-  min_capacity       = 5
-  resource_id        = "table/${aws_dynamodb_table.main.name}"
+  max_capacity       = 50
+  min_capacity       = 3
+  resource_id        = "table/${aws_dynamodb_table.users.name}"
   scalable_dimension = "dynamodb:table:ReadCapacityUnits"
   service_namespace  = "dynamodb"
 }
 
-resource "aws_appautoscaling_policy" "dynamodb_table_read_policy" {
+resource "aws_appautoscaling_policy" "users_table_read_policy" {
   count = var.dynamodb_billing_mode == "PROVISIONED" ? 1 : 0
 
-  name               = "${var.project_name}-${var.environment}-read-autoscaling"
+  name               = "${var.project_name}-${var.environment}-users-read-autoscaling"
   policy_type        = "TargetTrackingScaling"
-  resource_id        = aws_appautoscaling_target.dynamodb_table_read_target[0].resource_id
-  scalable_dimension = aws_appautoscaling_target.dynamodb_table_read_target[0].scalable_dimension
-  service_namespace  = aws_appautoscaling_target.dynamodb_table_read_target[0].service_namespace
+  resource_id        = aws_appautoscaling_target.users_table_read_target[0].resource_id
+  scalable_dimension = aws_appautoscaling_target.users_table_read_target[0].scalable_dimension
+  service_namespace  = aws_appautoscaling_target.users_table_read_target[0].service_namespace
 
   target_tracking_scaling_policy_configuration {
     predefined_metric_specification {
@@ -289,24 +313,24 @@ resource "aws_appautoscaling_policy" "dynamodb_table_read_policy" {
   }
 }
 
-resource "aws_appautoscaling_target" "dynamodb_table_write_target" {
+resource "aws_appautoscaling_target" "users_table_write_target" {
   count = var.dynamodb_billing_mode == "PROVISIONED" ? 1 : 0
 
-  max_capacity       = 100
-  min_capacity       = 5
-  resource_id        = "table/${aws_dynamodb_table.main.name}"
+  max_capacity       = 50
+  min_capacity       = 3
+  resource_id        = "table/${aws_dynamodb_table.users.name}"
   scalable_dimension = "dynamodb:table:WriteCapacityUnits"
   service_namespace  = "dynamodb"
 }
 
-resource "aws_appautoscaling_policy" "dynamodb_table_write_policy" {
+resource "aws_appautoscaling_policy" "users_table_write_policy" {
   count = var.dynamodb_billing_mode == "PROVISIONED" ? 1 : 0
 
-  name               = "${var.project_name}-${var.environment}-write-autoscaling"
+  name               = "${var.project_name}-${var.environment}-users-write-autoscaling"
   policy_type        = "TargetTrackingScaling"
-  resource_id        = aws_appautoscaling_target.dynamodb_table_write_target[0].resource_id
-  scalable_dimension = aws_appautoscaling_target.dynamodb_table_write_target[0].scalable_dimension
-  service_namespace  = aws_appautoscaling_target.dynamodb_table_write_target[0].service_namespace
+  resource_id        = aws_appautoscaling_target.users_table_write_target[0].resource_id
+  scalable_dimension = aws_appautoscaling_target.users_table_write_target[0].scalable_dimension
+  service_namespace  = aws_appautoscaling_target.users_table_write_target[0].service_namespace
 
   target_tracking_scaling_policy_configuration {
     predefined_metric_specification {

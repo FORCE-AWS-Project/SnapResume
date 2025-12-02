@@ -100,9 +100,9 @@ resource "aws_iam_role_policy" "codepipeline" {
       {
         Effect = "Allow"
         Action = [
-          "codestar-connections:UseConnection"
+          "secretsmanager:GetSecretValue"
         ]
-        Resource = "*"
+        Resource = var.github_token_secret_arn != "" ? var.github_token_secret_arn : "*"
       }
     ]
   })
@@ -268,6 +268,62 @@ resource "aws_codebuild_project" "backend" {
       name  = "DYNAMODB_TABLE"
       value = aws_dynamodb_table.main.name
     }
+
+    # JWT Authentication Environment Variables
+    environment_variable {
+      name  = "DYNAMODB_USERS_TABLE"
+      value = aws_dynamodb_table.users.name
+    }
+
+    environment_variable {
+      name  = "DYNAMODB_SECTIONS_TABLE"
+      value = aws_dynamodb_table.sections.name
+    }
+
+    environment_variable {
+      name  = "DYNAMODB_RESUMES_TABLE"
+      value = aws_dynamodb_table.resumes.name
+    }
+
+    environment_variable {
+      name  = "DYNAMODB_TEMPLATES_TABLE"
+      value = aws_dynamodb_table.templates.name
+    }
+
+    environment_variable {
+      name  = "DYNAMODB_SESSIONS_TABLE"
+      value = aws_dynamodb_table.sessions.name
+    }
+
+    environment_variable {
+      name  = "COGNITO_USER_POOL_ID"
+      value = aws_cognito_user_pool.main.id
+    }
+
+    environment_variable {
+      name  = "COGNITO_CLIENT_ID"
+      value = aws_cognito_user_pool_client.web.id
+    }
+
+    environment_variable {
+      name  = "REGION"
+      value = var.aws_region
+    }
+
+    environment_variable {
+      name  = "S3_BUCKET"
+      value = aws_s3_bucket.user_uploads.bucket
+    }
+
+    environment_variable {
+      name  = "NODE_ENV"
+      value = "production"
+    }
+
+    environment_variable {
+      name  = "ENVIRONMENT"
+      value = var.environment
+    }
   }
 
   source {
@@ -302,15 +358,17 @@ resource "aws_codepipeline" "main" {
     action {
       name             = "Source"
       category         = "Source"
-      owner            = "AWS"
-      provider         = "CodeStarSourceConnection"
-      version          = "1"
+      owner            = "ThirdParty"
+      provider         = "GitHub"
+      version          = "2"
       output_artifacts = ["source_output"]
 
       configuration = {
-        ConnectionArn    = var.github_codestar_connection_arn != "" ? var.github_codestar_connection_arn : aws_codestarconnections_connection.github[0].arn
-        FullRepositoryId = var.github_repo
-        BranchName       = var.github_branch
+        Owner                = split("/", var.github_repo)[0]
+        Repo                 = split("/", var.github_repo)[1]
+        Branch               = var.github_branch
+        PollForSourceChanges = "true"
+        Token                = "{{resolve:secretsmanager:${var.github_token_secret_arn}:GitHubToken:}}"
       }
     }
   }
@@ -375,16 +433,3 @@ resource "aws_cloudwatch_log_group" "codebuild_backend" {
   }
 }
 
-# CodeStar Connection to GitHub (only created if no external connection ARN provided)
-resource "aws_codestarconnections_connection" "github" {
-  count = var.github_codestar_connection_arn == "" ? 1 : 0
-
-  name          = "${var.project_name}-${var.environment}-github-connection"
-  provider_type = "GitHub"
-
-  tags = {
-    Name        = "${var.project_name}-${var.environment}-github-connection"
-    Environment = var.environment
-    Project     = var.project_name
-  }
-}

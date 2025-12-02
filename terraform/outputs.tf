@@ -194,11 +194,27 @@ output "sns_alarms_topic_arn" {
   value       = var.enable_cloudwatch_alarms ? aws_sns_topic.alarms[0].arn : null
 }
 
+# CloudFront API Outputs
+output "cloudfront_api_distribution_id" {
+  description = "CloudFront Distribution ID for API"
+  value       = aws_cloudfront_distribution.static_assets.id
+}
+
+output "cloudfront_api_domain" {
+  description = "CloudFront Domain Name for API"
+  value       = aws_cloudfront_distribution.static_assets.domain_name
+}
+
+output "cloudfront_api_url" {
+  description = "CloudFront URL for API"
+  value       = "https://${aws_cloudfront_distribution.static_assets.domain_name}"
+}
+
 # Environment Configuration Output
 output "frontend_env_config" {
   description = "Frontend environment configuration"
   value = {
-    REACT_APP_API_ENDPOINT         = aws_api_gateway_stage.main.invoke_url
+    REACT_APP_API_ENDPOINT         = "https://${aws_cloudfront_distribution.static_assets.domain_name}/api"
     REACT_APP_COGNITO_USER_POOL_ID = aws_cognito_user_pool.main.id
     REACT_APP_COGNITO_CLIENT_ID    = aws_cognito_user_pool_client.web.id
     REACT_APP_COGNITO_DOMAIN       = aws_cognito_user_pool_domain.main.domain
@@ -206,6 +222,7 @@ output "frontend_env_config" {
     REACT_APP_IDENTITY_POOL_ID     = aws_cognito_identity_pool.main.id
     REACT_APP_S3_BUCKET            = aws_s3_bucket.user_uploads.bucket
     REACT_APP_CDN_URL              = "https://${aws_cloudfront_distribution.static_assets.domain_name}"
+    REACT_APP_CLOUDFRONT_API_URL   = "https://${aws_cloudfront_distribution.static_assets.domain_name}"
   }
   sensitive = true
 }
@@ -213,14 +230,15 @@ output "frontend_env_config" {
 output "backend_env_config" {
   description = "Backend environment configuration"
   value = {
-    DYNAMODB_MAIN_TABLE      = aws_dynamodb_table.main.name
-    DYNAMODB_RESUMES_TABLE   = aws_dynamodb_table.resumes.name
-    DYNAMODB_TEMPLATES_TABLE = aws_dynamodb_table.templates.name
-    DYNAMODB_SESSIONS_TABLE  = aws_dynamodb_table.sessions.name
-    COGNITO_USER_POOL_ID     = aws_cognito_user_pool.main.id
-    COGNITO_CLIENT_ID        = aws_cognito_user_pool_client.web.id
-    REGION                   = var.aws_region
-    S3_BUCKET                = aws_s3_bucket.user_uploads.bucket
+    DYNAMODB_USERS_TABLE      = aws_dynamodb_table.users.name
+    DYNAMODB_SECTIONS_TABLE   = aws_dynamodb_table.sections.name
+    DYNAMODB_RESUMES_TABLE    = aws_dynamodb_table.resumes.name
+    DYNAMODB_TEMPLATES_TABLE  = aws_dynamodb_table.templates.name
+    DYNAMODB_SESSIONS_TABLE   = aws_dynamodb_table.sessions.name
+    COGNITO_USER_POOL_ID      = aws_cognito_user_pool.main.id
+    COGNITO_CLIENT_ID         = aws_cognito_user_pool_client.web.id
+    REGION                    = var.aws_region
+    S3_BUCKET                 = aws_s3_bucket.user_uploads.bucket
   }
 }
 
@@ -229,7 +247,7 @@ output "application_urls" {
   description = "Quick access URLs for the application"
   value = {
     frontend    = var.domain_name != "" ? "https://${var.domain_name}" : "https://${aws_amplify_branch.main.branch_name}.${aws_amplify_app.frontend.default_domain}"
-    api         = aws_api_gateway_stage.main.invoke_url
+    api         = "https://${aws_cloudfront_distribution.static_assets.domain_name}/api"
     amplify_console = "https://console.aws.amazon.com/amplify/home?region=${var.aws_region}#/${aws_amplify_app.frontend.id}"
     cloudwatch  = "https://console.aws.amazon.com/cloudwatch/home?region=${var.aws_region}#dashboards:name=${aws_cloudwatch_dashboard.main.dashboard_name}"
   }

@@ -1,0 +1,33 @@
+﻿/* File này có thể xóa vì đã thay thế bằng src/styles/globals.css */
+/* Nếu muốn giữ, chỉ giữ CSS reset cơ bản */
+
+:root {
+  font-family: system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+#root {
+  height: 100vh;
+  width: 100%;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+a {
+  transition: color 0.3s ease;
+}
+
+a:hover {
+  color: #d4a574;
+}

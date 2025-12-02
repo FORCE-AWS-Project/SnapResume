@@ -13,7 +13,8 @@ resource "aws_lambda_function" "api" {
   environment {
     variables = {
       ENVIRONMENT              = var.environment
-      DYNAMODB_MAIN_TABLE      = aws_dynamodb_table.main.name
+      DYNAMODB_USERS_TABLE     = aws_dynamodb_table.users.name
+      DYNAMODB_SECTIONS_TABLE  = aws_dynamodb_table.sections.name
       DYNAMODB_RESUMES_TABLE   = aws_dynamodb_table.resumes.name
       DYNAMODB_TEMPLATES_TABLE = aws_dynamodb_table.templates.name
       DYNAMODB_SESSIONS_TABLE  = aws_dynamodb_table.sessions.name
@@ -100,8 +101,10 @@ resource "aws_iam_role_policy" "lambda_custom" {
           "dynamodb:BatchWriteItem"
         ]
         Resource = [
-          aws_dynamodb_table.main.arn,
-          "${aws_dynamodb_table.main.arn}/index/*",
+          aws_dynamodb_table.users.arn,
+          "${aws_dynamodb_table.users.arn}/index/*",
+          aws_dynamodb_table.sections.arn,
+          "${aws_dynamodb_table.sections.arn}/index/*",
           aws_dynamodb_table.resumes.arn,
           "${aws_dynamodb_table.resumes.arn}/index/*",
           aws_dynamodb_table.templates.arn,
@@ -165,4 +168,119 @@ resource "aws_lambda_function_url" "api" {
     allow_headers     = ["*"]
     max_age           = 86400
   }
+}
+
+# Lambda Function for Cognito Post-Confirmation Trigger
+resource "aws_lambda_function" "cognito_post_confirmation" {
+  filename      = "cognito-post-confirmation.zip"
+  function_name = "${var.project_name}-${var.environment}-cognito-post-confirmation"
+  role          = aws_iam_role.cognito_lambda_exec.arn
+  handler       = "handlers/cognito-post-confirmation.lambdaHandler"
+  runtime       = "nodejs20.x"
+  timeout       = 30
+  memory_size   = 256
+
+  source_code_hash = fileexists("cognito-post-confirmation.zip") ? filebase64sha256("cognito-post-confirmation.zip") : null
+
+  environment {
+    variables = {
+      ENVIRONMENT          = var.environment
+      DYNAMODB_USERS_TABLE = aws_dynamodb_table.users.name
+      REGION               = var.aws_region
+    }
+  }
+
+  tracing_config {
+    mode = "Active"
+  }
+
+  tags = {
+    Name = "${var.project_name}-${var.environment}-cognito-post-confirmation-lambda"
+  }
+
+  lifecycle {
+    ignore_changes = [
+      filename,
+      source_code_hash
+    ]
+  }
+}
+
+# Lambda Execution Role for Cognito Triggers
+resource "aws_iam_role" "cognito_lambda_exec" {
+  name = "${var.project_name}-${var.environment}-cognito-lambda-exec"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Service = "lambda.amazonaws.com"
+        }
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
+}
+
+# Lambda Basic Execution Policy for Cognito Trigger
+resource "aws_iam_role_policy_attachment" "cognito_lambda_basic" {
+  role       = aws_iam_role.cognito_lambda_exec.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+# Lambda X-Ray Policy for Cognito Trigger
+resource "aws_iam_role_policy_attachment" "cognito_lambda_xray" {
+  role       = aws_iam_role.cognito_lambda_exec.name
+  policy_arn = "arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess"
+}
+
+# Lambda Custom Policy for Cognito Trigger
+resource "aws_iam_role_policy" "cognito_lambda_custom" {
+  name = "${var.project_name}-${var.environment}-cognito-lambda-policy"
+  role = aws_iam_role.cognito_lambda_exec.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "dynamodb:PutItem",
+          "dynamodb:UpdateItem"
+        ]
+        Resource = [
+          aws_dynamodb_table.users.arn
+        ]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "cognito-idp:AdminGetUser",
+          "cognito-idp:AdminUpdateUserAttributes"
+        ]
+        Resource = aws_cognito_user_pool.main.arn
+      }
+    ]
+  })
+}
+
+# CloudWatch Log Group for Cognito Lambda
+resource "aws_cloudwatch_log_group" "lambda_cognito" {
+  name              = "/aws/lambda/${aws_lambda_function.cognito_post_confirmation.function_name}"
+  retention_in_days = 30
+
+  tags = {
+    Name = "${var.project_name}-${var.environment}-cognito-lambda-logs"
+  }
+}
+
+# Lambda Permission for Cognito to invoke the post-confirmation trigger
+resource "aws_lambda_permission" "cognito_post_confirmation" {
+  statement_id  = "AllowCognitoInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.cognito_post_confirmation.function_name
+  principal     = "cognito-idp.amazonaws.com"
+  source_arn    = aws_cognito_user_pool.main.arn
 }

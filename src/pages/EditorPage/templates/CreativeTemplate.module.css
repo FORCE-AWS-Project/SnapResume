@@ -1,0 +1,104 @@
+.template {
+    background: #fff;
+    display: flex;
+    min-height: 1100px
+}
+
+.sidebar {
+    width: 280px;
+    background: linear-gradient(135deg, #fa8c16 0%, #fa541c 100%);
+    color: #fff;
+    padding: 40px 24px;
+    flex-shrink: 0
+}
+
+.photoContainer {
+    margin-bottom: 24px
+}
+
+.photo {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2)
+}
+
+.sidebarContent {}
+
+.name {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+    color: #fff
+}
+
+.roleTitle {
+    font-size: 14px;
+    color: #fff1f0;
+    margin: 0 0 24px 0;
+    font-weight: 400
+}
+
+.contactSection,
+.linksSection {
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3)
+}
+
+.sidebarTitle {
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 12px 0;
+    letter-spacing: 1px
+}
+
+.contactItem,
+.linkItem {
+    font-size: 12px;
+    color: #fff;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px
+}
+
+.linkItem a {
+    color: #fff;
+    text-decoration: none
+}
+
+.linkItem a:hover {
+    text-decoration: underline
+}
+
+.mainContent {
+    flex: 1;
+    padding: 40px;
+    background: #fff
+}
+
+.summary {
+    margin-bottom: 32px
+}
+
+.sectionTitle {
+    font-size: 16px;
+    font-weight: 700;
+    color: #fa8c16;
+    margin: 0 0 16px 0;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding-bottom: 8px;
+    border-bottom: 3px solid #fa8c16
+}
+
+.summaryText {
+    margin: 0;
+    color: #595959;
+    line-height: 1.7;
+    font-size: 14px
+}

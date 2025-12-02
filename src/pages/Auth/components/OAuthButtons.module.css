@@ -1,0 +1,24 @@
+.container {
+  width: 100%;
+}
+
+.googleBtn,
+.githubBtn {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(212, 165, 116, 0.3) !important;
+  color: var(--color-text-primary) !important;
+  height: 45px;
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  transition: all var(--transition-base);
+}
+
+.googleBtn:hover,
+.githubBtn:hover {
+  background-color: rgba(255, 255, 255, 0.12) !important;
+  border-color: var(--color-primary) !important;
+}
+
+.githubBtn {
+  background-color: rgba(0, 0, 0, 0.2) !important;
+}

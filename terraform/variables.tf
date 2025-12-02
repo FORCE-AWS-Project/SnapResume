@@ -40,12 +40,6 @@ variable "github_token_secret_arn" {
   default     = ""
 }
 
-variable "github_codestar_connection_arn" {
-  description = "ARN of the AWS CodeStar connection to GitHub"
-  type        = string
-  default     = ""
-}
-
 variable "lambda_runtime" {
   description = "Lambda runtime"
   type        = string
