@@ -185,7 +185,7 @@ export class ResumeService {
       updatedAt: now,
     };
 
-    await DynamoDBUtil.putItem(TableNames.RESUMES, resume as unknown as Record<string, unknown>);
+    await DynamoDBUtil.putItem<Resume>(TableNames.RESUMES, resume);
 
     return {
       resumeId,

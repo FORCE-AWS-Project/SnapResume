@@ -1,14 +1,10 @@
-/**
- * Template Model Types
- */
-
 import { InputDataSchema } from './schema.model';
 
 export interface Template {
-  PK?: string; // TEMPLATE#{templateId}
-  SK?: string; // METADATA
-  GSI1PK?: string; // CATEGORY#{category}
-  GSI1SK?: string; // NAME#{name}
+  PK?: string; 
+  SK?: string;
+  GSI1PK?: string;
+  GSI1SK?: string;
   templateId: string;
   name: string;
   category: string;

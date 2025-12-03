@@ -68,7 +68,7 @@ export class DynamoDBUtil {
   /**
    * Put an item in DynamoDB
    */
-  static async putItem<T extends Record<string, unknown>>(
+  static async putItem<T extends Object>(
     tableName: string,
     item: T
   ): Promise<void> {
