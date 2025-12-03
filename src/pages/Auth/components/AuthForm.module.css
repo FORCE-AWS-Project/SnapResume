@@ -1,20 +1,29 @@
 .container {
   padding: var(--spacing-lg) 0;
+  width: 100%;
+}
+
+.heading {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--color-text-dark);
+  margin-bottom: var(--spacing-sm);
 }
 
 .subtitle {
-  font-size: var(--font-size-base);
-  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  color: #999;
   margin-bottom: var(--spacing-lg);
   text-align: center;
 }
 
 .input {
   background-color: rgba(255, 255, 255, 0.05) !important;
-  border-color: rgba(212, 165, 116, 0.3) !important;
+  border-color: #e0e0e0 !important;
   color: var(--color-text-primary) !important;
   height: 45px;
   font-size: var(--font-size-base);
+  border-radius: var(--radius-sm) !important;
 }
 
 .input::placeholder {
@@ -38,25 +47,64 @@
   margin-bottom: var(--spacing-lg);
 }
 
+.rememberContainer :global(.ant-checkbox-wrapper),
+.termsContainer :global(.ant-checkbox-wrapper) {
+  color: #333 !important;
+  font-size: var(--font-size-sm);
+}
+
 .link {
   color: var(--color-primary);
   text-decoration: none;
-  font-size: var(--font-size-sm);
   transition: color var(--transition-base);
+  font-size: var(--font-size-sm);
 }
 
 .link:hover {
   color: #e8c4a0;
 }
 
+.submitBtn {
+  height: 44px;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  background: #000 !important;
+  border: none !important;
+}
+
+.submitBtn:hover {
+  background: #333 !important;
+}
+
 .divider {
-  border-top-color: rgba(212, 165, 116, 0.2) !important;
-  margin: var(--spacing-lg) 0 !important;
+  text-align: center;
+  color: #999;
+  font-size: var(--font-size-sm);
+  margin: var(--spacing-lg) 0;
+  position: relative;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: calc(50% - 40px);
+  height: 1px;
+  background: #e0e0e0;
+}
+
+.divider::before {
+  left: 0;
+}
+
+.divider::after {
+  right: 0;
 }
 
 .switchText {
   text-align: center;
-  margin-top: var(--spacing-lg);
-  color: var(--color-text-muted);
+  color: #666;
   font-size: var(--font-size-sm);
+  margin-top: var(--spacing-lg);
 }
