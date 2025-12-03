@@ -13,10 +13,10 @@ export default function Navbar() {
           <span className={styles.logoText}>SnapResume</span>
         </div>
         <Space size="large" className={styles.navLinks}>
-          <a href="templates">Template</a>
-          <a href="#features">Features</a>
-          <a href="#pricing">Pricing</a>
-          <a href="#about">About</a>
+          <a href="/templates" onClick={(e) => { e.preventDefault(); navigate('/templates') }}>Templates</a>
+          <a href="/features" onClick={(e) => { e.preventDefault(); navigate('/features') }}>Features</a>
+          <a href="/pricing" onClick={(e) => { e.preventDefault(); navigate('/pricing') }}>Pricing</a>
+          <a href="/about" onClick={(e) => { e.preventDefault(); navigate('/about') }}>About</a>
           <Button type="primary" onClick={() => navigate('/auth')}>Sign in</Button>
         </Space>
       </div>
