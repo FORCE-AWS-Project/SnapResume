@@ -9,13 +9,11 @@ import {
   ZoomOutOutlined,
   BackwardOutlined,
   PrinterOutlined,
-  FileTextOutlined,
-  FilePdfOutlined,
-  FileWordOutlined
+  UnorderedListOutlined
 } from '@ant-design/icons'
 import FormPanel from './components/FormPanel'
 import PreviewPanel from './components/PreviewPanel'
-import { downloadJSON, exportToPDF, exportToDOCX, validateATS } from '../../utils/exportResume'
+import { ResumeManagerModal } from '../../components/ResumeManager'
 import styles from './EditorPage.module.css'
 
 const { Header, Content } = Layout
@@ -26,49 +24,21 @@ export default function EditorPage() {
   const [zoom, setZoom] = useState(100)
   const [resumeName, setResumeName] = useState('My Resume')
   const [templateId, setTemplateId] = useState(1)
-  const [sectionOrder, setSectionOrder] = useState([
-    'experience',
-    'education',
-    'skills',
-    'projects',
-    'certifications',
-    'languages',
-    'volunteering',
-    'publications'
-  ])
-
+  const [managerModalVisible, setManagerModalVisible] = useState(false)
   const [resumeData, setResumeData] = useState({
     personalInfo: {
       fullName: '',
-      roleTitle: '',
-      pronouns: '',
       email: '',
       phone: '',
-      location: {
-        city: '',
-        state: '',
-        country: '',
-      },
-      links: {
-        linkedin: '',
-        github: '',
-        portfolio: '',
-        website: '',
-      },
+      location: '',
       summary: '',
       photoUrl: '',
-      showPhoto: false,
     },
     experience: [],
     education: [],
-    skills: {
-      categories: [],
-    },
+    skills: [],
     certifications: [],
     projects: [],
-    languages: [],
-    volunteering: [],
-    publications: [],
   })
 
   useEffect(() => {
@@ -79,79 +49,23 @@ export default function EditorPage() {
   }, [searchParams])
 
   const handleInputChange = (section, field, value) => {
-    if (field === null) {
-      // For array sections (experience, education, etc.)
-      setResumeData(prev => ({
-        ...prev,
-        [section]: value,
-      }))
-    } else {
-      // For nested object sections (personalInfo)
-      setResumeData(prev => ({
-        ...prev,
-        [section]: {
-          ...prev[section],
-          [field]: value,
-        },
-      }))
-    }
+    setResumeData(prev => ({
+      ...prev,
+      [section]: {
+        ...prev[section],
+        [field]: value,
+      },
+    }))
   }
 
   const handleSave = () => {
-    // Validate ATS compliance
-    const validation = validateATS(resumeData)
-    if (validation.issues.length > 0) {
-      const warningCount = validation.issues.filter(i => i.severity === 'warning').length
-      const errorCount = validation.issues.length - warningCount
-
-      if (errorCount > 0) {
-        message.warning(`Resume saved with ${errorCount} ATS issue(s). Check the console for details.`)
-        console.warn('ATS Issues:', validation.issues)
-      }
-    }
-
     message.success('Resume saved successfully!')
     console.log('Saved resume:', { resumeName, resumeData, templateId })
   }
 
-  const handleDownload = (format) => {
-    switch (format) {
-      case 'pdf':
-        exportToPDF()
-        message.success('Opening print dialog for PDF export...')
-        break
-      case 'json':
-        downloadJSON(resumeData, `${resumeName.replace(/\s+/g, '_')}.json`)
-        message.success('Resume downloaded as JSON!')
-        break
-      case 'docx':
-        exportToDOCX(resumeData)
-        break
-      default:
-        message.info('Please select a format')
-    }
+  const handleDownload = () => {
+    message.info('Download feature coming soon!')
   }
-
-  const downloadMenuItems = [
-    {
-      key: 'pdf',
-      label: 'Export as PDF',
-      icon: <FilePdfOutlined />,
-      onClick: () => handleDownload('pdf'),
-    },
-    {
-      key: 'json',
-      label: 'Export as JSON',
-      icon: <FileTextOutlined />,
-      onClick: () => handleDownload('json'),
-    },
-    {
-      key: 'docx',
-      label: 'Export as DOCX',
-      icon: <FileWordOutlined />,
-      onClick: () => handleDownload('docx'),
-    },
-  ]
 
   const handlePrint = () => {
     window.print()
@@ -201,14 +115,20 @@ export default function EditorPage() {
         </div>
 
         <Space className={styles.headerActions} size="small">
+          <Tooltip title="Manage Sections">
+            <Button
+              icon={<UnorderedListOutlined />}
+              onClick={() => setManagerModalVisible(true)}
+            >
+              Manage
+            </Button>
+          </Tooltip>
           <Button type="primary" icon={<SaveOutlined />} onClick={handleSave}>
             Save
           </Button>
-          <Dropdown menu={{ items: downloadMenuItems }}>
-            <Button icon={<DownloadOutlined />}>
-              Download
-            </Button>
-          </Dropdown>
+          <Button icon={<DownloadOutlined />} onClick={handleDownload}>
+            Download
+          </Button>
           <Button icon={<PrinterOutlined />} onClick={handlePrint}>
             Print
           </Button>
@@ -249,18 +169,22 @@ export default function EditorPage() {
 
       {/* Content */}
       <Content className={styles.content}>
-        <FormPanel
-          data={resumeData}
-          onInputChange={handleInputChange}
-          sectionOrder={sectionOrder}
-        />
+        <FormPanel data={resumeData} onInputChange={handleInputChange} />
         <PreviewPanel
           data={resumeData}
           templateId={templateId}
           zoom={zoom}
-          sectionOrder={sectionOrder}
         />
       </Content>
+
+      {/* Resume Manager Modal */}
+      <ResumeManagerModal
+        visible={managerModalVisible}
+        onClose={() => setManagerModalVisible(false)}
+        resumeData={resumeData}
+        onUpdateData={setResumeData}
+        onSave={handleSave}
+      />
     </Layout>
   )
 }
