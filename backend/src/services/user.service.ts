@@ -3,13 +3,21 @@
  * Business logic for user operations using separated DynamoDB tables
  */
 
-import AWS from 'aws-sdk';
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import {
+  DynamoDBDocumentClient,
+  GetCommand,
+  PutCommand,
+  UpdateCommand,
+  QueryCommand,
+} from '@aws-sdk/lib-dynamodb';
+import { ReturnValue } from '@aws-sdk/client-dynamodb';
 import { AWS_CONFIG } from '../constants';
 import { UserProfile, UpdateUserProfileRequest } from '../models';
 
-const dynamodb = new AWS.DynamoDB.DocumentClient({
-  region: AWS_CONFIG.REGION,
-});
+// Initialize DynamoDB client
+const client = new DynamoDBClient({ region: AWS_CONFIG.REGION });
+const docClient = DynamoDBDocumentClient.from(client);
 
 export class UserService {
   private static readonly USERS_TABLE = process.env.DYNAMODB_USERS_TABLE;
@@ -24,21 +32,21 @@ export class UserService {
 
     try {
       // First try to get user by primary key
-      const params = {
+      const command = new GetCommand({
         TableName: this.USERS_TABLE,
         Key: {
           userId: userId,
           email: userId // Fallback using userId as sort key
         }
-      };
+      });
 
-      const result = await dynamodb.get(params).promise();
+      const result = await docClient.send(command);
       if (result.Item) {
         return this.formatUserProfile(result.Item);
       }
 
       // If not found, try to query by email (more reliable)
-      const queryParams = {
+      const queryCommand = new QueryCommand({
         TableName: this.USERS_TABLE,
         IndexName: 'EmailIndex', // Assuming email index exists
         KeyConditionExpression: 'email = :email',
@@ -47,9 +55,9 @@ export class UserService {
           ':email': `placeholder@${userId}`, // Placeholder - we need email
           ':userId': userId
         }
-      };
+      });
 
-      const queryResult = await dynamodb.query(queryParams).promise();
+      const queryResult = await docClient.send(queryCommand);
       if (queryResult.Items && queryResult.Items.length > 0) {
         return this.formatUserProfile(queryResult.Items[0]);
       }
@@ -103,14 +111,14 @@ export class UserService {
           }
         };
 
-        await dynamodb.put({
+        await docClient.send(new PutCommand({
           TableName: this.USERS_TABLE,
           Item: {
             ...newUser,
             email: newUser.email // Ensure email is used as sort key
           },
           ConditionExpression: 'attribute_not_exists(userId)' // Prevent overwriting
-        }).promise();
+        }));
 
         return {
           userId,
@@ -136,10 +144,10 @@ export class UserService {
         },
         UpdateExpression: updateExpression,
         ExpressionAttributeValues: expressionAttributeValues,
-        ReturnValues: 'ALL_NEW'
+        ReturnValues: ReturnValue.ALL_NEW
       };
 
-      const result = await dynamodb.update(updateParams).promise();
+      const result = await docClient.send(new UpdateCommand(updateParams));
 
       return {
         userId,
@@ -185,15 +193,15 @@ export class UserService {
     };
 
     try {
-      await dynamodb.put({
+      await docClient.send(new PutCommand({
         TableName: this.USERS_TABLE,
         Item: newUser,
         ConditionExpression: 'attribute_not_exists(userId)'
-      }).promise();
+      }));
 
       console.log('User created successfully from Cognito:', userId);
     } catch (error: any) {
-      if (error.code === 'ConditionalCheckFailedException') {
+      if (error.name === 'ConditionalCheckFailedException') {
         console.log('User already exists:', userId);
       } else {
         console.error('Error creating user from Cognito:', error);
@@ -233,7 +241,7 @@ export class UserService {
         }
       };
 
-      const result = await dynamodb.query(params).promise();
+      const result = await docClient.send(new QueryCommand(params));
       if (result.Items && result.Items.length > 0) {
         return this.formatUserProfile(result.Items[0]);
       }

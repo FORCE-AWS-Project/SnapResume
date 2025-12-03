@@ -106,7 +106,7 @@ const router = Router();
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post('/auth/register', AuthController.register);
+// router.post('/auth/register', AuthController.register);
 
 /**
  * @swagger
@@ -164,7 +164,7 @@ router.post('/auth/register', AuthController.register);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post('/auth/login', AuthController.login);
+// router.post('/auth/login', AuthController.login);
 
 /**
  * @swagger
@@ -210,7 +210,7 @@ router.post('/auth/login', AuthController.login);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post('/auth/refresh', AuthController.refresh);
+// router.post('/auth/refresh', AuthController.refresh);
 
 // /**
 //  * @swagger
@@ -422,7 +422,7 @@ router.get('/auth/me', AuthController.getCurrentUser);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post('/auth/confirm-signup', AuthController.confirmSignUp);
+// router.post('/auth/confirm-signup', AuthController.confirmSignUp);
 
 /**
  * @swagger
@@ -465,7 +465,7 @@ router.post('/auth/confirm-signup', AuthController.confirmSignUp);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post('/auth/resend-confirmation', AuthController.resendConfirmationCode);
+// router.post('/auth/resend-confirmation', AuthController.resendConfirmationCode);
 
 // ==================== USER ROUTES ====================
 
