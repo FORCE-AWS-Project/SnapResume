@@ -8,71 +8,38 @@ env:
 phases:
   install:
     runtime-versions:
-      nodejs: 22
+      nodejs: 22.x
     commands:
       - echo Installing dependencies...
-      - echo Current directory: $(pwd)
-      - echo Listing files:
-      - ls -la
       - npm ci
 
   pre_build:
     commands:
-      - echo Installing TypeScript globally...
       - npm install -g typescript
-      - echo TypeScript version:
       - tsc --version
 
   build:
     commands:
       - echo Compiling TypeScript...
       - npm run build
-
-      - echo Verify build output:
       - ls -la dist/
-
-      - echo Copy package files to dist...
       - cp package.json package-lock.json dist/
-
-      - echo Installing production dependencies in dist...
       - cd dist
-      - npm ci --only=production
-
-      - echo Verify dist structure:
+      - npm ci --omit=dev
       - ls -la
-      - echo Checking if index.js exists:
-      - test -f index.js && echo "index.js found" || echo "index.js not found"
-
-      - echo Creating deployment package...
+      - test -f server.js && echo "server.js found" || echo "server.js NOT found"
       - zip -r ../lambda-deployment.zip .
       - cd ..
-
-      - echo Deployment package created:
       - ls -la lambda-deployment.zip
 
   post_build:
     commands:
-      - echo Deploying to Lambda function: $LAMBDA_FUNCTION_NAME
-      - aws lambda update-function-code \
-          --function-name $LAMBDA_FUNCTION_NAME \
-          --zip-file fileb://lambda-deployment.zip \
-          --runtime nodejs22.x
-
-      - echo Waiting for function update...
-      - aws lambda wait function-updated \
-          --function-name $LAMBDA_FUNCTION_NAME
-
-      - echo Getting function configuration...
-      - aws lambda get-function-configuration \
-          --function-name $LAMBDA_FUNCTION_NAME \
-          --query 'Runtime,Handler,CodeSize' \
-          --output table
+      - aws lambda update-function-code --function-name $LAMBDA_FUNCTION_NAME --zip-file fileb://lambda-deployment.zip
+      - aws lambda wait function-updated --function-name $LAMBDA_FUNCTION_NAME
 
 artifacts:
   files:
     - lambda-deployment.zip
-  base-directory: backend
-  discard-paths: yes
 
 cache:
   paths:
