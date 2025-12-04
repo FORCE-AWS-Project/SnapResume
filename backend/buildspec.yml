@@ -3,44 +3,77 @@ version: 0.2
 env:
   variables:
     NODE_ENV: production
+    NODE_VERSION: "22.x"
 
 phases:
   install:
+    runtime-versions:
+      nodejs: 22
     commands:
       - echo Installing dependencies...
-      - cd backend
+      - echo Current directory: $(pwd)
+      - echo Listing files:
+      - ls -la
       - npm ci
+
+  pre_build:
+    commands:
+      - echo Installing TypeScript globally...
+      - npm install -g typescript
+      - echo TypeScript version:
+      - tsc --version
 
   build:
     commands:
       - echo Compiling TypeScript...
-      - npx tsc
+      - npm run build
+
+      - echo Verify build output:
+      - ls -la dist/
+
+      - echo Copy package files to dist...
+      - cp package.json package-lock.json dist/
 
       - echo Installing production dependencies in dist...
-      - cp package*.json dist/
       - cd dist
       - npm ci --only=production
 
+      - echo Verify dist structure:
+      - ls -la
+      - echo Checking if index.js exists:
+      - test -f index.js && echo "index.js found" || echo "index.js not found"
+
       - echo Creating deployment package...
-      - zip -r lambda-deployment.zip . 
+      - zip -r ../lambda-deployment.zip .
+      - cd ..
+
+      - echo Deployment package created:
+      - ls -la lambda-deployment.zip
 
   post_build:
     commands:
-      - echo Updating Lambda...
+      - echo Deploying to Lambda function: $LAMBDA_FUNCTION_NAME
       - aws lambda update-function-code \
           --function-name $LAMBDA_FUNCTION_NAME \
-          --zip-file fileb://lambda-deployment.zip
+          --zip-file fileb://lambda-deployment.zip \
+          --runtime nodejs22.x
 
-      - echo Waiting for update...
+      - echo Waiting for function update...
       - aws lambda wait function-updated \
           --function-name $LAMBDA_FUNCTION_NAME
+
+      - echo Getting function configuration...
+      - aws lambda get-function-configuration \
+          --function-name $LAMBDA_FUNCTION_NAME \
+          --query 'Runtime,Handler,CodeSize' \
+          --output table
 
 artifacts:
   files:
     - lambda-deployment.zip
-  base-directory: backend/dist
-
+  base-directory: backend
+  discard-paths: yes
 
 cache:
   paths:
-    - 'backend/node_modules/**/*'
+    - node_modules/**/*

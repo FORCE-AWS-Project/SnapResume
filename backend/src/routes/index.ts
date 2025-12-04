@@ -19,332 +19,6 @@ const router = Router();
 
 /**
  * @swagger
- * /api/auth/register:
- *   post:
- *     tags: [Auth]
- *     summary: Register a new user
- *     description: Create a new user account with AWS Cognito and optionally create user profile in DynamoDB
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - email
- *               - password
- *             properties:
- *               email:
- *                 type: string
- *                 format: email
- *                 example: john.doe@example.com
- *               password:
- *                 type: string
- *                 format: password
- *                 minLength: 8
- *                 example: MySecureP@ss123
- *               name:
- *                 type: string
- *                 deprecated: true
- *                 description: Deprecated - use personalInfo.name instead. Kept for backward compatibility.
- *                 example: John Doe
- *               personalInfo:
- *                 type: object
- *                 description: Optional user profile information
- *                 properties:
- *                   name:
- *                     type: string
- *                     example: John Doe
- *                   phone:
- *                     type: string
- *                     example: +1-234-567-8900
- *                   location:
- *                     type: string
- *                     example: San Francisco, CA
- *                   linkedin:
- *                     type: string
- *                     example: https://linkedin.com/in/johndoe
- *                   github:
- *                     type: string
- *                     example: https://github.com/johndoe
- *                   portfolio:
- *                     type: string
- *                     example: https://johndoe.com
- *                   summary:
- *                     type: string
- *                     example: Experienced software engineer with 5+ years...
- *                   customFields:
- *                     type: object
- *                     additionalProperties:
- *                       type: string
- *                     example:
- *                       twitter: https://twitter.com/johndoe
- *     responses:
- *       200:
- *         description: Registration successful. User profile created in DynamoDB if provided.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   type: object
- *                   properties:
- *                     userId:
- *                       type: string
- *                     userConfirmed:
- *                       type: boolean
- *                     message:
- *                       type: string
- *       400:
- *         description: Bad request
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- */
-// router.post('/auth/register', AuthController.register);
-
-/**
- * @swagger
- * /api/auth/login:
- *   post:
- *     tags: [Auth]
- *     summary: Login user
- *     description: Authenticate user with email and password. Auto-creates user profile in DynamoDB on first login.
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - email
- *               - password
- *             properties:
- *               email:
- *                 type: string
- *                 format: email
- *                 example: john.doe@example.com
- *               password:
- *                 type: string
- *                 format: password
- *                 example: MySecureP@ss123
- *     responses:
- *       200:
- *         description: Login successful
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 data:
- *                   type: object
- *                   properties:
- *                     accessToken:
- *                       type: string
- *                     idToken:
- *                       type: string
- *                     refreshToken:
- *                       type: string
- *                     expiresIn:
- *                       type: number
- *                       example: 3600
- *                     userId:
- *                       type: string
- *       401:
- *         description: Invalid credentials
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- */
-// router.post('/auth/login', AuthController.login);
-
-/**
- * @swagger
- * /api/auth/refresh:
- *   post:
- *     tags: [Auth]
- *     summary: Refresh access token
- *     description: Get new access and ID tokens using refresh token
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - refreshToken
- *             properties:
- *               refreshToken:
- *                 type: string
- *     responses:
- *       200:
- *         description: Token refreshed successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 data:
- *                   type: object
- *                   properties:
- *                     accessToken:
- *                       type: string
- *                     idToken:
- *                       type: string
- *                     expiresIn:
- *                       type: number
- *       401:
- *         description: Invalid or expired refresh token
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- */
-// router.post('/auth/refresh', AuthController.refresh);
-
-// /**
-//  * @swagger
-//  * /api/auth/forgot-password:
-//  *   post:
-//  *     tags: [Auth]
-//  *     summary: Initiate forgot password flow
-//  *     description: Send password reset code to user's email
-//  *     requestBody:
-//  *       required: true
-//  *       content:
-//  *         application/json:
-//  *           schema:
-//  *             type: object
-//  *             required:
-//  *               - email
-//  *             properties:
-//  *               email:
-//  *                 type: string
-//  *                 format: email
-//  *     responses:
-//  *       200:
-//  *         description: Password reset code sent
-//  *       400:
-//  *         description: Invalid email
-//  *         content:
-//  *           application/json:
-//  *             schema:
-//  *               $ref: '#/components/schemas/Error'
-//  */
-// router.post('/auth/forgot-password', AuthController.forgotPassword);
-
-// /**
-//  * @swagger
-//  * /api/auth/confirm-forgot-password:
-//  *   post:
-//  *     tags: [Auth]
-//  *     summary: Confirm password reset
-//  *     description: Reset password using verification code
-//  *     requestBody:
-//  *       required: true
-//  *       content:
-//  *         application/json:
-//  *           schema:
-//  *             type: object
-//  *             required:
-//  *               - email
-//  *               - code
-//  *               - newPassword
-//  *             properties:
-//  *               email:
-//  *                 type: string
-//  *                 format: email
-//  *               code:
-//  *                 type: string
-//  *               newPassword:
-//  *                 type: string
-//  *                 format: password
-//  *                 minLength: 8
-//  *     responses:
-//  *       200:
-//  *         description: Password reset successful
-//  *       400:
-//  *         description: Invalid code or password
-//  *         content:
-//  *           application/json:
-//  *             schema:
-//  *               $ref: '#/components/schemas/Error'
-//  */
-// router.post('/auth/confirm-forgot-password', AuthController.confirmForgotPassword);
-
-/**
- * @swagger
- * /api/auth/logout:
- *   post:
- *     tags: [Auth]
- *     summary: Logout user
- *     description: Invalidate all tokens (global sign out)
- *     security:
- *       - BearerAuth: []
- *       - LocalAuth: []
- *     responses:
- *       200:
- *         description: Logout successful
- *       401:
- *         description: Unauthorized
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- */
-router.post('/auth/logout', AuthController.logout);
-
-// /**
-//  * @swagger
-//  * /api/auth/change-password:
-//  *   post:
-//  *     tags: [Auth]
-//  *     summary: Change password
-//  *     description: Change password for authenticated user
-//  *     security:
-//  *       - BearerAuth: []
-//  *       - LocalAuth: []
-//  *     requestBody:
-//  *       required: true
-//  *       content:
-//  *         application/json:
-//  *           schema:
-//  *             type: object
-//  *             required:
-//  *               - previousPassword
-//  *               - newPassword
-//  *             properties:
-//  *               previousPassword:
-//  *                 type: string
-//  *                 format: password
-//  *               newPassword:
-//  *                 type: string
-//  *                 format: password
-//  *                 minLength: 8
-//  *     responses:
-//  *       200:
-//  *         description: Password changed successfully
-//  *       400:
-//  *         description: Invalid password
-//  *         content:
-//  *           application/json:
-//  *             schema:
-//  *               $ref: '#/components/schemas/Error'
-//  */
-// router.post('/auth/change-password', AuthController.changePassword);
-
-/**
- * @swagger
  * /api/auth/me:
  *   get:
  *     tags: [Auth]
@@ -352,7 +26,6 @@ router.post('/auth/logout', AuthController.logout);
  *     description: Get authenticated user's profile from DynamoDB
  *     security:
  *       - BearerAuth: []
- *       - LocalAuth: []
  *     responses:
  *       200:
  *         description: User profile retrieved successfully
@@ -376,97 +49,6 @@ router.post('/auth/logout', AuthController.logout);
  */
 router.get('/auth/me', AuthController.getCurrentUser);
 
-/**
- * @swagger
- * /api/auth/confirm-signup:
- *   post:
- *     tags: [Auth]
- *     summary: Confirm email verification
- *     description: Confirm user registration with verification code sent to email
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - email
- *               - code
- *             properties:
- *               email:
- *                 type: string
- *                 format: email
- *                 example: john.doe@example.com
- *               code:
- *                 type: string
- *                 example: 123456
- *                 description: 6-digit verification code sent to email
- *     responses:
- *       200:
- *         description: Email verified successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                   example: Email verified successfully. You can now login.
- *       400:
- *         description: Invalid email or code
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- */
-// router.post('/auth/confirm-signup', AuthController.confirmSignUp);
-
-/**
- * @swagger
- * /api/auth/resend-confirmation:
- *   post:
- *     tags: [Auth]
- *     summary: Resend verification code
- *     description: Send a new verification code to user's email
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - email
- *             properties:
- *               email:
- *                 type: string
- *                 format: email
- *                 example: john.doe@example.com
- *     responses:
- *       200:
- *         description: Verification code sent successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                   example: Verification code sent to your email.
- *       400:
- *         description: Invalid email
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- */
-// router.post('/auth/resend-confirmation', AuthController.resendConfirmationCode);
-
 // ==================== USER ROUTES ====================
 
 /**
@@ -478,7 +60,6 @@ router.get('/auth/me', AuthController.getCurrentUser);
  *     description: Get authenticated user's profile
  *     security:
  *       - BearerAuth: []
- *       - LocalAuth: []
  *     responses:
  *       200:
  *         description: Profile retrieved successfully
@@ -505,7 +86,6 @@ router.get('/users/me', UserController.getUserProfile);
  *     description: Update authenticated user's profile information
  *     security:
  *       - BearerAuth: []
- *       - LocalAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -543,7 +123,6 @@ router.put('/users/me', UserController.updateUserProfile);
  *     description: Get all resumes for authenticated user
  *     security:
  *       - BearerAuth: []
- *       - LocalAuth: []
  *     parameters:
  *       - in: query
  *         name: limit
@@ -593,7 +172,6 @@ router.get('/resumes', ResumeController.listResumes);
  *     description: Get a specific resume (metadata only, without section data)
  *     security:
  *       - BearerAuth: []
- *       - LocalAuth: []
  *     parameters:
  *       - in: path
  *         name: resumeId
@@ -627,7 +205,6 @@ router.get('/resumes/:resumeId', ResumeController.getResume);
  *     description: Get complete resume with all section data populated
  *     security:
  *       - BearerAuth: []
- *       - LocalAuth: []
  *     parameters:
  *       - in: path
  *         name: resumeId
@@ -650,24 +227,14 @@ router.get('/resumes/:resumeId', ResumeController.getResume);
  *                   properties:
  *                     resumeId:
  *                       type: string
+ *                     userId:
+ *                        type: string
  *                     name:
  *                       type: string
  *                     templateId:
  *                       type: string
- *                     personalInfo:
- *                       $ref: '#/components/schemas/PersonalInfo'
- *                     experience:
- *                       type: array
- *                       items:
- *                         $ref: '#/components/schemas/Section'
- *                     education:
- *                       type: array
- *                       items:
- *                         $ref: '#/components/schemas/Section'
- *                     skills:
- *                       type: array
- *                       items:
- *                         $ref: '#/components/schemas/Section'
+ *                     sections:
+ *                        type: object
  *       404:
  *         description: Resume not found
  */
@@ -682,7 +249,6 @@ router.get('/resumes/:resumeId/full', ResumeController.getFullResume);
  *     description: Create a new resume for authenticated user
  *     security:
  *       - BearerAuth: []
- *       - LocalAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -731,7 +297,6 @@ router.post('/resumes', ResumeController.createResume);
  *     description: Update an existing resume
  *     security:
  *       - BearerAuth: []
- *       - LocalAuth: []
  *     parameters:
  *       - in: path
  *         name: resumeId
@@ -772,7 +337,6 @@ router.put('/resumes/:resumeId', ResumeController.updateResume);
  *     description: Delete a resume
  *     security:
  *       - BearerAuth: []
- *       - LocalAuth: []
  *     parameters:
  *       - in: path
  *         name: resumeId
@@ -787,8 +351,6 @@ router.put('/resumes/:resumeId', ResumeController.updateResume);
  */
 router.delete('/resumes/:resumeId', ResumeController.deleteResume);
 
-// ==================== SECTION ROUTES ====================
-
 /**
  * @swagger
  * /api/sections:
@@ -798,7 +360,6 @@ router.delete('/resumes/:resumeId', ResumeController.deleteResume);
  *     description: Get all sections for authenticated user, optionally filtered by resume or type
  *     security:
  *       - BearerAuth: []
- *       - LocalAuth: []
  *     parameters:
  *       - in: query
  *         name: resumeId
@@ -847,7 +408,6 @@ router.get('/sections', SectionController.listSections);
  *     description: Get a specific section
  *     security:
  *       - BearerAuth: []
- *       - LocalAuth: []
  *     parameters:
  *       - in: path
  *         name: sectionId
@@ -880,7 +440,6 @@ router.get('/sections/:sectionId', SectionController.getSection);
  *     description: Create a new resume section
  *     security:
  *       - BearerAuth: []
- *       - LocalAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -936,7 +495,6 @@ router.post('/sections', SectionController.createSection);
  *     description: Update an existing section
  *     security:
  *       - BearerAuth: []
- *       - LocalAuth: []
  *     parameters:
  *       - in: path
  *         name: sectionId
@@ -973,7 +531,6 @@ router.put('/sections/:sectionId', SectionController.updateSection);
  *     description: Delete a section
  *     security:
  *       - BearerAuth: []
- *       - LocalAuth: []
  *     parameters:
  *       - in: path
  *         name: sectionId
@@ -1075,7 +632,6 @@ router.get('/templates/:templateId', TemplateController.getTemplate);
  *     description: Analyze job description and recommend best matching resume sections using AWS Bedrock
  *     security:
  *       - BearerAuth: []
- *       - LocalAuth: []
  *     requestBody:
  *       required: true
  *       content:
