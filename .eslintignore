@@ -1,0 +1,2 @@
+# Chrome Extension files - not linted with web app ESLint
+chrome-extension/**

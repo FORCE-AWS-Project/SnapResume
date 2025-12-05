@@ -13,7 +13,8 @@ import {
 } from '@ant-design/icons'
 import FormPanel from './components/FormPanel'
 import PreviewPanel from './components/PreviewPanel'
-import { ResumeManagerModal } from '../../components/ResumeManager'
+import { ResumeManagerProvider } from '../../components/ResumeManager/context/ResumeManagerContext'
+import { ResumeManagerUniversal } from '../../components/ResumeManager/ResumeManagerUniversal'
 import styles from './EditorPage.module.css'
 
 const { Header, Content } = Layout
@@ -41,11 +42,28 @@ export default function EditorPage() {
     projects: [],
   })
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     const templateIdParam = searchParams.get('templateId')
     const templateNameParam = searchParams.get('templateName')
+    
     if (templateIdParam) setTemplateId(parseInt(templateIdParam))
     if (templateNameParam) setResumeName(templateNameParam)
+
+    // Sync with extension if available
+    if (window.__EXTENSION_BRIDGE__) {
+      window.__EXTENSION_BRIDGE__.requestData().then((data) => {
+        if (data && Object.keys(data).length > 0) {
+          setResumeData(data)
+        }
+      })
+
+      // Listen for updates from extension
+      window.__EXTENSION_BRIDGE__.onDataUpdate((newData) => {
+        setResumeData(newData)
+        message.info('Resume updated from extension')
+      })
+    }
   }, [searchParams])
 
   const handleInputChange = (section, field, value) => {
@@ -60,6 +78,12 @@ export default function EditorPage() {
 
   const handleSave = () => {
     message.success('Resume saved successfully!')
+    
+    // Sync with extension if available
+    if (window.__EXTENSION_BRIDGE__) {
+      window.__EXTENSION_BRIDGE__.sendData(resumeData)
+    }
+
     console.log('Saved resume:', { resumeName, resumeData, templateId })
   }
 
@@ -85,106 +109,109 @@ export default function EditorPage() {
   ]
 
   return (
-    <Layout className={styles.layout}>
-      {/* Header */}
-      <Header className={styles.header}>
-        <div className={styles.headerLeft}>
-          <Tooltip title="Back to templates">
-            <Button
-              type="text"
-              icon={<BackwardOutlined />}
-              onClick={() => navigate('/templates')}
-              className={styles.backBtn}
-            />
-          </Tooltip>
-          <div className={styles.logoContainer} onClick={() => navigate('/')}>
-            <span className={styles.logoIcon}>📄</span>
-            <h1 className={styles.logoText}>SnapResume</h1>
+    <ResumeManagerProvider>
+      <Layout className={styles.layout}>
+        {/* Header */}
+        <Header className={styles.header}>
+          <div className={styles.headerLeft}>
+            <Tooltip title="Back to templates">
+              <Button
+                type="text"
+                icon={<BackwardOutlined />}
+                onClick={() => navigate('/templates')}
+                className={styles.backBtn}
+              />
+            </Tooltip>
+            <div className={styles.logoContainer} onClick={() => navigate('/')}>
+              <span className={styles.logoIcon}>📄</span>
+              <h1 className={styles.logoText}>SnapResume</h1>
+            </div>
           </div>
-        </div>
 
-        <div className={styles.resumeInfo}>
-          <input
-            type="text"
-            value={resumeName}
-            onChange={(e) => setResumeName(e.target.value)}
-            className={styles.resumeNameInput}
-            placeholder="Resume name"
-          />
-          <span className={styles.template}>Template: {templateId}</span>
-        </div>
+          <div className={styles.resumeInfo}>
+            <input
+              type="text"
+              value={resumeName}
+              onChange={(e) => setResumeName(e.target.value)}
+              className={styles.resumeNameInput}
+              placeholder="Resume name"
+            />
+            <span className={styles.template}>Template: {templateId}</span>
+          </div>
 
-        <Space className={styles.headerActions} size="small">
-          <Tooltip title="Manage Sections">
-            <Button
-              icon={<UnorderedListOutlined />}
-              onClick={() => setManagerModalVisible(true)}
-            >
-              Manage
+          <Space className={styles.headerActions} size="small">
+            <Tooltip title="Manage Sections">
+              <Button
+                icon={<UnorderedListOutlined />}
+                onClick={() => setManagerModalVisible(true)}
+              >
+                Manage
+              </Button>
+            </Tooltip>
+            <Button type="primary" icon={<SaveOutlined />} onClick={handleSave}>
+              Save
             </Button>
-          </Tooltip>
-          <Button type="primary" icon={<SaveOutlined />} onClick={handleSave}>
-            Save
-          </Button>
-          <Button icon={<DownloadOutlined />} onClick={handleDownload}>
-            Download
-          </Button>
-          <Button icon={<PrinterOutlined />} onClick={handlePrint}>
-            Print
-          </Button>
-          <Dropdown
-            menu={{ items: zoomMenuItems, onClick: (e) => handleZoom(parseInt(e.key)) }}
-          >
-            <Button icon={<SettingOutlined />} />
-          </Dropdown>
-        </Space>
-      </Header>
+            <Button icon={<DownloadOutlined />} onClick={handleDownload}>
+              Download
+            </Button>
+            <Button icon={<PrinterOutlined />} onClick={handlePrint}>
+              Print
+            </Button>
+            <Dropdown
+              menu={{ items: zoomMenuItems, onClick: (e) => handleZoom(parseInt(e.key)) }}
+            >
+              <Button icon={<SettingOutlined />} />
+            </Dropdown>
+          </Space>
+        </Header>
 
-      {/* Toolbar */}
-      <div className={styles.toolbar}>
-        <Space>
-          <span className={styles.zoomLabel}>Zoom:</span>
-          <Button
-            icon={<ZoomOutOutlined />}
-            onClick={() => handleZoom(zoom - 10)}
-            disabled={zoom <= 50}
-          />
-          <InputNumber
-            min={50}
-            max={200}
-            value={zoom}
-            onChange={handleZoom}
-            step={10}
-            className={styles.zoomInput}
-          />
-          <span>{zoom}%</span>
-          <Button
-            icon={<ZoomInOutlined />}
-            onClick={() => handleZoom(zoom + 10)}
-            disabled={zoom >= 200}
-          />
-        </Space>
-        <span className={styles.pageIndicator}>1/1</span>
-      </div>
+        {/* Toolbar */}
+        <div className={styles.toolbar}>
+          <Space>
+            <span className={styles.zoomLabel}>Zoom:</span>
+            <Button
+              icon={<ZoomOutOutlined />}
+              onClick={() => handleZoom(zoom - 10)}
+              disabled={zoom <= 50}
+            />
+            <InputNumber
+              min={50}
+              max={200}
+              value={zoom}
+              onChange={handleZoom}
+              step={10}
+              className={styles.zoomInput}
+            />
+            <span>{zoom}%</span>
+            <Button
+              icon={<ZoomInOutlined />}
+              onClick={() => handleZoom(zoom + 10)}
+              disabled={zoom >= 200}
+            />
+          </Space>
+          <span className={styles.pageIndicator}>1/1</span>
+        </div>
 
-      {/* Content */}
-      <Content className={styles.content}>
-        <FormPanel data={resumeData} onInputChange={handleInputChange} />
-        <PreviewPanel
-          data={resumeData}
-          templateId={templateId}
-          zoom={zoom}
+        {/* Content */}
+        <Content className={styles.content}>
+          <FormPanel data={resumeData} onInputChange={handleInputChange} />
+          <PreviewPanel
+            data={resumeData}
+            templateId={templateId}
+            zoom={zoom}
+          />
+        </Content>
+
+        {/* Resume Manager Modal - Now Universal */}
+        <ResumeManagerUniversal
+          visible={managerModalVisible}
+          onClose={() => setManagerModalVisible(false)}
+          resumeData={resumeData}
+          onUpdateData={setResumeData}
+          onSave={handleSave}
+          mode="modal"
         />
-      </Content>
-
-      {/* Resume Manager Modal */}
-      <ResumeManagerModal
-        visible={managerModalVisible}
-        onClose={() => setManagerModalVisible(false)}
-        resumeData={resumeData}
-        onUpdateData={setResumeData}
-        onSave={handleSave}
-      />
-    </Layout>
+      </Layout>
+    </ResumeManagerProvider>
   )
 }
