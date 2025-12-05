@@ -8,7 +8,7 @@ export default function Navbar() {
   return (
     <nav className={styles.navbar}>
       <div className={styles.container}>
-        <div className={styles.logoSection} onClick={() => navigate('/')}>
+          <div className={styles.logoSection} onClick={() => navigate('/')}>
           <span className={styles.logoIcon}>✨</span>
           <span className={styles.logoText}>SnapResume</span>
         </div>

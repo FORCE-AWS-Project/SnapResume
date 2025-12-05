@@ -297,7 +297,10 @@ export default function FeaturesPage() {
               >
                 Get Started Free
               </Button>
-              <Button size="large">
+              <Button 
+                size="large" 
+                onClick={() => navigate('/pricing')}
+                >
                 View Pricing
               </Button>
             </Space>
