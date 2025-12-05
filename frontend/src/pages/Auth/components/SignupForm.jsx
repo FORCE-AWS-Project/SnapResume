@@ -1,4 +1,4 @@
-import { Form, Input, Button, Checkbox, Divider } from 'antd'
+import { Form, Input, Button, Checkbox } from 'antd'
 import { UserOutlined, LockOutlined, EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons'
 import OAuthButtons from './OAuthButtons'
 import styles from './AuthForm.module.css'
@@ -13,7 +13,8 @@ export default function SignupForm({ onSuccess, onSwitchTab }) {
 
   return (
     <div className={styles.container}>
-      <p className={styles.subtitle}>Sign up for free!</p>
+      <h2 className={styles.heading}>Get Started Free!</h2>
+      <p className={styles.subtitle}>Create your account and start building amazing resumes</p>
       
       <Form
         form={form}
@@ -22,55 +23,26 @@ export default function SignupForm({ onSuccess, onSwitchTab }) {
         autoComplete="off"
         requiredMark={false}
       >
-        <Form.Item
-          name="email"
-          rules={[
-            { required: true, message: 'Please enter your email' },
-            { type: 'email', message: 'Please enter a valid email' }
-          ]}
-        >
+        <Form.Item label="Email">
           <Input
-            prefix={<UserOutlined />}
-            placeholder="Email/Username/Phone number"
+            placeholder="Input your email"
             size="large"
             className={styles.input}
           />
         </Form.Item>
 
-        <Form.Item
-          name="password"
-          rules={[
-            { required: true, message: 'Please enter your password' },
-            { min: 8, message: 'Password must be at least 8 characters' }
-          ]}
-        >
+        <Form.Item label="Password">
           <Input.Password
-            prefix={<LockOutlined />}
-            placeholder="Password"
+            placeholder="Input your password"
             size="large"
             className={styles.input}
             iconRender={(visible) => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
           />
         </Form.Item>
 
-        <Form.Item
-          name="confirmPassword"
-          dependencies={['password']}
-          rules={[
-            { required: true, message: 'Please confirm your password' },
-            ({ getFieldValue }) => ({
-              validator(_, value) {
-                if (!value || getFieldValue('password') === value) {
-                  return Promise.resolve()
-                }
-                return Promise.reject(new Error('Passwords do not match'))
-              },
-            }),
-          ]}
-        >
+        <Form.Item label="Confirm Password">
           <Input.Password
-            prefix={<LockOutlined />}
-            placeholder="Confirm your Password"
+            placeholder="Confirm your password"
             size="large"
             className={styles.input}
             iconRender={(visible) => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
@@ -83,19 +55,23 @@ export default function SignupForm({ onSuccess, onSwitchTab }) {
           </Checkbox>
         </div>
 
-        <Form.Item>
-          <Button type="primary" htmlType="submit" size="large" block>
-            Sign up now!
-          </Button>
-        </Form.Item>
+        <Button 
+          type="primary" 
+          htmlType="submit" 
+          size="large" 
+          block
+          className={styles.submitBtn}
+        >
+          Sign up
+        </Button>
       </Form>
 
-      <Divider className={styles.divider}>OR</Divider>
+      <p className={styles.divider}>Or continue with</p>
 
       <OAuthButtons />
 
       <p className={styles.switchText}>
-        Already have an account? <a href="#login" onClick={(e) => { e.preventDefault(); onSwitchTab(); }} className={styles.link}>Login</a>
+        Already have an account? <a href="#login" onClick={(e) => { e.preventDefault(); onSwitchTab(); }} className={styles.link}>Log in here</a>
       </p>
     </div>
   )

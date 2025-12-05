@@ -22,3 +22,18 @@
 .githubBtn {
   background-color: rgba(0, 0, 0, 0.2) !important;
 }
+
+.oauthBtn {
+  height: 44px !important;
+  font-weight: 500;
+  border: 1px solid #e0e0e0 !important;
+  background: #fff !important;
+  color: #333 !important;
+  border-radius: var(--radius-sm) !important;
+  transition: all var(--transition-base);
+}
+
+.oauthBtn:hover {
+  background: #f5f5f5 !important;
+  border-color: var(--color-primary) !important;
+}
