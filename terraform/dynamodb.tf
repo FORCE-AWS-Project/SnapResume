@@ -38,52 +38,61 @@ resource "aws_dynamodb_table" "users" {
   }
 }
 
-# DynamoDB Table - Resume Sections
+# DynamoDB Table - Sections (Single Table Design for Users and Sections)
 resource "aws_dynamodb_table" "sections" {
   name           = "${var.project_name}-${var.environment}-sections"
   billing_mode   = var.dynamodb_billing_mode
-  hash_key       = "sectionId"
-  range_key      = "userId"
+  hash_key       = "PK"
+  range_key      = "SK"
 
-  # If using provisioned mode
   read_capacity  = var.dynamodb_billing_mode == "PROVISIONED" ? 5 : null
   write_capacity = var.dynamodb_billing_mode == "PROVISIONED" ? 5 : null
 
   attribute {
-    name = "sectionId"
+    name = "PK"
     type = "S"
   }
 
   attribute {
-    name = "userId"
+    name = "SK"
     type = "S"
   }
 
   attribute {
-    name = "sectionType"
+    name = "GSI1PK"
     type = "S"
   }
 
   attribute {
-    name = "createdAt"
-    type = "N"
+    name = "GSI1SK"
+    type = "S"
   }
 
-  # GSI1 for querying sections by user and type (e.g., get all experience sections for a user)
+  attribute {
+    name = "GSI2PK"
+    type = "S"
+  }
+
+  attribute {
+    name = "GSI2SK"
+    type = "S"
+  }
+
+  # GSI1 for querying sections by user and tags (for AI matching)
   global_secondary_index {
     name            = "GSI1"
-    hash_key        = "userId"
-    range_key       = "sectionType"
+    hash_key        = "GSI1PK"
+    range_key       = "GSI1SK"
     projection_type = "ALL"
     read_capacity   = var.dynamodb_billing_mode == "PROVISIONED" ? 5 : null
     write_capacity  = var.dynamodb_billing_mode == "PROVISIONED" ? 5 : null
   }
 
-  # GSI2 for querying sections by type and created date (e.g., get most recent experience sections)
+  # GSI2 for querying sections by resume and type
   global_secondary_index {
     name            = "GSI2"
-    hash_key        = "sectionType"
-    range_key       = "createdAt"
+    hash_key        = "GSI2PK"
+    range_key       = "GSI2SK"
     projection_type = "ALL"
     read_capacity   = var.dynamodb_billing_mode == "PROVISIONED" ? 5 : null
     write_capacity  = var.dynamodb_billing_mode == "PROVISIONED" ? 5 : null
@@ -224,66 +233,6 @@ resource "aws_dynamodb_table" "templates" {
   }
 }
 
-# DynamoDB Table - User Sessions
-resource "aws_dynamodb_table" "sessions" {
-  name           = "${var.project_name}-${var.environment}-sessions"
-  billing_mode   = var.dynamodb_billing_mode
-  hash_key       = "PK"
-  range_key      = "SK"
-
-  read_capacity  = var.dynamodb_billing_mode == "PROVISIONED" ? 3 : null
-  write_capacity = var.dynamodb_billing_mode == "PROVISIONED" ? 3 : null
-
-  attribute {
-    name = "PK"
-    type = "S"
-  }
-
-  attribute {
-    name = "SK"
-    type = "S"
-  }
-
-  attribute {
-    name = "GSI1PK"
-    type = "S"
-  }
-
-  attribute {
-    name = "GSI1SK"
-    type = "S"
-  }
-
-  # GSI1 for querying sessions by user
-  # GSI1PK: USER#{userId}
-  # GSI1SK: CREATED#{timestamp}
-  global_secondary_index {
-    name            = "GSI1"
-    hash_key        = "GSI1PK"
-    range_key       = "GSI1SK"
-    projection_type = "ALL"
-    read_capacity   = var.dynamodb_billing_mode == "PROVISIONED" ? 3 : null
-    write_capacity  = var.dynamodb_billing_mode == "PROVISIONED" ? 3 : null
-  }
-
-  point_in_time_recovery {
-    enabled = true
-  }
-
-  server_side_encryption {
-    enabled = true
-  }
-
-  # TTL for automatic expiration of sessions
-  ttl {
-    attribute_name = "expiresAt"
-    enabled        = true
-  }
-
-  tags = {
-    Name = "${var.project_name}-${var.environment}-sessions-table"
-  }
-}
 
 # Auto-scaling for Users Table (if using PROVISIONED mode)
 resource "aws_appautoscaling_target" "users_table_read_target" {

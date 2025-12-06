@@ -1,6 +1,6 @@
 # Lambda Function for API
 resource "aws_lambda_function" "api" {
-  filename      = "lambda-placeholder.zip"
+  filename      = "lambda.zip"
   function_name = "${var.project_name}-${var.environment}-api"
   role          = aws_iam_role.lambda_exec.arn
   handler       = "index.lambdaHandler"
@@ -8,7 +8,7 @@ resource "aws_lambda_function" "api" {
   timeout       = 30
   memory_size   = 512
 
-  source_code_hash = fileexists("lambda-placeholder.zip") ? filebase64sha256("lambda-placeholder.zip") : null
+  source_code_hash = fileexists("lambda.zip") ? filebase64sha256("lambda.zip") : null
 
   environment {
     variables = {
@@ -17,7 +17,6 @@ resource "aws_lambda_function" "api" {
       DYNAMODB_SECTIONS_TABLE  = aws_dynamodb_table.sections.name
       DYNAMODB_RESUMES_TABLE   = aws_dynamodb_table.resumes.name
       DYNAMODB_TEMPLATES_TABLE = aws_dynamodb_table.templates.name
-      DYNAMODB_SESSIONS_TABLE  = aws_dynamodb_table.sessions.name
       COGNITO_USER_POOL_ID     = aws_cognito_user_pool.main.id
       COGNITO_CLIENT_ID        = aws_cognito_user_pool_client.web.id
       REGION                   = var.aws_region
@@ -109,8 +108,6 @@ resource "aws_iam_role_policy" "lambda_custom" {
           "${aws_dynamodb_table.resumes.arn}/index/*",
           aws_dynamodb_table.templates.arn,
           "${aws_dynamodb_table.templates.arn}/index/*",
-          aws_dynamodb_table.sessions.arn,
-          "${aws_dynamodb_table.sessions.arn}/index/*"
         ]
       },
       {
@@ -172,15 +169,15 @@ resource "aws_lambda_function_url" "api" {
 
 # Lambda Function for Cognito Post-Confirmation Trigger
 resource "aws_lambda_function" "cognito_post_confirmation" {
-  filename      = "cognito-post-confirmation.zip"
-  function_name = "${var.project_name}-${var.environment}-cognito-post-confirmation"
+  filename      = "lambda.zip"
+  function_name = "${var.project_name}-${var.environment}-lambda"
   role          = aws_iam_role.cognito_lambda_exec.arn
-  handler       = "handlers/cognito-post-confirmation.lambdaHandler"
+  handler       = "src/handlers/lambda.lambdaHandler"
   runtime       = "nodejs20.x"
   timeout       = 30
   memory_size   = 256
 
-  source_code_hash = fileexists("cognito-post-confirmation.zip") ? filebase64sha256("cognito-post-confirmation.zip") : null
+  source_code_hash = fileexists("lambda.zip") ? filebase64sha256("lambda.zip") : null
 
   environment {
     variables = {

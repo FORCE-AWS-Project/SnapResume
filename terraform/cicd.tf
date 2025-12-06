@@ -103,6 +103,14 @@ resource "aws_iam_role_policy" "codepipeline" {
           "secretsmanager:GetSecretValue"
         ]
         Resource = var.github_token_secret_arn != "" ? var.github_token_secret_arn : "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "codestar-connections:UseConnection",
+          "codestar-connections:PassConnection"
+        ]
+        Resource = aws_codestarconnections_connection.github.arn
       }
     ]
   })
@@ -158,7 +166,8 @@ resource "aws_iam_role_policy" "codebuild" {
         Effect = "Allow"
         Action = [
           "lambda:UpdateFunctionCode",
-          "lambda:GetFunction"
+          "lambda:GetFunction",
+          "lambda:GetFunctionConfiguration"
         ]
         Resource = aws_lambda_function.api.arn
       },
@@ -181,65 +190,6 @@ resource "aws_iam_role_policy" "codebuild" {
   })
 }
 
-# CodeBuild Project - Frontend (triggers Amplify deployment)
-resource "aws_codebuild_project" "frontend" {
-  name          = "${var.project_name}-${var.environment}-frontend"
-  description   = "Trigger Amplify deployment for frontend"
-  service_role  = aws_iam_role.codebuild.arn
-  build_timeout = 30
-
-  artifacts {
-    type = "CODEPIPELINE"
-  }
-
-  environment {
-    compute_type                = "BUILD_GENERAL1_SMALL"
-    image                       = "aws/codebuild/standard:7.0"
-    type                        = "LINUX_CONTAINER"
-    image_pull_credentials_type = "CODEBUILD"
-    privileged_mode             = false
-
-    environment_variable {
-      name  = "AMPLIFY_APP_ID"
-      value = aws_amplify_app.frontend.id
-    }
-
-    environment_variable {
-      name  = "AMPLIFY_BRANCH"
-      value = aws_amplify_branch.main.branch_name
-    }
-
-    environment_variable {
-      name  = "COGNITO_USER_POOL_ID"
-      value = aws_cognito_user_pool.main.id
-    }
-
-    environment_variable {
-      name  = "COGNITO_CLIENT_ID"
-      value = aws_cognito_user_pool_client.web.id
-    }
-
-    environment_variable {
-      name  = "API_ENDPOINT"
-      value = aws_api_gateway_stage.main.invoke_url
-    }
-  }
-
-  source {
-    type      = "CODEPIPELINE"
-    buildspec = "frontend/buildspec-amplify.yml"
-  }
-
-  logs_config {
-    cloudwatch_logs {
-      group_name = "/aws/codebuild/${var.project_name}-${var.environment}-frontend"
-    }
-  }
-
-  tags = {
-    Name = "${var.project_name}-${var.environment}-frontend-build"
-  }
-}
 
 # CodeBuild Project - Backend
 resource "aws_codebuild_project" "backend" {
@@ -269,12 +219,6 @@ resource "aws_codebuild_project" "backend" {
       value = aws_dynamodb_table.users.name
     }
 
-    # JWT Authentication Environment Variables
-    environment_variable {
-      name  = "DYNAMODB_USERS_TABLE"
-      value = aws_dynamodb_table.users.name
-    }
-
     environment_variable {
       name  = "DYNAMODB_SECTIONS_TABLE"
       value = aws_dynamodb_table.sections.name
@@ -288,11 +232,6 @@ resource "aws_codebuild_project" "backend" {
     environment_variable {
       name  = "DYNAMODB_TEMPLATES_TABLE"
       value = aws_dynamodb_table.templates.name
-    }
-
-    environment_variable {
-      name  = "DYNAMODB_SESSIONS_TABLE"
-      value = aws_dynamodb_table.sessions.name
     }
 
     environment_variable {
@@ -366,29 +305,13 @@ resource "aws_codepipeline" "main" {
       configuration = {
         ConnectionArn    = aws_codestarconnections_connection.github.arn
         FullRepositoryId = var.github_repo
-        BranchName       = var.github_branch
+        BranchName       = var.github_branch_backend
       }
     }
   }
 
   stage {
     name = "Build"
-
-    action {
-      name             = "Build-Frontend"
-      category         = "Build"
-      owner            = "AWS"
-      provider         = "CodeBuild"
-      version          = "1"
-      input_artifacts  = ["source_output"]
-      output_artifacts = ["frontend_output"]
-
-      configuration = {
-        ProjectName = aws_codebuild_project.frontend.name
-      }
-
-      run_order = 1
-    }
 
     action {
       name             = "Build-Backend"
@@ -402,8 +325,6 @@ resource "aws_codepipeline" "main" {
       configuration = {
         ProjectName = aws_codebuild_project.backend.name
       }
-
-      run_order = 1
     }
   }
 
@@ -412,15 +333,6 @@ resource "aws_codepipeline" "main" {
   }
 }
 
-# CloudWatch Log Groups for CodeBuild
-resource "aws_cloudwatch_log_group" "codebuild_frontend" {
-  name              = "/aws/codebuild/${var.project_name}-${var.environment}-frontend"
-  retention_in_days = 30
-
-  tags = {
-    Name = "${var.project_name}-${var.environment}-frontend-build-logs"
-  }
-}
 
 resource "aws_cloudwatch_log_group" "codebuild_backend" {
   name              = "/aws/codebuild/${var.project_name}-${var.environment}-backend"

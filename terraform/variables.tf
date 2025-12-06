@@ -22,22 +22,41 @@ variable "domain_name" {
   default     = ""
 }
 
-variable "github_repo" {
-  description = "GitHub repository (format: owner/repo)"
+variable "github_repo_url" {
+  description = "GitHub repository in url form"
   type        = string
-  default     = ""
+  default     = "https://github.com/FORCE-AWS-Project/SnapResume"
 }
 
-variable "github_branch" {
+variable "github_repo"{
+  description = "GitHub repository (format: owner/repo)"
+  type        = string
+  default     = "FORCE-AWS-Project/SnapResume"
+}
+
+variable "github_branch_frontend" {
   description = "GitHub branch for CI/CD"
   type        = string
-  default     = "main"
+  default     = "dev-frontend"
+}
+
+variable "github_branch_backend" {
+  description = "GitHub branch for CI/CD"
+  type        = string
+  default     = "dev-backend"
 }
 
 variable "github_token_secret_arn" {
   description = "ARN of the secret containing GitHub token"
   type        = string
   default     = ""
+}
+
+variable "github_access_token" {
+  description = "GitHub personal access token for Amplify"
+  type        = string
+  default     = ""
+  sensitive   = true
 }
 
 variable "lambda_runtime" {

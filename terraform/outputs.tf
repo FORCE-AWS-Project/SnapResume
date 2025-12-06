@@ -160,17 +160,6 @@ output "dynamodb_templates_table_name" {
   value       = aws_dynamodb_table.templates.name
 }
 
-output "dynamodb_sessions_table_name" {
-  description = "DynamoDB Sessions Table Name"
-  value       = aws_dynamodb_table.sessions.name
-}
-
-# Route 53 Outputs
-output "route53_zone_id" {
-  description = "Route 53 Hosted Zone ID"
-  value       = var.domain_name != "" ? aws_route53_zone.main[0].zone_id : null
-}
-
 output "route53_name_servers" {
   description = "Route 53 Name Servers"
   value       = var.domain_name != "" ? aws_route53_zone.main[0].name_servers : null
@@ -201,11 +190,6 @@ output "codepipeline_name" {
 output "codepipeline_arn" {
   description = "CodePipeline ARN"
   value       = aws_codepipeline.main.arn
-}
-
-output "codebuild_frontend_project_name" {
-  description = "CodeBuild Frontend Project Name"
-  value       = aws_codebuild_project.frontend.name
 }
 
 output "codebuild_backend_project_name" {
@@ -264,7 +248,6 @@ output "backend_env_config" {
     DYNAMODB_SECTIONS_TABLE   = aws_dynamodb_table.sections.name
     DYNAMODB_RESUMES_TABLE    = aws_dynamodb_table.resumes.name
     DYNAMODB_TEMPLATES_TABLE  = aws_dynamodb_table.templates.name
-    DYNAMODB_SESSIONS_TABLE   = aws_dynamodb_table.sessions.name
     COGNITO_USER_POOL_ID      = aws_cognito_user_pool.main.id
     COGNITO_CLIENT_ID         = aws_cognito_user_pool_client.web.id
     REGION                    = var.aws_region

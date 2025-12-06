@@ -11,7 +11,7 @@ resource "aws_s3_bucket_public_access_block" "user_uploads" {
   bucket = aws_s3_bucket.user_uploads.id
 
   block_public_acls       = true
-  block_public_policy     = true
+  block_public_policy     = false  
   ignore_public_acls      = true
   restrict_public_buckets = true
 }
@@ -95,7 +95,6 @@ resource "aws_cloudfront_origin_access_identity" "oai" {
   comment = "OAI for ${var.project_name} user uploads"
 }
 
-# S3 Bucket Policy for CloudFront
 resource "aws_s3_bucket_policy" "user_uploads" {
   bucket = aws_s3_bucket.user_uploads.id
 
@@ -110,6 +109,13 @@ resource "aws_s3_bucket_policy" "user_uploads" {
         }
         Action   = "s3:GetObject"
         Resource = "${aws_s3_bucket.user_uploads.arn}/*"
+      },
+      {
+        Sid    = "PublicReadTemplates"
+        Effect = "Allow"
+        Principal = "*"
+        Action   = "s3:GetObject"
+        Resource = "${aws_s3_bucket.user_uploads.arn}/templates/*"
       }
     ]
   })
