@@ -37,13 +37,13 @@ variable "github_repo"{
 variable "github_branch_frontend" {
   description = "GitHub branch for CI/CD"
   type        = string
-  default     = "dev-frontend"
+  default     = "dev"
 }
 
 variable "github_branch_backend" {
   description = "GitHub branch for CI/CD"
   type        = string
-  default     = "dev-backend"
+  default     = "dev"
 }
 
 variable "github_token_secret_arn" {
