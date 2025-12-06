@@ -326,10 +326,11 @@ export class SectionService {
       const sectionType = existing.sectionType;
       const sectionIds = resume.sections[sectionType] || [];
       const filteredIds = sectionIds.filter((id: string) => id !== sectionId);
-      let updatedItems = {
-        sections: {}
-      }
-      updatedItems.sections[sectionType] = filteredIds;
+
+      // Update the specific section type array directly
+      const updates = {
+        [`sections.${sectionType}`]: filteredIds
+      };
 
       await DynamoDBUtil.updateItem(
         TableNames.RESUMES,
@@ -337,7 +338,7 @@ export class SectionService {
           PK: `USER#${userId}`,
           SK: `RESUME#${existing.resumeId}`,
         },
-        updatedItems
+        updates
       );
     }
   }

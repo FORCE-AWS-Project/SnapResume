@@ -105,11 +105,15 @@ export class DynamoDBUtil {
       const expressionAttributeValues: Record<string, unknown> = {};
 
       Object.keys(updates).forEach((field, index) => {
-        const placeholder = `#field${index}`;
         const valuePlaceholder = `:value${index}`;
 
-        updateExpressionParts.push(`${placeholder} = ${valuePlaceholder}`);
-        expressionAttributeNames[placeholder] = field;
+        if (field.includes('.')) {
+          updateExpressionParts.push(`${field} = ${valuePlaceholder}`);
+        } else {
+          const placeholder = `#field${index}`;
+          updateExpressionParts.push(`${placeholder} = ${valuePlaceholder}`);
+          expressionAttributeNames[placeholder] = field;
+        }
         expressionAttributeValues[valuePlaceholder] = updates[field];
       });
 
