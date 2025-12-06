@@ -198,20 +198,16 @@ const swaggerDefinition = {
         },
         required: ['sectionId', 'userId', 'resumeId', 'sectionType', 'tags', 'data'],
       },
-      // Resume metadata and styling
+      // Resume metadata
       ResumeMetadata: {
         type: 'object',
         properties: {
-          targetRole: { type: 'string', example: 'Senior Software Engineer' },
-          targetCompany: { type: 'string', example: 'Google' },
           keywords: {
             type: 'array',
             items: { type: 'string' },
             example: ['backend', 'cloud', 'leadership'],
+            description: 'Keywords associated with the resume for search and AI matching'
           },
-          lastOptimized: { type: 'string', format: 'date-time' },
-          optimizedForJobId: { type: 'string', example: 'job_123' },
-          matchScore: { type: 'number', minimum: 0, maximum: 100 },
         },
       },
       ResumeStyling: {
@@ -246,7 +242,6 @@ const swaggerDefinition = {
             },
           },
           metadata: { $ref: '#/components/schemas/ResumeMetadata' },
-          styling: { $ref: '#/components/schemas/ResumeStyling' },
           createdAt: { type: 'string', format: 'date-time' },
           updatedAt: { type: 'string', format: 'date-time' },
         },
@@ -261,7 +256,6 @@ const swaggerDefinition = {
           name: { type: 'string', example: 'Software Engineer Resume - Google' },
           templateId: { type: 'string', example: 'TPL_MODERN_001' },
           metadata: { $ref: '#/components/schemas/ResumeMetadata' },
-          styling: { $ref: '#/components/schemas/ResumeStyling' },
           createdAt: { type: 'string', format: 'date-time' },
           updatedAt: { type: 'string', format: 'date-time' },
           data: {
@@ -423,12 +417,21 @@ const swaggerDefinition = {
       CreateSectionRequest: {
         type: 'object',
         properties: {
-          resumeId: { type: 'string', example: 'resume_def456' },
-          sectionType: { type: 'string', example: 'experience' },
+          title: {
+            type: 'string',
+            description: 'Section title',
+            example: 'Senior Software Engineer',
+          },
+          sectionType: {
+            type: 'string',
+            example: 'experience',
+            description: 'Type of section (experience, education, skills, projects, certifications)'
+          },
           tags: {
             type: 'array',
             items: { type: 'string' },
             example: ['backend', 'cloud'],
+            description: 'Tags for AI matching and search'
           },
           data: {
             type: 'object',
@@ -441,11 +444,31 @@ const swaggerDefinition = {
             },
           },
         },
-        required: ['resumeId', 'sectionType', 'data'],
+        required: ['title', 'sectionType', 'data'],
       },
       UpdateSectionRequest: {
         type: 'object',
         properties: {
+          sectionId: {
+            type: 'string',
+            description: 'Section ID (required for updating existing sections)',
+            example: 'exp_001',
+          },
+          resumeId: {
+            type: 'string',
+            description: 'Resume ID (required for all section operations)',
+            example: 'resume_def456',
+          },
+          title: {
+            type: 'string',
+            description: 'Section title',
+            example: 'Senior Software Engineer',
+          },
+          sectionType: {
+            type: 'string',
+            description: 'New section type (optional, used to change section type)',
+            example: 'project',
+          },
           tags: {
             type: 'array',
             items: { type: 'string' },
@@ -460,6 +483,7 @@ const swaggerDefinition = {
             },
           },
         },
+        required: ['resumeId'],
       },
       CreateResumeRequest: {
         type: 'object',
@@ -468,18 +492,39 @@ const swaggerDefinition = {
           templateId: { type: 'string', example: 'TPL_MODERN_001' },
           sections: {
             type: 'object',
-            description: 'Initial sections to include (optional)',
+            description: 'Initial sections to create (optional)',
             additionalProperties: {
               type: 'array',
-              items: { type: 'string' },
+              items: { $ref: '#/components/schemas/CreateSectionRequest' },
             },
             example: {
-              experience: ['exp_001'],
-              education: ['edu_001'],
+              experience: [{
+                title: 'Senior Software Engineer',
+                tags: ['backend', 'cloud'],
+                data: {
+                  company: 'Tech Corp',
+                  position: 'Senior Software Engineer',
+                  location: 'San Francisco, CA',
+                  startDate: '2020-01',
+                  endDate: '2023-12',
+                  description: 'Led development of microservices platform...'
+                }
+              }],
+              education: [{
+                title: 'Bachelor of Science',
+                tags: ['cs'],
+                data: {
+                  institution: 'University of California, Berkeley',
+                  degree: 'Computer Science',
+                  field: 'Computer Science',
+                  location: 'Berkeley, CA',
+                  startDate: '2014-09',
+                  endDate: '2018-05'
+                }
+              }]
             },
           },
           metadata: { $ref: '#/components/schemas/ResumeMetadata' },
-          styling: { $ref: '#/components/schemas/ResumeStyling' },
         },
         required: ['name', 'templateId'],
       },
@@ -489,18 +534,43 @@ const swaggerDefinition = {
           name: { type: 'string', example: 'Updated Resume Name' },
           sections: {
             type: 'object',
-            description: 'Updated section mappings',
+            description: 'Updated sections with create, update, or type change operations',
             additionalProperties: {
               type: 'array',
-              items: { type: 'string' },
+              items: { $ref: '#/components/schemas/UpdateSectionRequest' },
             },
             example: {
-              experience: ['exp_001', 'exp_003'],
-              skills: ['skills_001', 'skills_004'],
+              experience: [{
+                sectionId: 'exp_001',
+                title: 'Senior Software Engineer',
+                tags: ['backend', 'cloud', 'leadership'],
+                data: {
+                  endDate: '2023-12',
+                  current: false,
+                  achievements: ['Reduced API latency by 40%']
+                }
+              }, {
+                title: 'Staff Software Engineer',
+                tags: ['leadership', 'architecture'],
+                data: {
+                  company: 'New Company',
+                  position: 'Staff Software Engineer',
+                  startDate: '2024-01',
+                  current: true
+                }
+              }],
+              skills: [{
+                sectionId: 'skills_001',
+                title: 'Technical Skills',
+                tags: ['technical'],
+                data: {
+                  category: 'Technical Skills',
+                  skillsList: ['Python', 'AWS', 'Docker', 'Kubernetes']
+                }
+              }]
             },
           },
           metadata: { $ref: '#/components/schemas/ResumeMetadata' },
-          styling: { $ref: '#/components/schemas/ResumeStyling' },
         },
       },
       GetRecommendationsRequest: {

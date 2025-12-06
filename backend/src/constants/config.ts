@@ -35,10 +35,10 @@ export const DateFormats = {
 } as const;
 
 export const TableNames = {
-  MAIN: process.env.DYNAMODB_MAIN_TABLE || '',
+  SECTIONS: process.env.DYNAMODB_SECTIONS_TABLE || '',
   RESUMES: process.env.DYNAMODB_RESUMES_TABLE || '',
   TEMPLATES: process.env.DYNAMODB_TEMPLATES_TABLE || '',
-  SESSIONS: process.env.DYNAMODB_SESSIONS_TABLE || '',
+  USERS: process.env.DYNAMODB_USERS_TABLE || '',
 } as const;
 
 export const AWS_CONFIG = {

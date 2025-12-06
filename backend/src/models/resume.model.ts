@@ -2,15 +2,10 @@
  * Resume Model Types
  */
 
-import { PersonalInfo } from './user.model';
+import { CreateSectionRequest, UpdateSectionRequest } from './section.model';
 
 export interface ResumeMetadata {
-  targetRole?: string;
-  targetCompany?: string;
   keywords?: string[];
-  lastOptimized?: string;
-  optimizedForJobId?: string;
-  matchScore?: number;
 }
 
 export interface ResumeStyling {
@@ -28,37 +23,29 @@ export interface Resume {
   userId: string;
   name: string;
   templateId: string;
-  sections: Record<string, string[]>; // Changed from selectedSections
+  sections: Record<string, string[]>; // Store section IDs only, not full section data
   metadata?: ResumeMetadata;
-  styling?: ResumeStyling;
   createdAt: string;
   updatedAt: string;
 }
 
-// Flexible resume data - supports any section types
-export interface ResumeData {
-  personalInfo: PersonalInfo;
-  [sectionType: string]: unknown; // Any section type with any data structure
-}
-
 export interface FullResume extends Omit<Resume, 'sections'> {
-  data: ResumeData;
+  data: {
+    [sectionType: string]: unknown;
+  }
 }
 
 export interface CreateResumeRequest {
   name: string;
   templateId: string;
-  sections?: Record<string, string[]>; // Changed from selectedSections
+  sections?: Record<string, CreateSectionRequest[]>;
   metadata?: ResumeMetadata;
-  styling?: ResumeStyling;
 }
 
 export interface UpdateResumeRequest {
   name?: string;
-  // templateId removed - not allowed to change template
-  sections?: Record<string, string[]>; // Changed from selectedSections
+  sections?: Record<string, UpdateSectionRequest[]>;
   metadata?: ResumeMetadata;
-  styling?: ResumeStyling;
 }
 
 export interface ListResumesParams {

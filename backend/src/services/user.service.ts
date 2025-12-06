@@ -89,10 +89,9 @@ export class UserService {
       const now = new Date().toISOString();
 
       if (!existingUser) {
-        // Create new user profile
         const newUser = {
           userId,
-          email: personalInfo?.email || `${userId}@placeholder.com`,
+          email: personalInfo?.email,
           createdAt: now,
           updatedAt: now,
           personalInfo: {
@@ -100,10 +99,6 @@ export class UserService {
             email: personalInfo?.email || '',
             phone: personalInfo?.phone || '',
             location: personalInfo?.location || '',
-            linkedin: personalInfo?.linkedin || '',
-            github: personalInfo?.github || '',
-            portfolio: personalInfo?.portfolio || '',
-            summary: personalInfo?.summary || '',
           },
           metadata: {
             signUpDate: now,

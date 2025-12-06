@@ -27,7 +27,6 @@ phases:
       - cd dist
       - npm ci --omit=dev
       - ls -la
-      - test -f server.js && echo "server.js found" || echo "server.js NOT found"
       - zip -r ../lambda-deployment.zip .
       - cd ..
       - ls -la lambda-deployment.zip

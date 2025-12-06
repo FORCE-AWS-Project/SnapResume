@@ -7,11 +7,6 @@ export interface PersonalInfo {
   email?: string;
   phone?: string;
   location?: string;
-  linkedin?: string;
-  github?: string;
-  portfolio?: string;
-  summary?: string;
-  customFields?: Record<string, string>;
 }
 
 export interface User {

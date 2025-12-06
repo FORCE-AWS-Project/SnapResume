@@ -19,6 +19,7 @@ export class ResponseUtil {
     const response: ApiResponse<T> = {
       ...(message && { message }),
       ...(data && { data }),
+      isOk: true,
     };
 
     return res.status(statusCode).json(response);
@@ -45,6 +46,7 @@ export class ResponseUtil {
       error,
       message,
       ...(details && { details }),
+      isOk: false,
     };
 
     return res.status(statusCode).json(response);

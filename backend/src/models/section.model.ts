@@ -13,33 +13,40 @@ export interface Section {
   GSI2SK?: string; // CREATED#{timestamp}
   sectionId: string;
   userId: string;
-  resumeId: string; // NEW - sections are tied to specific resumes
-  sectionType: string; // e.g., "experience", "education", "skills", or any custom type
+  resumeId: string;
+  title: string;
+  sectionType: string;
   tags: string[];
-  data: Record<string, unknown>; // Flexible JSON data based on template schema
+  data: Record<string, unknown>;
   createdAt: string;
   updatedAt: string;
 }
 
 // Request types
 export interface CreateSectionRequest {
-  resumeId: string; // NEW - required to tie section to resume
+  resumeId: string;
   sectionType: string;
   tags?: string[];
-  data: Record<string, unknown>; // Any JSON data structure
+  title: string;
+  data: Record<string, unknown>;
 }
 
 export interface UpdateSectionRequest {
+  sectionId: string;
+  resumeId: string;
+  title?: string;
+  sectionType?: string; // Optional field to support section type changes
   tags?: string[];
-  data?: Record<string, unknown>; // Partial update of data
+  data?: Record<string, unknown>;
 }
 
 // Query params
 export interface ListSectionsParams {
-  type?: string; // Filter by section type
-  tags?: string; // Comma-separated tags for filtering
+  resumeId?: string;
+  type?: string;
+  tags?: string;
   limit?: number;
-  exclusiveStartKey?: Record<string, unknown>; // For pagination
+  exclusiveStartKey?: Record<string, unknown>;
 }
 
 // Response types
@@ -47,13 +54,4 @@ export interface ListSectionsResponse {
   sections: Section[];
   count: number;
   lastEvaluatedKey?: Record<string, unknown>;
-}
-
-export interface CreateSectionResponse {
-  sectionId: string;
-  createdAt: string;
-}
-
-export interface UpdateSectionResponse {
-  updatedAt: string;
 }

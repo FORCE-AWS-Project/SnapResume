@@ -5,7 +5,6 @@
 
 import { Router } from 'express';
 import {
-  AuthController,
   UserController,
   ResumeController,
   SectionController,
@@ -14,40 +13,6 @@ import {
 } from '../controllers';
 
 const router = Router();
-
-// ==================== AUTH ROUTES ====================
-
-/**
- * @swagger
- * /api/auth/me:
- *   get:
- *     tags: [Auth]
- *     summary: Get current user profile
- *     description: Get authenticated user's profile from DynamoDB
- *     security:
- *       - BearerAuth: []
- *     responses:
- *       200:
- *         description: User profile retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 data:
- *                   $ref: '#/components/schemas/User'
- *       401:
- *         description: Unauthorized
- *       404:
- *         description: User not found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- */
-router.get('/auth/me', AuthController.getCurrentUser);
 
 // ==================== USER ROUTES ====================
 
@@ -202,7 +167,7 @@ router.get('/resumes/:resumeId', ResumeController.getResume);
  *   get:
  *     tags: [Resumes]
  *     summary: Get full resume
- *     description: Get complete resume with all section data populated
+ *     description: Get complete resume with all section data populated from section IDs
  *     security:
  *       - BearerAuth: []
  *     parameters:
@@ -223,18 +188,7 @@ router.get('/resumes/:resumeId', ResumeController.getResume);
  *                 success:
  *                   type: boolean
  *                 data:
- *                   type: object
- *                   properties:
- *                     resumeId:
- *                       type: string
- *                     userId:
- *                        type: string
- *                     name:
- *                       type: string
- *                     templateId:
- *                       type: string
- *                     sections:
- *                        type: object
+ *                   $ref: '#/components/schemas/FullResume'
  *       404:
  *         description: Resume not found
  */
@@ -246,7 +200,7 @@ router.get('/resumes/:resumeId/full', ResumeController.getFullResume);
  *   post:
  *     tags: [Resumes]
  *     summary: Create new resume
- *     description: Create a new resume for authenticated user
+ *     description: Create a new resume for authenticated user with optional initial sections
  *     security:
  *       - BearerAuth: []
  *     requestBody:
@@ -254,23 +208,7 @@ router.get('/resumes/:resumeId/full', ResumeController.getFullResume);
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - name
- *               - templateId
- *             properties:
- *               name:
- *                 type: string
- *                 example: Software Engineer Resume - Google
- *               templateId:
- *                 type: string
- *                 example: TPL_MODERN_001
- *               sections:
- *                 type: object
- *                 additionalProperties:
- *                   type: array
- *                   items:
- *                     type: string
+ *             $ref: '#/components/schemas/CreateResumeRequest'
  *     responses:
  *       200:
  *         description: Resume created successfully
@@ -294,7 +232,7 @@ router.post('/resumes', ResumeController.createResume);
  *   put:
  *     tags: [Resumes]
  *     summary: Update resume
- *     description: Update an existing resume
+ *     description: Update an existing resume with support for creating, updating, or changing section types
  *     security:
  *       - BearerAuth: []
  *     parameters:
@@ -308,21 +246,19 @@ router.post('/resumes', ResumeController.createResume);
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *               templateId:
- *                 type: string
- *               sections:
- *                 type: object
- *                 additionalProperties:
- *                   type: array
- *                   items:
- *                     type: string
+ *             $ref: '#/components/schemas/UpdateResumeRequest'
  *     responses:
  *       200:
  *         description: Resume updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   $ref: '#/components/schemas/Resume'
  *       404:
  *         description: Resume not found
  */
@@ -437,7 +373,7 @@ router.get('/sections/:sectionId', SectionController.getSection);
  *   post:
  *     tags: [Sections]
  *     summary: Create section
- *     description: Create a new resume section
+ *     description: Create a new resume section (requires resumeId)
  *     security:
  *       - BearerAuth: []
  *     requestBody:
@@ -448,11 +384,16 @@ router.get('/sections/:sectionId', SectionController.getSection);
  *             type: object
  *             required:
  *               - resumeId
+ *               - title
  *               - sectionType
+ *               - data
  *             properties:
  *               resumeId:
  *                 type: string
  *                 example: resume_abc123
+ *               title:
+ *                 type: string
+ *                 example: Senior Software Engineer
  *               sectionType:
  *                 type: string
  *                 enum: [experience, education, skills, projects, certifications]

@@ -7,12 +7,14 @@ export interface ApiResponse<T = unknown> {
   message?: string;
   error?: string;
   details?: string[];
+  isOk: boolean;
 }
 
 export interface ErrorResponse {
   error: string;
   message: string;
   details?: string[];
+  isOk: boolean;
 }
 
 export interface SuccessResponse<T = unknown> {

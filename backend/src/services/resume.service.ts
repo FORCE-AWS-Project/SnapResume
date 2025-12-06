@@ -8,15 +8,13 @@ import { DynamoDBUtil } from '../utils';
 import { TableNames, Limits } from '../constants';
 import {
   Resume,
-  Section,
   CreateResumeRequest,
   UpdateResumeRequest,
   ListResumesParams,
   ResumeSummary,
   FullResume,
-  ResumeData,
 } from '../models';
-import { UserService } from './user.service';
+import { SectionService } from './section.service';
 import { QueryCommandInput } from '@aws-sdk/lib-dynamodb';
 
 export class ResumeService {
@@ -93,81 +91,19 @@ export class ResumeService {
   }
 
   /**
-   * Get full resume with all sections populated
-   */
-  static async getFullResume(
-    userId: string,
-    resumeId: string
-  ): Promise<FullResume | null> {
-    // Get resume metadata
-    const resume = await this.getResume(userId, resumeId);
-
-    if (!resume) {
-      return null;
-    }
-
-    // Get user profile for personalInfo
-    const profile = await UserService.getUserProfile(userId);
-
-    // Collect all section IDs
-    const allSectionIds: string[] = [];
-    const sectionTypeMap: Record<string, string> = {};
-
-    Object.entries(resume.sections || {}).forEach(([sectionType, sectionIds]) => {
-      sectionIds?.forEach((sectionId: string) => {
-        allSectionIds.push(sectionId);
-        sectionTypeMap[sectionId] = sectionType;
-      });
-    });
-
-    // Batch get all sections
-    const sectionKeys = allSectionIds.map((sectionId) => ({
-      PK: `USER#${userId}`,
-      SK: `SECTION#${sectionTypeMap[sectionId]}#${sectionId}`,
-    }));
-
-    const sectionItems = await DynamoDBUtil.batchGetItems<Section>(
-      TableNames.MAIN,
-      sectionKeys
-    );
-
-    // Group sections by type
-    const groupedSections: Record<string, unknown[]> = {};
-    sectionItems.forEach((section) => {
-      const cleanSection = DynamoDBUtil.stripInternalFields<Record<string, unknown>>(
-        section as unknown as Record<string, unknown>
-      );
-
-      const sectionType = section.sectionType;
-      if (!groupedSections[sectionType]) {
-        groupedSections[sectionType] = [];
-      }
-      groupedSections[sectionType].push(cleanSection);
-    });
-
-    const data: ResumeData = {
-      personalInfo: profile?.personalInfo || {},
-      ...groupedSections,
-    };
-
-    const { sections, ...resumeMetadata } = resume;
-
-    return {
-      ...resumeMetadata,
-      data,
-    };
-  }
-
-  /**
    * Create a new resume
    */
   static async createResume(
     userId: string,
     data: CreateResumeRequest
-  ): Promise<{ resumeId: string; createdAt: string }> {
+  ): Promise<Resume> {
     const resumeId = uuidv4().split('-')[0];
     const now = new Date().toISOString();
     const timestamp = Date.now();
+
+    const sections = data.sections
+      ? await SectionService.bulkCreateSections(userId, resumeId, data.sections)
+      : {};
 
     const resume: Resume = {
       PK: `USER#${userId}`,
@@ -178,19 +114,15 @@ export class ResumeService {
       userId,
       name: data.name,
       templateId: data.templateId,
-      sections: data.sections || {},
+      sections,
       metadata: data.metadata || {},
-      styling: data.styling || {},
       createdAt: now,
       updatedAt: now,
     };
 
     await DynamoDBUtil.putItem<Resume>(TableNames.RESUMES, resume);
 
-    return {
-      resumeId,
-      createdAt: now,
-    };
+    return DynamoDBUtil.stripInternalFields<Resume>((await this.getResume(userId,resumeId)) as unknown as Record<string,unknown>);
   }
 
   /**
@@ -200,21 +132,21 @@ export class ResumeService {
     userId: string,
     resumeId: string,
     data: UpdateResumeRequest
-  ): Promise<{ updatedAt: string }> {
-    // Check if resume exists
+  ): Promise<Resume> {
     const existing = await this.getResume(userId, resumeId);
 
     if (!existing) {
       throw new Error('Resume not found');
     }
 
-    // Build updates object
+    const sections = data.sections
+      ? await SectionService.bulkProcessResumeSections(userId, resumeId, data.sections)
+      : undefined;
+
     const updates: Record<string, unknown> = {};
     const allowedFields: (keyof UpdateResumeRequest)[] = [
       'name',
-      'sections',
       'metadata',
-      'styling',
     ];
 
     allowedFields.forEach((field) => {
@@ -223,7 +155,10 @@ export class ResumeService {
       }
     });
 
-    // Update GSI1SK with new timestamp
+    if (sections) {
+      updates.sections = sections;
+    }
+
     const timestamp = Date.now();
     updates.GSI1SK = `UPDATED#${timestamp}`;
 
@@ -236,8 +171,39 @@ export class ResumeService {
       updates
     );
 
+    return DynamoDBUtil.stripInternalFields<Resume>(updated as unknown as Record<string,unknown>);
+  }
+
+  /**
+   * Get full resume with sections
+   */
+  static async getFullResume(userId: string, resumeId: string): Promise<FullResume | null> {
+    const resume = await this.getResume(userId, resumeId);
+
+    if (!resume) {
+      return null;
+    }
+
+    const data = {};
+
+    if (resume.sections) {
+      const allSectionIds: string[] = [];
+      for (const sectionIds of Object.values(resume.sections)) {
+        allSectionIds.push(...sectionIds);
+      }
+
+      const allSections = await SectionService.bulkReadSections(userId, allSectionIds);
+
+      for (const [sectionType, sectionIds] of Object.entries(resume.sections)) {
+        data[sectionType] = allSections.filter(section =>
+          sectionIds.includes(section.sectionId) && section.sectionType === sectionType
+        );
+      }
+    }
+
     return {
-      updatedAt: updated.updatedAt,
+      ...resume,
+      data,
     };
   }
 
@@ -252,9 +218,13 @@ export class ResumeService {
       throw new Error('Resume not found');
     }
 
+    // Delete all sections for the resume
+    await SectionService.bulkDeleteResumeSections(userId, resumeId);
+
+    // Delete the resume
     await DynamoDBUtil.deleteItem(TableNames.RESUMES, {
       PK: `USER#${userId}`,
-      SK: `RESUME#${resumeId}`,
+      SK: `RESUME#${resumeId}`
     });
   }
 }

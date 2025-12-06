@@ -1,10 +1,3 @@
-/**
- * Authentication Middleware
- *
- * Validates and extracts user information from Cognito JWT tokens.
- * Supports both access tokens and ID tokens with automatic fallback.
- */
-
 import { Response, NextFunction } from 'express';
 import { ResponseUtil } from '../utils';
 import { AWS_CONFIG, ErrorMessages } from '../constants';
@@ -30,7 +23,6 @@ const idTokenVerifier = CognitoJwtVerifier.create({
  */
 export async function authMiddleware(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
-    // Extract JWT token from Authorization header
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -42,9 +34,8 @@ export async function authMiddleware(req: AuthenticatedRequest, res: Response, n
       return;
     }
 
-    const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+    const token = authHeader.substring(7); 
 
-    // Try to verify as access token first, then fall back to ID token
     let payload;
     let tokenType: 'access' | 'id' = 'access';
 
@@ -69,20 +60,17 @@ export async function authMiddleware(req: AuthenticatedRequest, res: Response, n
       }
     }
 
-    // Validate required claims
     if (!payload.sub) {
       console.error('Authentication failed: Missing sub claim in token');
       ResponseUtil.unauthorized(res, ErrorMessages.UNAUTHORIZED);
       return;
     }
 
-    // Extract user information from token claims
     const userName = payload.name ||
                    payload['cognito:username'] ||
                    payload.email?.split('@')[0] ||
                    'Unknown';
 
-    // Attach user info to request object
     req.user = {
       userId: payload.sub,
       email: payload.email || '',
@@ -99,29 +87,5 @@ export async function authMiddleware(req: AuthenticatedRequest, res: Response, n
       stack: error instanceof Error ? error.stack : undefined
     });
     ResponseUtil.unauthorized(res, ErrorMessages.UNAUTHORIZED);
-  }
-}
-
-/**
- * Optional authentication middleware that allows requests without authentication
- * but sets user info if token is present.
- */
-export async function optionalAuthMiddleware(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
-  try {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      // No token provided, continue without user info
-      return next();
-    }
-
-    // Token present, try to authenticate
-    await authMiddleware(req, res, next);
-  } catch (error) {
-    // Optional auth should never block the request
-    console.warn('Optional authentication failed, continuing without user context:', {
-      error: error instanceof Error ? error.message : 'Unknown error'
-    });
-    next();
   }
 }

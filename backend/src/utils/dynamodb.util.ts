@@ -22,6 +22,9 @@ import {
   BatchGetCommand,
   BatchGetCommandInput,
   BatchGetCommandOutput,
+  BatchWriteCommand,
+  BatchWriteCommandInput,
+  BatchWriteCommandOutput,
 } from '@aws-sdk/lib-dynamodb';
 import { AWS_CONFIG } from '../constants';
 
@@ -221,5 +224,111 @@ export class DynamoDBUtil {
    */
   static stripInternalFieldsFromArray<T>(items: Record<string, unknown>[]): T[] {
     return items.map((item) => this.stripInternalFields<T>(item));
+  }
+
+  /**
+   * Generic batch write operations (create/update/delete)
+   */
+  static async batchWriteItems(
+    tableName: string,
+    requestItems: any[]
+  ): Promise<void> {
+    try {
+      if (requestItems.length === 0) {
+        return;
+      }
+
+      const batches: any[][] = [];
+      for (let i = 0; i < requestItems.length; i += 25) {
+        batches.push(requestItems.slice(i, i + 25));
+      }
+
+      for (const batch of batches) {
+        const params: BatchWriteCommandInput = {
+          RequestItems: {
+            [tableName]: batch
+          }
+        };
+
+        const command = new BatchWriteCommand(params);
+        await docClient.send(command);
+      }
+    } catch (error) {
+      console.error('Error batch writing items:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Batch create items
+   */
+  static async batchCreateItems<T extends Object>(
+    tableName: string,
+    items: T[]
+  ): Promise<void> {
+    const requestItems = items.map(item => ({
+      PutRequest: {
+        Item: item
+      }
+    }));
+    console.log("Table name: ",tableName);
+    console.log("Items: ",items)
+    return this.batchWriteItems(tableName, requestItems);
+  }
+
+  /**
+   * Batch update items
+   */
+  static async batchUpdateItems(
+    tableName: string,
+    updates: Array<{key: DynamoDBKey, update: Record<string, unknown>}>
+  ): Promise<void> {
+    const requestItems = updates.map(({key, update}) => {
+      // Build update expression
+      const updateExpressionParts: string[] = [];
+      const expressionAttributeNames: Record<string, string> = {};
+      const expressionAttributeValues: Record<string, unknown> = {};
+
+      Object.keys(update).forEach((field, index) => {
+        const placeholder = `#field${index}`;
+        const valuePlaceholder = `:value${index}`;
+
+        updateExpressionParts.push(`${placeholder} = ${valuePlaceholder}`);
+        expressionAttributeNames[placeholder] = field;
+        expressionAttributeValues[valuePlaceholder] = update[field];
+      });
+
+      // Add updatedAt timestamp
+      updateExpressionParts.push('#updatedAt = :updatedAt');
+      expressionAttributeNames['#updatedAt'] = 'updatedAt';
+      expressionAttributeValues[':updatedAt'] = new Date().toISOString();
+
+      return {
+        UpdateRequest: {
+          Key: key,
+          UpdateExpression: `SET ${updateExpressionParts.join(', ')}`,
+          ExpressionAttributeNames: expressionAttributeNames,
+          ExpressionAttributeValues: expressionAttributeValues
+        }
+      };
+    });
+
+    return this.batchWriteItems(tableName, requestItems);
+  }
+
+  /**
+   * Batch delete items
+   */
+  static async batchDeleteItems(
+    tableName: string,
+    keys: DynamoDBKey[]
+  ): Promise<void> {
+    const requestItems = keys.map(key => ({
+      DeleteRequest: {
+        Key: key
+      }
+    }));
+
+    return this.batchWriteItems(tableName, requestItems);
   }
 }

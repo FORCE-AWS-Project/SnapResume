@@ -13,8 +13,7 @@ import {
   UpdateSectionRequest,
   ListSectionsParams,
   ListSectionsResponse,
-  CreateSectionResponse,
-  UpdateSectionResponse,
+  Resume,
 } from '../models';
 
 export class SectionService {
@@ -32,13 +31,37 @@ export class SectionService {
 
     let result;
 
-    if (params.type) {
-      // Use GSI2 to query by section type
-      result = await DynamoDBUtil.queryItems<Section>(TableNames.MAIN, {
+    if (params.resumeId && params.type) {
+      // Query sections for specific resume and type
+      result = await DynamoDBUtil.queryItems<Section>(TableNames.SECTIONS, {
         IndexName: 'GSI2',
         KeyConditionExpression: 'GSI2PK = :pk',
         ExpressionAttributeValues: {
-          ':pk': `SECTION#${userId}#${params.type}`,
+          ':pk': `SECTION#${params.resumeId}#${params.type}`,
+        },
+        Limit: limit,
+        ExclusiveStartKey: params.exclusiveStartKey,
+      });
+    } else if (params.resumeId) {
+      // Query all sections for specific resume
+      result = await DynamoDBUtil.queryItems<Section>(TableNames.SECTIONS, {
+        KeyConditionExpression: 'PK = :pk AND begins_with(SK, :sk)',
+        ExpressionAttributeValues: {
+          ':pk': `USER#${userId}`,
+          ':sk': `SECTION#${params.resumeId}#`,
+        },
+        Limit: limit,
+        ExclusiveStartKey: params.exclusiveStartKey,
+      });
+    } else if (params.type) {
+      // Use GSI2 to query by section type across all resumes
+      result = await DynamoDBUtil.queryItems<Section>(TableNames.SECTIONS, {
+        KeyConditionExpression: 'PK = :pk AND begins_with(SK, :sk)',
+        FilterExpression: 'sectionType = :type',
+        ExpressionAttributeValues: {
+          ':pk': `USER#${userId}`,
+          ':sk': 'SECTION#',
+          ':type': params.type,
         },
         Limit: limit,
         ExclusiveStartKey: params.exclusiveStartKey,
@@ -46,7 +69,7 @@ export class SectionService {
     } else if (params.tags) {
       // Use GSI1 to query by tags
       const tagList = params.tags.split(',').sort().join('#');
-      result = await DynamoDBUtil.queryItems<Section>(TableNames.MAIN, {
+      result = await DynamoDBUtil.queryItems<Section>(TableNames.SECTIONS, {
         IndexName: 'GSI1',
         KeyConditionExpression: 'GSI1PK = :pk AND begins_with(GSI1SK, :tags)',
         ExpressionAttributeValues: {
@@ -58,7 +81,7 @@ export class SectionService {
       });
     } else {
       // Query all sections for user
-      result = await DynamoDBUtil.queryItems<Section>(TableNames.MAIN, {
+      result = await DynamoDBUtil.queryItems<Section>(TableNames.SECTIONS, {
         KeyConditionExpression: 'PK = :pk AND begins_with(SK, :sk)',
         ExpressionAttributeValues: {
           ':pk': `USER#${userId}`,
@@ -94,13 +117,13 @@ export class SectionService {
 
     if (sectionType && resumeId) {
       // Direct get if section type and resumeId are provided
-      section = await DynamoDBUtil.getItem<Section>(TableNames.MAIN, {
+      section = await DynamoDBUtil.getItem<Section>(TableNames.SECTIONS, {
         PK: `USER#${userId}`,
         SK: `SECTION#${resumeId}#${sectionType}#${sectionId}`,
       });
     } else {
       // Query all sections and find matching sectionId
-      const result = await DynamoDBUtil.queryItems<Section>(TableNames.MAIN, {
+      const result = await DynamoDBUtil.queryItems<Section>(TableNames.SECTIONS, {
         KeyConditionExpression: 'PK = :pk AND begins_with(SK, :sk)',
         ExpressionAttributeValues: {
           ':pk': `USER#${userId}`,
@@ -124,25 +147,8 @@ export class SectionService {
   static async createSection(
     userId: string,
     request: CreateSectionRequest
-  ): Promise<CreateSectionResponse> {
-    const { resumeId, sectionType, tags = [], data } = request;
-
-    // Basic validation
-    if (!resumeId || resumeId.trim().length === 0) {
-      throw new Error('Resume ID is required');
-    }
-
-    if (!sectionType || sectionType.trim().length === 0) {
-      throw new Error('Section type is required');
-    }
-
-    if (sectionType.length > Limits.MAX_SECTION_TYPE_LENGTH) {
-      throw new Error(`Section type must be less than ${Limits.MAX_SECTION_TYPE_LENGTH} characters`);
-    }
-
-    if (tags.length > Limits.MAX_TAGS_PER_SECTION) {
-      throw new Error(`Cannot have more than ${Limits.MAX_TAGS_PER_SECTION} tags`);
-    }
+  ): Promise<Section> {
+    const { resumeId, title, sectionType, tags = [], data } = request;
 
     const sectionId = uuidv4().split('-')[0];
     const now = new Date().toISOString();
@@ -159,6 +165,7 @@ export class SectionService {
       GSI2PK: `SECTION#${resumeId}#${sectionType}`,
       GSI2SK: `CREATED#${timestamp}`,
       sectionId,
+      title,
       userId,
       resumeId,
       sectionType,
@@ -168,12 +175,9 @@ export class SectionService {
       updatedAt: now,
     };
 
-    await DynamoDBUtil.putItem(TableNames.MAIN, section as unknown as Record<string, unknown>);
+    await DynamoDBUtil.putItem(TableNames.SECTIONS, section as unknown as Record<string, unknown>);
 
-    return {
-      sectionId,
-      createdAt: now,
-    };
+    return DynamoDBUtil.stripInternalFields(section as unknown as Record<string,unknown>);
   }
 
   /**
@@ -183,9 +187,9 @@ export class SectionService {
     userId: string,
     sectionId: string,
     request: UpdateSectionRequest
-  ): Promise<UpdateSectionResponse> {
+  ): Promise<Section> {
     // Find the section (we need sectionType and resumeId for the SK)
-    const result = await DynamoDBUtil.queryItems<Section>(TableNames.MAIN, {
+    const result = await DynamoDBUtil.queryItems<Section>(TableNames.SECTIONS, {
       KeyConditionExpression: 'PK = :pk AND begins_with(SK, :sk)',
       ExpressionAttributeValues: {
         ':pk': `USER#${userId}`,
@@ -207,6 +211,10 @@ export class SectionService {
       updates.data = request.data;
     }
 
+    if(request.title){
+      updates.title = request.title;
+    }
+
     // Update tags if provided
     if (request.tags) {
       if (request.tags.length > Limits.MAX_TAGS_PER_SECTION) {
@@ -219,7 +227,7 @@ export class SectionService {
     }
 
     const updated = await DynamoDBUtil.updateItem<Section>(
-      TableNames.MAIN,
+      TableNames.SECTIONS,
       {
         PK: existing.PK,
         SK: existing.SK,
@@ -227,9 +235,62 @@ export class SectionService {
       updates
     );
 
-    return {
-      updatedAt: updated.updatedAt,
+    return DynamoDBUtil.stripInternalFields(updated as unknown as Record<string,unknown>);
+  }
+
+  /**
+   * Change section type (requires recreation due to SK structure)
+   */
+  static async changeSectionType(
+    userId: string,
+    sectionId: string,
+    oldType: string,
+    newType: string
+  ): Promise<Section> {
+    const result = await DynamoDBUtil.queryItems<Section>(TableNames.SECTIONS, {
+      KeyConditionExpression: 'PK = :pk AND begins_with(SK, :sk)',
+      ExpressionAttributeValues: {
+        ':pk': `USER#${userId}`,
+        ':sk': `SECTION#`,
+      },
+    });
+
+    const existing = result.items.find((s) => s.sectionId === sectionId && s.sectionType === oldType);
+
+    if (!existing) {
+      throw new Error('Section not found');
+    }
+
+    const newSectionId = uuidv4().split('-')[0];
+    const now = new Date().toISOString();
+    const timestamp = Date.now();
+
+    const newSection: Section = {
+      PK: existing.PK,
+      SK: `SECTION#${existing.resumeId}#${newType}#${newSectionId}`,
+      GSI1PK: existing.GSI1PK,
+      GSI1SK: existing.GSI1SK,
+      GSI2PK: `SECTION#${existing.resumeId}#${newType}`,
+      GSI2SK: `CREATED#${timestamp}`,
+      sectionId: newSectionId,
+      title: existing.title,
+      userId: existing.userId,
+      resumeId: existing.resumeId,
+      sectionType: newType,
+      tags: existing.tags,
+      data: existing.data,
+      createdAt: existing.createdAt,
+      updatedAt: now,
     };
+
+    await DynamoDBUtil.deleteItem(TableNames.SECTIONS, {
+      PK: existing.PK,
+      SK: existing.SK,
+    });
+
+    await DynamoDBUtil.putItem(TableNames.SECTIONS, newSection as unknown as Record<string, unknown>);
+
+    return DynamoDBUtil.stripInternalFields(newSection as unknown as Record<string, unknown>);
   }
 
   /**
@@ -237,7 +298,7 @@ export class SectionService {
    */
   static async deleteSection(userId: string, sectionId: string): Promise<void> {
     // Find the section (we need sectionType and resumeId for the SK)
-    const result = await DynamoDBUtil.queryItems<Section>(TableNames.MAIN, {
+    const result = await DynamoDBUtil.queryItems<Section>(TableNames.SECTIONS, {
       KeyConditionExpression: 'PK = :pk AND begins_with(SK, :sk)',
       ExpressionAttributeValues: {
         ':pk': `USER#${userId}`,
@@ -251,9 +312,371 @@ export class SectionService {
       throw new Error('Section not found');
     }
 
-    await DynamoDBUtil.deleteItem(TableNames.MAIN, {
+    await DynamoDBUtil.deleteItem(TableNames.SECTIONS, {
       PK: existing.PK,
       SK: existing.SK,
     });
+
+    const resume = await DynamoDBUtil.getItem<Resume>(TableNames.RESUMES, {
+      PK: `USER#${userId}`,
+      SK: `RESUME#${existing.resumeId}`,
+    });
+
+    if (resume && resume.sections) {
+      const sectionType = existing.sectionType;
+      const sectionIds = resume.sections[sectionType] || [];
+      const filteredIds = sectionIds.filter((id: string) => id !== sectionId);
+      let updatedItems = {
+        sections: {}
+      }
+      updatedItems.sections[sectionType] = filteredIds;
+
+      await DynamoDBUtil.updateItem(
+        TableNames.RESUMES,
+        {
+          PK: `USER#${userId}`,
+          SK: `RESUME#${existing.resumeId}`,
+        },
+        updatedItems
+      );
+    }
+  }
+
+  /**
+   * Bulk read sections by IDs
+   */
+  static async bulkReadSections(
+    userId: string,
+    sectionIds: string[]
+  ): Promise<Section[]> {
+    if (sectionIds.length === 0) return [];
+
+    // Query all sections for the user
+    const allSections = await DynamoDBUtil.queryItems<Section>(TableNames.SECTIONS, {
+      KeyConditionExpression: 'PK = :pk AND begins_with(SK, :sk)',
+      ExpressionAttributeValues: {
+        ':pk': `USER#${userId}`,
+        ':sk': 'SECTION#',
+      },
+    });
+
+    // Filter by the requested section IDs
+    return allSections.items
+      .filter(section => sectionIds.includes(section.sectionId))
+      .map(section => DynamoDBUtil.stripInternalFields(section as unknown as Record<string, unknown>));
+  }
+
+  /**
+   * Bulk read sections by resume and type
+   */
+  static async bulkReadResumeSections(
+    userId: string,
+    resumeId: string,
+    sectionTypes?: string[]
+  ): Promise<Record<string, Section[]>> {
+    if (sectionTypes && sectionTypes.length > 0) {
+      // Query specific section types
+      const promises = sectionTypes.map(async (sectionType) => {
+        const result = await DynamoDBUtil.queryItems<Section>(TableNames.SECTIONS, {
+          IndexName: 'GSI2',
+          KeyConditionExpression: 'GSI2PK = :pk',
+          ExpressionAttributeValues: {
+            ':pk': `SECTION#${resumeId}#${sectionType}`,
+          },
+        });
+
+        return {
+          sectionType,
+          sections: result.items.map(section =>
+            DynamoDBUtil.stripInternalFields(section as unknown as Record<string, unknown>) as Section
+          )
+        };
+      });
+
+      const results = await Promise.all(promises);
+      const sectionsByType: Record<string, Section[]> = {};
+
+      results.forEach(({ sectionType, sections }) => {
+        sectionsByType[sectionType] = sections;
+      });
+
+      return sectionsByType;
+    } else {
+      // Query all sections for the resume
+      const result = await DynamoDBUtil.queryItems<Section>(TableNames.SECTIONS, {
+        KeyConditionExpression: 'PK = :pk AND begins_with(SK, :sk)',
+        ExpressionAttributeValues: {
+          ':pk': `USER#${userId}`,
+          ':sk': `SECTION#${resumeId}#`,
+        },
+      });
+
+      const sectionsByType: Record<string, Section[]> = {};
+
+      result.items.forEach(section => {
+        const cleanSection = DynamoDBUtil.stripInternalFields(section as unknown as Record<string, unknown>);
+        if (!sectionsByType[section.sectionType]) {
+          sectionsByType[section.sectionType] = [];
+        }
+        sectionsByType[section.sectionType].push(cleanSection as Section);
+      });
+
+      return sectionsByType;
+    }
+  }
+
+  /**
+   * Bulk create sections for a resume
+   */
+  static async bulkCreateSections(
+    userId: string,
+    resumeId: string,
+    sectionsData: Record<string, CreateSectionRequest[]>
+  ): Promise<Record<string, string[]>> {
+    const sections: Record<string, string[]> = {};
+    const sectionItems: any[] = [];
+    const now = new Date().toISOString();
+    const timestamp = Date.now();
+
+    for (const [sectionType, sectionRequests] of Object.entries(sectionsData)) {
+      sections[sectionType] = [];
+
+      for (const sectionRequest of sectionRequests) {
+        const sectionId = uuidv4().split('-')[0];
+        sections[sectionType].push(sectionId);
+
+        const sortedTags = (sectionRequest.tags || []).sort().join('#');
+        const sectionItem = {
+          PK: `USER#${userId}`,
+          SK: `SECTION#${resumeId}#${sectionType}#${sectionId}`,
+          GSI1PK: `SECTION#${userId}`,
+          GSI1SK: `TAGS#${sortedTags}`,
+          GSI2PK: `SECTION#${resumeId}#${sectionType}`,
+          GSI2SK: `CREATED#${timestamp}`,
+          sectionId,
+          title: sectionRequest.title,
+          userId,
+          resumeId,
+          sectionType,
+          tags: sectionRequest.tags || [],
+          data: sectionRequest.data || {},
+          createdAt: now,
+          updatedAt: now,
+        };
+
+        sectionItems.push(sectionItem);
+      }
+    }
+
+    if (sectionItems.length > 0) {
+      await DynamoDBUtil.batchCreateItems(TableNames.SECTIONS, sectionItems);
+    }
+
+    return sections;
+  }
+
+  /**
+   * Bulk update sections
+   */
+  static async bulkUpdateSections(
+    userId: string,
+    updates: Array<{sectionId: string, data: Partial<UpdateSectionRequest>}>
+  ): Promise<void> {
+    if (updates.length === 0) return;
+
+    // Get all sections to find their PK/SK
+    const allSections = await DynamoDBUtil.queryItems<Section>(TableNames.SECTIONS, {
+      KeyConditionExpression: 'PK = :pk AND begins_with(SK, :sk)',
+      ExpressionAttributeValues: {
+        ':pk': `USER#${userId}`,
+        ':sk': 'SECTION#',
+      },
+    });
+
+    const sectionUpdates: Array<{key: {PK: string, SK: string}, update: Record<string, unknown>}> = [];
+
+    for (const update of updates) {
+      const existingSection = allSections.items.find(s => s.sectionId === update.sectionId);
+      if (!existingSection) continue;
+
+      const updateData: Record<string, unknown> = {};
+
+      if (update.data.title) updateData.title = update.data.title;
+      if (update.data.data) updateData.data = update.data.data;
+      if (update.data.tags) {
+        updateData.tags = update.data.tags;
+        updateData.GSI1SK = `TAGS#${update.data.tags.sort().join('#')}`;
+      }
+
+      sectionUpdates.push({
+        key: {
+          PK: existingSection.PK,
+          SK: existingSection.SK
+        },
+        update: updateData
+      });
+    }
+
+    if (sectionUpdates.length > 0) {
+      await DynamoDBUtil.batchUpdateItems(TableNames.SECTIONS, sectionUpdates);
+    }
+  }
+
+  /**
+   * Bulk delete all sections for a resume
+   */
+  static async bulkDeleteResumeSections(
+    userId: string,
+    resumeId: string
+  ): Promise<void> {
+    const sections = await DynamoDBUtil.queryItems<Section>(TableNames.SECTIONS, {
+      KeyConditionExpression: 'PK = :pk AND begins_with(SK, :sk)',
+      ExpressionAttributeValues: {
+        ':pk': `USER#${userId}`,
+        ':sk': `SECTION#${resumeId}#`
+      }
+    });
+
+    if (sections.items.length === 0) return;
+
+    const deleteRequests = sections.items.map(section => ({
+      DeleteRequest: {
+        Key: {
+          PK: section.PK,
+          SK: section.SK
+        }
+      }
+    }));
+
+    await DynamoDBUtil.batchWriteItems(TableNames.SECTIONS, deleteRequests);
+  }
+
+  /**
+   * Bulk create and update sections for resume update
+   */
+  static async bulkProcessResumeSections(
+    userId: string,
+    resumeId: string,
+    sectionsData: Record<string, UpdateSectionRequest[]>,
+  ): Promise<Record<string, string[]>> {
+    const sections: Record<string, string[]> = {};
+    const sectionCreates: any[] = [];
+    const sectionUpdates: Array<{key: {PK: string, SK: string}, update: Record<string, unknown>}> = [];
+    const typeChanges: Array<{oldType: string, newType: string, sectionId: string}> = [];
+
+    const now = new Date().toISOString();
+    const timestamp = Date.now();
+
+    const existingSectionIds: string[] = [];
+    for (const updateRequests of Object.values(sectionsData)) {
+      for (const updateRequest of updateRequests) {
+        if (updateRequest.sectionId) {
+          existingSectionIds.push(updateRequest.sectionId);
+        }
+      }
+    }
+
+    const existingSectionsMap = new Map<string, any>();
+    if (existingSectionIds.length > 0) {
+      const allSections = await DynamoDBUtil.queryItems<Section>(TableNames.SECTIONS, {
+        KeyConditionExpression: 'PK = :pk AND begins_with(SK, :sk)',
+        ExpressionAttributeValues: {
+          ':pk': `USER#${userId}`,
+          ':sk': 'SECTION#',
+        },
+      });
+
+      allSections.items.forEach(section => {
+        if (existingSectionIds.includes(section.sectionId)) {
+          existingSectionsMap.set(section.sectionId, section);
+        }
+      });
+    }
+
+    for (const [sectionType, updateRequests] of Object.entries(sectionsData)) {
+      sections[sectionType] = [];
+
+      for (const updateRequest of updateRequests) {
+        if (updateRequest.sectionId) {
+          if (updateRequest.sectionType && updateRequest.sectionType !== sectionType) {
+            typeChanges.push({
+              oldType: sectionType,
+              newType: updateRequest.sectionType,
+              sectionId: updateRequest.sectionId
+            });
+            sections[updateRequest.sectionType] = sections[updateRequest.sectionType] || [];
+          } else {
+            const existingSection = existingSectionsMap.get(updateRequest.sectionId);
+            if (existingSection) {
+              const updateData: Record<string, unknown> = {};
+
+              if (updateRequest.title) updateData.title = updateRequest.title;
+              if (updateRequest.data) updateData.data = updateRequest.data;
+              if (updateRequest.tags) {
+                updateData.tags = updateRequest.tags;
+                updateData.GSI1SK = `TAGS#${updateRequest.tags.sort().join('#')}`;
+              }
+
+              sectionUpdates.push({
+                key: {
+                  PK: existingSection.PK,
+                  SK: existingSection.SK
+                },
+                update: updateData
+              });
+              sections[sectionType].push(updateRequest.sectionId);
+            }
+          }
+        } else {
+          const sectionId = uuidv4().split('-')[0];
+          sections[sectionType].push(sectionId);
+
+          const sortedTags = (updateRequest.tags || []).sort().join('#');
+          const sectionItem = {
+            PK: `USER#${userId}`,
+            SK: `SECTION#${resumeId}#${sectionType}#${sectionId}`,
+            GSI1PK: `SECTION#${userId}`,
+            GSI1SK: `TAGS#${sortedTags}`,
+            GSI2PK: `SECTION#${resumeId}#${sectionType}`,
+            GSI2SK: `CREATED#${timestamp}`,
+            sectionId,
+            title: updateRequest.title,
+            userId,
+            resumeId,
+            sectionType,
+            tags: updateRequest.tags || [],
+            data: updateRequest.data || {},
+            createdAt: now,
+            updatedAt: now,
+          };
+
+          sectionCreates.push(sectionItem);
+        }
+      }
+    }
+
+    const batchPromises: Promise<void>[] = [];
+
+    if (sectionCreates.length > 0) {
+      batchPromises.push(DynamoDBUtil.batchCreateItems(TableNames.SECTIONS, sectionCreates));
+    }
+
+    if (sectionUpdates.length > 0) {
+      batchPromises.push(DynamoDBUtil.batchUpdateItems(TableNames.SECTIONS, sectionUpdates));
+    }
+
+    await Promise.all(batchPromises);
+
+    for (const change of typeChanges) {
+      const updated = await this.changeSectionType(
+        userId,
+        change.sectionId,
+        change.oldType,
+        change.newType
+      );
+      sections[change.newType].push(updated.sectionId);
+    }
+
+    return sections;
   }
 }
