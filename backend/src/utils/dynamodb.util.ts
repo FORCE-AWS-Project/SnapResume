@@ -25,6 +25,7 @@ import {
   BatchWriteCommand,
   BatchWriteCommandInput,
   BatchWriteCommandOutput,
+  TransactWriteCommand,
 } from '@aws-sdk/lib-dynamodb';
 import { AWS_CONFIG } from '../constants';
 
@@ -271,8 +272,7 @@ export class DynamoDBUtil {
         Item: item
       }
     }));
-    console.log("Table name: ",tableName);
-    console.log("Items: ",items)
+
     return this.batchWriteItems(tableName, requestItems);
   }
 
@@ -283,18 +283,17 @@ export class DynamoDBUtil {
     tableName: string,
     updates: Array<{key: DynamoDBKey, update: Record<string, unknown>}>
   ): Promise<void> {
-    const requestItems = updates.map(({key, update}) => {
-      // Build update expression
+    const transactItems = updates.map(({ key, update }) => {
       const updateExpressionParts: string[] = [];
       const expressionAttributeNames: Record<string, string> = {};
       const expressionAttributeValues: Record<string, unknown> = {};
 
       Object.keys(update).forEach((field, index) => {
-        const placeholder = `#field${index}`;
+        const namePlaceholder = `#field${index}`;
         const valuePlaceholder = `:value${index}`;
 
-        updateExpressionParts.push(`${placeholder} = ${valuePlaceholder}`);
-        expressionAttributeNames[placeholder] = field;
+        updateExpressionParts.push(`${namePlaceholder} = ${valuePlaceholder}`);
+        expressionAttributeNames[namePlaceholder] = field;
         expressionAttributeValues[valuePlaceholder] = update[field];
       });
 
@@ -304,7 +303,8 @@ export class DynamoDBUtil {
       expressionAttributeValues[':updatedAt'] = new Date().toISOString();
 
       return {
-        UpdateRequest: {
+        Update: {
+          TableName: tableName,
           Key: key,
           UpdateExpression: `SET ${updateExpressionParts.join(', ')}`,
           ExpressionAttributeNames: expressionAttributeNames,
@@ -313,7 +313,12 @@ export class DynamoDBUtil {
       };
     });
 
-    return this.batchWriteItems(tableName, requestItems);
+    // Execute the transaction
+    const command = new TransactWriteCommand({
+      TransactItems: transactItems
+    });
+
+    await docClient.send(command);
   }
 
   /**

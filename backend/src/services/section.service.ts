@@ -597,7 +597,7 @@ export class SectionService {
       sections[sectionType] = [];
 
       for (const updateRequest of updateRequests) {
-        if (updateRequest.sectionId) {
+        if (existingSectionsMap.get(updateRequest.sectionId ?? "")) {
           if (updateRequest.sectionType && updateRequest.sectionType !== sectionType) {
             typeChanges.push({
               oldType: sectionType,
@@ -656,6 +656,9 @@ export class SectionService {
     }
 
     const batchPromises: Promise<void>[] = [];
+    
+    console.log("Section creates: ",sectionCreates);
+    console.log("Section updates: ",sectionUpdates);
 
     if (sectionCreates.length > 0) {
       batchPromises.push(DynamoDBUtil.batchCreateItems(TableNames.SECTIONS, sectionCreates));
@@ -664,7 +667,6 @@ export class SectionService {
     if (sectionUpdates.length > 0) {
       batchPromises.push(DynamoDBUtil.batchUpdateItems(TableNames.SECTIONS, sectionUpdates));
     }
-
     await Promise.all(batchPromises);
 
     for (const change of typeChanges) {
