@@ -6,6 +6,9 @@ import styles from './FormSection.module.css'
 export default function Skills({ data, onChange }) {
     const [newSkillInput, setNewSkillInput] = useState({})
 
+    // Ensure data has the correct structure
+    const skillsData = data?.categories ? data : { categories: [] }
+
     const addCategory = () => {
         const newCategory = {
             id: Date.now(),
@@ -13,19 +16,19 @@ export default function Skills({ data, onChange }) {
             skills: [],
         }
         onChange({
-            ...data,
-            categories: [...data.categories, newCategory],
+            ...skillsData,
+            categories: [...skillsData.categories, newCategory],
         })
     }
 
     const updateCategoryName = (index, name) => {
-        const updated = { ...data }
+        const updated = { ...skillsData }
         updated.categories[index].name = name
         onChange(updated)
     }
 
     const deleteCategory = (index) => {
-        const updated = { ...data }
+        const updated = { ...skillsData }
         updated.categories = updated.categories.filter((_, i) => i !== index)
         onChange(updated)
     }
@@ -34,7 +37,7 @@ export default function Skills({ data, onChange }) {
         const skillText = newSkillInput[categoryIndex]?.trim()
         if (!skillText) return
 
-        const updated = { ...data }
+        const updated = { ...skillsData }
         if (!updated.categories[categoryIndex].skills.includes(skillText)) {
             updated.categories[categoryIndex].skills.push(skillText)
             onChange(updated)
@@ -44,7 +47,7 @@ export default function Skills({ data, onChange }) {
     }
 
     const deleteSkill = (categoryIndex, skillIndex) => {
-        const updated = { ...data }
+        const updated = { ...skillsData }
         updated.categories[categoryIndex].skills = updated.categories[categoryIndex].skills.filter(
             (_, i) => i !== skillIndex
         )
@@ -78,7 +81,7 @@ export default function Skills({ data, onChange }) {
             </div>
 
             <Space direction="vertical" style={{ width: '100%' }} size="middle">
-                {data.categories.length === 0 ? (
+                {skillsData.categories.length === 0 ? (
                     <Card className={styles.emptyState} size="small">
                         <p>No skill categories yet. Suggested categories:</p>
                         <Space wrap>
@@ -88,9 +91,9 @@ export default function Skills({ data, onChange }) {
                                     style={{ cursor: 'pointer' }}
                                     onClick={() => {
                                         onChange({
-                                            ...data,
+                                            ...skillsData,
                                             categories: [
-                                                ...data.categories,
+                                                ...skillsData.categories,
                                                 { id: Date.now(), name: cat.name, skills: [] }
                                             ]
                                         })
@@ -102,7 +105,7 @@ export default function Skills({ data, onChange }) {
                         </Space>
                     </Card>
                 ) : (
-                    data.categories.map((category, catIndex) => (
+                    skillsData.categories.map((category, catIndex) => (
                         <Card
                             key={category.id}
                             size="small"

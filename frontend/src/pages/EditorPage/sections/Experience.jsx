@@ -9,6 +9,9 @@ const { TextArea } = Input
 export default function Experience({ data, onChange }) {
     const [expandedIndex, setExpandedIndex] = useState(0)
 
+    // Ensure data is an array
+    const expData = Array.isArray(data) ? data : []
+
     const addExperience = () => {
         const newExp = {
             id: Date.now(),
@@ -21,18 +24,18 @@ export default function Experience({ data, onChange }) {
             current: false,
             description: [],
         }
-        onChange([...data, newExp])
-        setExpandedIndex(data.length)
+        onChange([...expData, newExp])
+        setExpandedIndex(expData.length)
     }
 
     const updateExperience = (index, field, value) => {
-        const updated = [...data]
+        const updated = [...expData]
         updated[index] = { ...updated[index], [field]: value }
         onChange(updated)
     }
 
     const deleteExperience = (index) => {
-        const updated = data.filter((_, i) => i !== index)
+        const updated = expData.filter((_, i) => i !== index)
         onChange(updated)
         if (expandedIndex >= updated.length) {
             setExpandedIndex(Math.max(0, updated.length - 1))
@@ -40,19 +43,19 @@ export default function Experience({ data, onChange }) {
     }
 
     const addBulletPoint = (index) => {
-        const updated = [...data]
+        const updated = [...expData]
         updated[index].description.push('')
         onChange(updated)
     }
 
     const updateBulletPoint = (expIndex, bulletIndex, value) => {
-        const updated = [...data]
+        const updated = [...expData]
         updated[expIndex].description[bulletIndex] = value
         onChange(updated)
     }
 
     const deleteBulletPoint = (expIndex, bulletIndex) => {
-        const updated = [...data]
+        const updated = [...expData]
         updated[expIndex].description = updated[expIndex].description.filter((_, i) => i !== bulletIndex)
         onChange(updated)
     }
@@ -72,7 +75,7 @@ export default function Experience({ data, onChange }) {
             </div>
 
             <Space direction="vertical" style={{ width: '100%' }} size="middle">
-                {data.map((exp, index) => (
+                {expData.map((exp, index) => (
                     <Card
                         key={exp.id}
                         size="small"
