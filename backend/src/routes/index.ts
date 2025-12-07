@@ -581,6 +581,7 @@ router.get('/templates/:templateId', TemplateController.getTemplate);
  *             type: object
  *             required:
  *               - jobDescription
+ *               - resumeId
  *             properties:
  *               jobDescription:
  *                 type: string
@@ -588,7 +589,7 @@ router.get('/templates/:templateId', TemplateController.getTemplate);
  *               resumeId:
  *                 type: string
  *                 example: resume_abc123
- *                 description: Optional - if provided, only analyzes sections from this resume
+ *                 description: Resume ID to get recommendations for
  *     responses:
  *       200:
  *         description: Recommendations generated successfully

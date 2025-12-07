@@ -135,7 +135,7 @@ resource "aws_iam_role_policy" "lambda_custom" {
           "bedrock:InvokeModelWithResponseStream"
         ]
         Resource = [
-          "arn:aws:bedrock:${var.aws_region}::foundation-model/anthropic.claude-3-5-sonnet-20241022-v2:0",
+          "arn:aws:bedrock:${var.aws_region}::foundation-model/anthropic.claude-3-sonnet-20240229-v1:0",
           "arn:aws:bedrock:${var.aws_region}::foundation-model/anthropic.claude-*"
         ]
       }

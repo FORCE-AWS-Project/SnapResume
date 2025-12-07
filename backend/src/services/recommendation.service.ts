@@ -6,6 +6,7 @@
 import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime';
 import { AWS_CONFIG, BedrockConfig } from '../constants';
 import { GetRecommendationsRequest, RecommendationResponse, Section } from '../models';
+import { ResumeService } from './resume.service';
 import { SectionService } from './section.service';
 
 const bedrockClient = new BedrockRuntimeClient({
@@ -20,16 +21,20 @@ export class RecommendationService {
     userId: string,
     data: GetRecommendationsRequest
   ): Promise<RecommendationResponse> {
-    const { jobDescription } = data;
+    const { jobDescription, resumeId } = data;
 
-    // Get all sections for the user
+    const resume = await ResumeService.getResume(userId, resumeId);
+    if (!resume) {
+      throw new Error('Resume not found');
+    }
+
+
     const { sections } = await SectionService.listSections(userId);
 
     if (sections.length === 0) {
       throw new Error('No sections found');
     }
 
-    // Group sections by type
     const groupedSections: Record<string, Section[]> = {};
     sections.forEach((section) => {
       const sectionType = section.sectionType;
@@ -39,9 +44,9 @@ export class RecommendationService {
       groupedSections[sectionType].push(section);
     });
 
-    // Call Bedrock to analyze and recommend sections
     const recommendations = await this.analyzeWithBedrock(
       jobDescription,
+      resume,
       groupedSections
     );
 
@@ -53,6 +58,7 @@ export class RecommendationService {
    */
   private static async analyzeWithBedrock(
     jobDescription: string,
+    resume: any,
     sections: Record<string, Section[]>
   ): Promise<RecommendationResponse> {
     const prompt = this.buildPrompt(jobDescription, sections);

@@ -55,7 +55,8 @@ const publicPaths = [
   '/templates',
   '/api-docs',
   '/resumes',
-  '/sections'
+  '/sections',
+  '/recommendations'
 ];
 
 // Apply authentication middleware conditionally

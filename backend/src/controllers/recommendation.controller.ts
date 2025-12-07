@@ -16,11 +16,15 @@ export class RecommendationController {
    */
   static async getRecommendations(req: AuthenticatedRequest, res: Response): Promise<Response> {
     try {
-      const userId = req.user.userId;
+      const userId = req?.user?.userId ?? "testingid111";
       const body: GetRecommendationsRequest = req.body;
 
       if (!body.jobDescription) {
         return ResponseUtil.badRequest(res, ErrorMessages.JOB_DESCRIPTION_REQUIRED);
+      }
+
+      if (!body.resumeId) {
+        return ResponseUtil.badRequest(res, ErrorMessages.RESUME_ID_REQUIRED);
       }
 
       const result = await RecommendationService.getRecommendations(userId, body);
@@ -29,6 +33,9 @@ export class RecommendationController {
       console.error('Error in getRecommendations:', error);
       if (error.message === 'No sections found') {
         return ResponseUtil.badRequest(res, ErrorMessages.NO_SECTIONS_FOUND);
+      }
+      if (error.message === 'Resume not found') {
+        return ResponseUtil.notFound(res, ErrorMessages.RESUME_NOT_FOUND);
       }
       return ResponseUtil.internalError(res, ErrorMessages.BEDROCK_ERROR);
     }

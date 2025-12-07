@@ -19,6 +19,7 @@ export const ErrorMessages = {
   RESUME_NOT_FOUND: 'Resume not found',
   RESUME_NAME_REQUIRED: 'Resume name is required',
   RESUME_TEMPLATE_REQUIRED: 'Template ID is required',
+  RESUME_ID_REQUIRED: 'Resume ID is required',
 
   // Section
   SECTION_NOT_FOUND: 'Section not found',

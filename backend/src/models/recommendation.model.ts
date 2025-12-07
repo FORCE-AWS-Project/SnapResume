@@ -32,5 +32,5 @@ export interface RecommendationResponse {
 
 export interface GetRecommendationsRequest {
   jobDescription: string;
-  resumeId?: string;
+  resumeId: string;
 }
