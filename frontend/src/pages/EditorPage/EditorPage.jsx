@@ -16,6 +16,7 @@ import PreviewPanel from './components/PreviewPanel'
 import { ResumeManagerProvider } from '../../components/ResumeManager/context/ResumeManagerContext'
 import { ResumeManagerUniversal } from '../../components/ResumeManager/ResumeManagerUniversal'
 import styles from './EditorPage.module.css'
+import html2pdf from 'html2pdf.js'
 
 const { Header, Content } = Layout
 
@@ -25,6 +26,7 @@ export default function EditorPage() {
   const [zoom, setZoom] = useState(100)
   const [resumeName, setResumeName] = useState('My Resume')
   const [templateId, setTemplateId] = useState(1)
+  const [sectionOrder, setSectionOrder] = useState(['experience', 'education', 'skills', 'projects', 'certifications', 'languages', 'volunteering', 'publications'])
   const [managerModalVisible, setManagerModalVisible] = useState(false)
   const [resumeData, setResumeData] = useState({
     personalInfo: {
@@ -51,7 +53,7 @@ export default function EditorPage() {
   useEffect(() => {
     const templateIdParam = searchParams.get('templateId')
     const templateNameParam = searchParams.get('templateName')
-    
+
     if (templateIdParam) setTemplateId(parseInt(templateIdParam))
     if (templateNameParam) setResumeName(templateNameParam)
 
@@ -72,28 +74,57 @@ export default function EditorPage() {
   }, [searchParams])
 
   const handleInputChange = (section, field, value) => {
-    setResumeData(prev => ({
-      ...prev,
-      [section]: {
-        ...prev[section],
-        [field]: value,
-      },
-    }))
+    setResumeData(prev => {
+      if (field === null) {
+        return {
+          ...prev,
+          [section]: value,
+        }
+      }
+      return {
+        ...prev,
+        [section]: {
+          ...prev[section],
+          [field]: value,
+        },
+      }
+    })
   }
 
   const handleSave = () => {
     message.success('Resume saved successfully!')
-    
+
     // Sync with extension if available
     if (window.__EXTENSION_BRIDGE__) {
       window.__EXTENSION_BRIDGE__.sendData(resumeData)
     }
 
-    console.log('Saved resume:', { resumeName, resumeData, templateId })
+    console.log('Saved resume:', { resumeName, resumeData, templateId, sectionOrder })
   }
 
   const handleDownload = () => {
-    message.info('Download feature coming soon!')
+    const element = document.getElementById('resume-preview-content')
+    if (!element) {
+      message.error('Resume preview not found')
+      return
+    }
+
+    const opt = {
+      margin: 0,
+      filename: `${resumeName.replace(/\s+/g, '_') || 'resume'}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+    }
+
+    message.loading('Generating PDF...', 1)
+
+    html2pdf().set(opt).from(element).save().then(() => {
+      message.success('PDF Downloaded!')
+    }).catch(err => {
+      console.error('PDF generation error:', err)
+      message.error('Failed to generate PDF')
+    })
   }
 
   const handlePrint = () => {
@@ -199,11 +230,12 @@ export default function EditorPage() {
 
         {/* Content */}
         <Content className={styles.content}>
-          <FormPanel data={resumeData} onInputChange={handleInputChange} />
+          <FormPanel data={resumeData} onInputChange={handleInputChange} sectionOrder={sectionOrder} />
           <PreviewPanel
             data={resumeData}
             templateId={templateId}
             zoom={zoom}
+            sectionOrder={sectionOrder}
           />
         </Content>
 
@@ -215,6 +247,8 @@ export default function EditorPage() {
           onUpdateData={setResumeData}
           onSave={handleSave}
           mode="modal"
+          sectionOrder={sectionOrder}
+          onOrderChange={setSectionOrder}
         />
       </Layout>
     </ResumeManagerProvider>
