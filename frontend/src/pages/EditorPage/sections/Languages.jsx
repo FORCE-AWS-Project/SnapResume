@@ -5,23 +5,26 @@ import styles from './FormSection.module.css'
 const { Option } = Select
 
 export default function Languages({ data, onChange }) {
+    // Ensure data is an array
+    const langData = Array.isArray(data) ? data : []
+
     const addLanguage = () => {
         const newLang = {
             id: Date.now(),
             language: '',
             proficiency: 'Professional',
         }
-        onChange([...data, newLang])
+        onChange([...langData, newLang])
     }
 
     const updateLanguage = (index, field, value) => {
-        const updated = [...data]
+        const updated = [...langData]
         updated[index] = { ...updated[index], [field]: value }
         onChange(updated)
     }
 
     const deleteLanguage = (index) => {
-        onChange(data.filter((_, i) => i !== index))
+        onChange(langData.filter((_, i) => i !== index))
     }
 
     const proficiencyLevels = [
@@ -55,12 +58,12 @@ export default function Languages({ data, onChange }) {
             </div>
 
             <Space direction="vertical" style={{ width: '100%' }} size="middle">
-                {data.length === 0 ? (
+                {langData.length === 0 ? (
                     <div className={styles.emptyState}>
                         List languages you speak and your proficiency level
                     </div>
                 ) : (
-                    data.map((lang, index) => (
+                    langData.map((lang, index) => (
                         <Card
                             key={lang.id}
                             size="small"

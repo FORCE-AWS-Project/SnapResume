@@ -6,6 +6,9 @@ import styles from './FormSection.module.css'
 const { Option } = Select
 
 export default function Certifications({ data, onChange }) {
+    // Ensure data is an array
+    const certData = Array.isArray(data) ? data : []
+
     const addCertification = () => {
         const newCert = {
             id: Date.now(),
@@ -17,17 +20,17 @@ export default function Certifications({ data, onChange }) {
             credentialUrl: '',
             doesNotExpire: false,
         }
-        onChange([...data, newCert])
+        onChange([...certData, newCert])
     }
 
     const updateCertification = (index, field, value) => {
-        const updated = [...data]
+        const updated = [...certData]
         updated[index] = { ...updated[index], [field]: value }
         onChange(updated)
     }
 
     const deleteCertification = (index) => {
-        onChange(data.filter((_, i) => i !== index))
+        onChange(certData.filter((_, i) => i !== index))
     }
 
     const popularCerts = [
@@ -57,12 +60,12 @@ export default function Certifications({ data, onChange }) {
             </div>
 
             <Space direction="vertical" style={{ width: '100%' }} size="middle">
-                {data.length === 0 ? (
+                {certData.length === 0 ? (
                     <div className={styles.emptyState}>
                         Add professional certifications to stand out
                     </div>
                 ) : (
-                    data.map((cert, index) => (
+                    certData.map((cert, index) => (
                         <Card
                             key={cert.id}
                             size="small"

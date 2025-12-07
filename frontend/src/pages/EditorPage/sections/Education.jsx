@@ -6,6 +6,9 @@ import styles from './FormSection.module.css'
 const { Option } = Select
 
 export default function Education({ data, onChange }) {
+    // Ensure data is an array
+    const eduData = Array.isArray(data) ? data : []
+
     const addEducation = () => {
         const newEdu = {
             id: Date.now(),
@@ -18,17 +21,17 @@ export default function Education({ data, onChange }) {
             honors: '',
             hideGradYear: false,
         }
-        onChange([...data, newEdu])
+        onChange([...eduData, newEdu])
     }
 
     const updateEducation = (index, field, value) => {
-        const updated = [...data]
+        const updated = [...eduData]
         updated[index] = { ...updated[index], [field]: value }
         onChange(updated)
     }
 
     const deleteEducation = (index) => {
-        onChange(data.filter((_, i) => i !== index))
+        onChange(eduData.filter((_, i) => i !== index))
     }
 
     const degreeTypes = [
@@ -60,12 +63,12 @@ export default function Education({ data, onChange }) {
             </div>
 
             <Space direction="vertical" style={{ width: '100%' }} size="middle">
-                {data.length === 0 ? (
+                {eduData.length === 0 ? (
                     <div className={styles.emptyState}>
                         Click "Add Education" to add your educational background
                     </div>
                 ) : (
-                    data.map((edu, index) => (
+                    eduData.map((edu, index) => (
                         <Card
                             key={edu.id}
                             size="small"

@@ -6,6 +6,9 @@ import styles from './FormSection.module.css'
 const { TextArea } = Input
 
 export default function Volunteering({ data, onChange }) {
+    // Ensure data is an array
+    const volData = Array.isArray(data) ? data : []
+
     const addVolunteering = () => {
         const newVol = {
             id: Date.now(),
@@ -17,33 +20,33 @@ export default function Volunteering({ data, onChange }) {
             current: false,
             description: [],
         }
-        onChange([...data, newVol])
+        onChange([...volData, newVol])
     }
 
     const updateVolunteering = (index, field, value) => {
-        const updated = [...data]
+        const updated = [...volData]
         updated[index] = { ...updated[index], [field]: value }
         onChange(updated)
     }
 
     const deleteVolunteering = (index) => {
-        onChange(data.filter((_, i) => i !== index))
+        onChange(volData.filter((_, i) => i !== index))
     }
 
     const addBulletPoint = (index) => {
-        const updated = [...data]
+        const updated = [...volData]
         updated[index].description.push('')
         onChange(updated)
     }
 
     const updateBulletPoint = (volIndex, bulletIndex, value) => {
-        const updated = [...data]
+        const updated = [...volData]
         updated[volIndex].description[bulletIndex] = value
         onChange(updated)
     }
 
     const deleteBulletPoint = (volIndex, bulletIndex) => {
-        const updated = [...data]
+        const updated = [...volData]
         updated[volIndex].description = updated[volIndex].description.filter((_, i) => i !== bulletIndex)
         onChange(updated)
     }
@@ -65,12 +68,12 @@ export default function Volunteering({ data, onChange }) {
             </div>
 
             <Space direction="vertical" style={{ width: '100%' }} size="middle">
-                {data.length === 0 ? (
+                {volData.length === 0 ? (
                     <div className={styles.emptyState}>
                         Showcase your community involvement and volunteer work
                     </div>
                 ) : (
-                    data.map((vol, index) => (
+                    volData.map((vol, index) => (
                         <Card
                             key={vol.id}
                             size="small"

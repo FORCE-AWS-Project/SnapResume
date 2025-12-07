@@ -37,9 +37,14 @@ export default function EditorPage() {
     },
     experience: [],
     education: [],
-    skills: [],
+    skills: {
+      categories: [],
+    },
     certifications: [],
     projects: [],
+    languages: [],
+    volunteering: [],
+    publications: [],
   })
 
   // eslint-disable-next-line react-hooks/set-state-in-effect

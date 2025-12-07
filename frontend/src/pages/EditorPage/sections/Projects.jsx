@@ -5,6 +5,9 @@ import styles from './FormSection.module.css'
 const { TextArea } = Input
 
 export default function Projects({ data, onChange }) {
+    // Ensure data is an array
+    const projData = Array.isArray(data) ? data : []
+
     const addProject = () => {
         const newProject = {
             id: Date.now(),
@@ -15,17 +18,17 @@ export default function Projects({ data, onChange }) {
             url: '',
             github: '',
         }
-        onChange([...data, newProject])
+        onChange([...projData, newProject])
     }
 
     const updateProject = (index, field, value) => {
-        const updated = [...data]
+        const updated = [...projData]
         updated[index] = { ...updated[index], [field]: value }
         onChange(updated)
     }
 
     const deleteProject = (index) => {
-        onChange(data.filter((_, i) => i !== index))
+        onChange(projData.filter((_, i) => i !== index))
     }
 
     const updateTechStack = (index, value) => {
@@ -48,12 +51,12 @@ export default function Projects({ data, onChange }) {
             </div>
 
             <Space direction="vertical" style={{ width: '100%' }} size="middle">
-                {data.length === 0 ? (
+                {projData.length === 0 ? (
                     <div className={styles.emptyState}>
                         Showcase your personal or professional projects
                     </div>
                 ) : (
-                    data.map((project, index) => (
+                    projData.map((project, index) => (
                         <Card
                             key={project.id}
                             size="small"
