@@ -1,6 +1,9 @@
-﻿import { useState, useEffect } from 'react'
-import { useSearchParams, useNavigate } from 'react-router-dom'
-import { Layout, Button, Space, Dropdown, InputNumber, Tooltip, message } from 'antd'
+﻿import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../../context/AuthContext'
+import { Spin, Result, Button } from 'antd'
+import { useState, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
+import { Layout, Space, Dropdown, InputNumber, Tooltip, message } from 'antd'
 import {
   SaveOutlined,
   DownloadOutlined,
@@ -20,8 +23,9 @@ import styles from './EditorPage.module.css'
 const { Header, Content } = Layout
 
 export default function EditorPage() {
-  const [searchParams] = useSearchParams()
   const navigate = useNavigate()
+  const { isAuthenticated, loading: authLoading, user } = useAuth()
+  const [searchParams] = useSearchParams()
   const [zoom, setZoom] = useState(100)
   const [resumeName, setResumeName] = useState('My Resume')
   const [templateId, setTemplateId] = useState(1)
@@ -46,6 +50,13 @@ export default function EditorPage() {
     volunteering: [],
     publications: [],
   })
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      navigate('/auth?tab=login')
+    }
+  }, [isAuthenticated, authLoading, navigate])
 
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
@@ -89,7 +100,7 @@ export default function EditorPage() {
       window.__EXTENSION_BRIDGE__.sendData(resumeData)
     }
 
-    console.log('Saved resume:', { resumeName, resumeData, templateId })
+    console.log('Saved resume:', { resumeName, resumeData, templateId, user })
   }
 
   const handleDownload = () => {
@@ -112,6 +123,36 @@ export default function EditorPage() {
     { key: '150', label: '150%' },
     { key: '200', label: '200%' },
   ]
+
+  // Show loading spinner while checking authentication
+  if (authLoading) {
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh'
+      }}>
+        <Spin size="large" tip="Loading..." />
+      </div>
+    )
+  }
+
+  // Show error if not authenticated
+  if (!isAuthenticated) {
+    return (
+      <Result
+        status="403"
+        title="Access Denied"
+        subTitle="You need to be logged in to access the resume editor."
+        extra={
+          <Button type="primary" onClick={() => navigate('/auth?tab=login')}>
+            Go to Login
+          </Button>
+        }
+      />
+    )
+  }
 
   return (
     <ResumeManagerProvider>
@@ -142,6 +183,7 @@ export default function EditorPage() {
               placeholder="Resume name"
             />
             <span className={styles.template}>Template: {templateId}</span>
+            {user && <span className={styles.userInfo}>{user.email}</span>}
           </div>
 
           <Space className={styles.headerActions} size="small">
