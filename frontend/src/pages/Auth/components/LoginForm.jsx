@@ -1,4 +1,4 @@
-import { Form, Input, Button, Checkbox, Space, Divider } from 'antd'
+import { Form, Input, Button, Checkbox } from 'antd'
 import { UserOutlined, LockOutlined, EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons'
 import OAuthButtons from './OAuthButtons'
 import styles from './AuthForm.module.css'
@@ -13,7 +13,8 @@ export default function LoginForm({ onSuccess, onSwitchTab }) {
 
   return (
     <div className={styles.container}>
-      <p className={styles.subtitle}>Login to continue learning with us!</p>
+      <h2 className={styles.heading}>Welcome Back!</h2>
+      <p className={styles.subtitle}>Log in to start creating stunning resumes with ease</p>
       
       <Form
         form={form}
@@ -22,25 +23,17 @@ export default function LoginForm({ onSuccess, onSwitchTab }) {
         autoComplete="off"
         requiredMark={false}
       >
-        <Form.Item
-          name="email"
-          rules={[{ required: true, message: 'Please enter your email, username, or phone number' }]}
-        >
+        <Form.Item label="Email">
           <Input
-            prefix={<UserOutlined />}
-            placeholder="Email/Username/Phone number"
+            placeholder="Input your email"
             size="large"
             className={styles.input}
           />
         </Form.Item>
 
-        <Form.Item
-          name="password"
-          rules={[{ required: true, message: 'Please enter your password' }]}
-        >
+        <Form.Item label="Password">
           <Input.Password
-            prefix={<LockOutlined />}
-            placeholder="Password"
+            placeholder="Input your password"
             size="large"
             className={styles.input}
             iconRender={(visible) => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
@@ -49,22 +42,26 @@ export default function LoginForm({ onSuccess, onSwitchTab }) {
 
         <div className={styles.rememberContainer}>
           <Checkbox>Remember me</Checkbox>
-          <a href="#forgot" className={styles.link}>Trouble login in?</a>
+          <a href="#forgot" className={styles.link}>Forgot Password?</a>
         </div>
 
-        <Form.Item>
-          <Button type="primary" htmlType="submit" size="large" block>
-            Login!
-          </Button>
-        </Form.Item>
+        <Button 
+          type="primary" 
+          htmlType="submit" 
+          size="large" 
+          block
+          className={styles.submitBtn}
+        >
+          Login
+        </Button>
       </Form>
 
-      <Divider className={styles.divider}>OR</Divider>
+      <p className={styles.divider}>Or continue with</p>
 
       <OAuthButtons />
 
       <p className={styles.switchText}>
-        Don't have an account? <a href="#signup" onClick={(e) => { e.preventDefault(); onSwitchTab(); }} className={styles.link}>Sign up</a>
+        Don't have an account? <a href="#signup" onClick={(e) => { e.preventDefault(); onSwitchTab(); }} className={styles.link}>Sign up here</a>
       </p>
     </div>
   )

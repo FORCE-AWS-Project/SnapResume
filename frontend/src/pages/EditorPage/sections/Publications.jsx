@@ -6,6 +6,9 @@ import styles from './FormSection.module.css'
 const { TextArea } = Input
 
 export default function Publications({ data, onChange }) {
+    // Ensure data is an array
+    const pubData = Array.isArray(data) ? data : []
+
     const addPublication = () => {
         const newPub = {
             id: Date.now(),
@@ -15,17 +18,17 @@ export default function Publications({ data, onChange }) {
             url: '',
             description: '',
         }
-        onChange([...data, newPub])
+        onChange([...pubData, newPub])
     }
 
     const updatePublication = (index, field, value) => {
-        const updated = [...data]
+        const updated = [...pubData]
         updated[index] = { ...updated[index], [field]: value }
         onChange(updated)
     }
 
     const deletePublication = (index) => {
-        onChange(data.filter((_, i) => i !== index))
+        onChange(pubData.filter((_, i) => i !== index))
     }
 
     return (
@@ -45,12 +48,12 @@ export default function Publications({ data, onChange }) {
             </div>
 
             <Space direction="vertical" style={{ width: '100%' }} size="middle">
-                {data.length === 0 ? (
+                {pubData.length === 0 ? (
                     <div className={styles.emptyState}>
                         Add published articles, papers, or speaking engagements
                     </div>
                 ) : (
-                    data.map((pub, index) => (
+                    pubData.map((pub, index) => (
                         <Card
                             key={pub.id}
                             size="small"

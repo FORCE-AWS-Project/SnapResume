@@ -24,7 +24,11 @@ export default function HeroSection() {
               >
                 Create Resume
               </Button>
-              <Button size="large" className={styles.secondaryBtn}>
+              <Button 
+                size="large"
+                className={styles.secondaryBtn}
+                onClick={() => navigate('/features')}
+               >
                 Learn More
               </Button>
             </div>
@@ -32,7 +36,7 @@ export default function HeroSection() {
           <Col xs={24} md={12}>
             <Card className={styles.showcase}>
               <img 
-                src="https://via.placeholder.com/400x350?text=Resume+Preview" 
+                src="Logo.png" 
                 alt="Resume Preview"
               />
             </Card>
