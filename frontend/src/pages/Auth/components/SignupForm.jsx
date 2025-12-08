@@ -3,7 +3,7 @@ import { UserOutlined, LockOutlined, EyeInvisibleOutlined, EyeTwoTone, MailOutli
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../../context/AuthContext'
-import OAuthButtons from './OAuthButtons'
+
 import styles from './AuthForm.module.css'
 
 export default function SignupForm({ onSuccess, onSwitchTab }) {
@@ -60,7 +60,7 @@ export default function SignupForm({ onSuccess, onSwitchTab }) {
     <div className={styles.container}>
       <h2 className={styles.heading}>Get Started Free!</h2>
       <p className={styles.subtitle}>Create your account and start building amazing resumes</p>
-      
+
       {error && (
         <div style={{
           padding: '12px',
@@ -82,7 +82,7 @@ export default function SignupForm({ onSuccess, onSwitchTab }) {
         autoComplete="off"
         requiredMark={false}
       >
-        <Form.Item 
+        <Form.Item
           label="Email"
           name="email"
           rules={[
@@ -98,7 +98,7 @@ export default function SignupForm({ onSuccess, onSwitchTab }) {
           />
         </Form.Item>
 
-        <Form.Item 
+        <Form.Item
           label="Password"
           name="password"
           rules={[
@@ -114,7 +114,7 @@ export default function SignupForm({ onSuccess, onSwitchTab }) {
           />
         </Form.Item>
 
-        <Form.Item 
+        <Form.Item
           label="Confirm Password"
           name="confirmPassword"
           rules={[
@@ -130,12 +130,12 @@ export default function SignupForm({ onSuccess, onSwitchTab }) {
         </Form.Item>
 
         <div className={styles.termsContainer}>
-          <Form.Item 
+          <Form.Item
             name="agree"
             valuePropName="checked"
             rules={[
-              { 
-                validator: (_, value) => 
+              {
+                validator: (_, value) =>
                   value ? Promise.resolve() : Promise.reject(new Error('You must agree to the terms!'))
               }
             ]}
@@ -146,10 +146,10 @@ export default function SignupForm({ onSuccess, onSwitchTab }) {
           </Form.Item>
         </div>
 
-        <Button 
-          type="primary" 
-          htmlType="submit" 
-          size="large" 
+        <Button
+          type="primary"
+          htmlType="submit"
+          size="large"
           block
           className={styles.submitBtn}
           loading={loading}
@@ -159,9 +159,7 @@ export default function SignupForm({ onSuccess, onSwitchTab }) {
         </Button>
       </Form>
 
-      <p className={styles.divider}>Or continue with</p>
 
-      <OAuthButtons />
 
       <p className={styles.switchText}>
         Already have an account? <a href="#login" onClick={(e) => { e.preventDefault(); onSwitchTab(); }} className={styles.link}>Log in here</a>

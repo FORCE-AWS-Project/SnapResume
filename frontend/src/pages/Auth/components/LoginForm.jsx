@@ -2,7 +2,7 @@ import { Form, Input, Button, Checkbox, message } from 'antd'
 import { UserOutlined, LockOutlined, EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../../context/AuthContext'
-import OAuthButtons from './OAuthButtons'
+
 import styles from './AuthForm.module.css'
 
 export default function LoginForm({ onSuccess, onSwitchTab }) {
@@ -28,7 +28,7 @@ export default function LoginForm({ onSuccess, onSwitchTab }) {
     <div className={styles.container}>
       <h2 className={styles.heading}>Welcome Back!</h2>
       <p className={styles.subtitle}>Log in to start creating stunning resumes with ease</p>
-      
+
       {error && (
         <div style={{
           padding: '12px',
@@ -50,7 +50,7 @@ export default function LoginForm({ onSuccess, onSwitchTab }) {
         autoComplete="off"
         requiredMark={false}
       >
-        <Form.Item 
+        <Form.Item
           label="Email"
           name="email"
           rules={[
@@ -66,7 +66,7 @@ export default function LoginForm({ onSuccess, onSwitchTab }) {
           />
         </Form.Item>
 
-        <Form.Item 
+        <Form.Item
           label="Password"
           name="password"
           rules={[
@@ -88,10 +88,10 @@ export default function LoginForm({ onSuccess, onSwitchTab }) {
           <a href="#forgot" className={styles.link}>Forgot Password?</a>
         </div>
 
-        <Button 
-          type="primary" 
-          htmlType="submit" 
-          size="large" 
+        <Button
+          type="primary"
+          htmlType="submit"
+          size="large"
           block
           className={styles.submitBtn}
           loading={loading}
@@ -101,9 +101,7 @@ export default function LoginForm({ onSuccess, onSwitchTab }) {
         </Button>
       </Form>
 
-      <p className={styles.divider}>Or continue with</p>
 
-      <OAuthButtons />
 
       <p className={styles.switchText}>
         Don't have an account? <a href="#signup" onClick={(e) => { e.preventDefault(); onSwitchTab(); }} className={styles.link}>Sign up here</a>
