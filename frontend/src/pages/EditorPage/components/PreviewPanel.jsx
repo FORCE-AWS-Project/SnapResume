@@ -267,7 +267,7 @@ export default function PreviewPanel({ data, templateId = 1, zoom = 100, section
         {isEmpty ? (
           <Empty description="Start filling in your information to preview your resume" />
         ) : (
-          <Card className={styles.card}>
+          <Card className={styles.card} id="resume-preview-content">
             {renderTemplate()}
           </Card>
         )}
