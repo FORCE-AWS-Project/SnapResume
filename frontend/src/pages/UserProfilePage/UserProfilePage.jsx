@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Row,
@@ -27,6 +27,10 @@ import {
   EditOutlined,
   CalendarOutlined,
   SaveOutlined,
+  FileTextOutlined,
+  PlusOutlined,
+  EyeOutlined,
+  DeleteOutlined,
 } from "@ant-design/icons";
 import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
@@ -41,12 +45,106 @@ export default function UserProfilePage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [form] = Form.useForm();
   const [updating, setUpdating] = useState(false);
+  const [resumes, setResumes] = useState([]);
+  const [resumesLoading, setResumesLoading] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated && !userProfile) {
       fetchUserProfile();
     }
   }, [isAuthenticated, userProfile, fetchUserProfile]);
+
+  const [pagination, setPagination] = useState({
+    count: 0,
+    lastEvaluatedKey: null,
+    limit: 20,
+  });
+
+  const fetchResumes = useCallback(async (lastKey = null) => {
+    setResumesLoading(true);
+    try {
+      const limit = 20;
+      const params = {
+        limit,
+      };
+      if (lastKey) {
+        params.lastEvaluatedKey = lastKey;
+      }
+
+      const response = await API.resume.getResumes(params);
+      console.log("Resumes API Response:", response.data);
+
+      if (response.data?.success) {
+        const data = response.data.data;
+        console.log("Resumes data:", data);
+        setResumes(data.resumes || []);
+        setPagination({
+          count: data.count || 0,
+          lastEvaluatedKey: data.lastEvaluatedKey || null,
+          limit,
+        });
+      } else {
+        console.warn("API response not successful:", response.data);
+        setResumes([]);
+      }
+    } catch (error) {
+      console.error("Error fetching resumes:", error);
+      console.error("Error details:", {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+      });
+      // Show error message for debugging
+      message.error(
+        "Failed to load resumes. Please check console for details."
+      );
+      setResumes([]);
+    } finally {
+      setResumesLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchResumes();
+    }
+  }, [isAuthenticated, fetchResumes]);
+
+  const handleEditResume = (resumeId) => {
+    navigate(`/editor?resumeId=${resumeId}`);
+  };
+
+  const handleDeleteResume = async (resumeId, resumeName) => {
+    try {
+      await API.resume.deleteResume(resumeId);
+      message.success(`Resume "${resumeName}" deleted successfully`);
+      fetchResumes();
+    } catch (error) {
+      console.error("Error deleting resume:", error);
+      message.error("Failed to delete resume. Please try again.");
+    }
+  };
+
+  const formatResumeDate = (dateString) => {
+    if (!dateString) return "N/A";
+    try {
+      return new Date(dateString).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      });
+    } catch {
+      return dateString;
+    }
+  };
+
+  const getSectionCount = (sections) => {
+    if (!sections) return 0;
+    return Object.values(sections).reduce(
+      (total, sectionArray) => total + (sectionArray?.length || 0),
+      0
+    );
+  };
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
@@ -120,6 +218,8 @@ export default function UserProfilePage() {
         form.resetFields();
         // Refresh profile data
         await fetchUserProfile();
+        // Refresh resumes
+        await fetchResumes();
       } else {
         message.error("Failed to update profile");
       }
@@ -356,6 +456,146 @@ export default function UserProfilePage() {
                       </div>
                     </div>
                   </div>
+                </Card>
+              </Col>
+            </Row>
+
+            {/* Resumes Section */}
+            <Row gutter={[24, 24]} style={{ marginTop: 24 }}>
+              <Col xs={24}>
+                <Card
+                  title={
+                    <span className={styles.cardTitle}>
+                      <FileTextOutlined /> My Resumes
+                    </span>
+                  }
+                  className={styles.card}
+                  extra={
+                    <Button
+                      type="primary"
+                      icon={<PlusOutlined />}
+                      size="small"
+                      onClick={() => navigate("/editor")}
+                    >
+                      Create New
+                    </Button>
+                  }
+                >
+                  {resumesLoading ? (
+                    <div className={styles.resumesLoading}>
+                      <Spin />
+                    </div>
+                  ) : resumes.length === 0 ? (
+                    <Empty
+                      description="No resumes yet. Create your first resume!"
+                      image={Empty.PRESENTED_IMAGE_SIMPLE}
+                      className={styles.resumesEmpty}
+                    >
+                      <Button
+                        type="primary"
+                        icon={<PlusOutlined />}
+                        onClick={() => navigate("/editor")}
+                      >
+                        Create Your First Resume
+                      </Button>
+                    </Empty>
+                  ) : (
+                    <Row gutter={[16, 16]}>
+                      {resumes.map((resume) => (
+                        <Col xs={24} sm={12} lg={8} key={resume.resumeId}>
+                          <Card
+                            className={styles.resumeCard}
+                            hoverable
+                            actions={[
+                              <Button
+                                type="text"
+                                icon={<EyeOutlined />}
+                                onClick={() =>
+                                  handleEditResume(resume.resumeId)
+                                }
+                                key="view"
+                              >
+                                View
+                              </Button>,
+                              <Button
+                                type="text"
+                                danger
+                                icon={<DeleteOutlined />}
+                                onClick={() =>
+                                  handleDeleteResume(
+                                    resume.resumeId,
+                                    resume.name
+                                  )
+                                }
+                                key="delete"
+                              >
+                                Delete
+                              </Button>,
+                            ]}
+                          >
+                            <div className={styles.resumeCardContent}>
+                              <div className={styles.resumeCardHeader}>
+                                <FileTextOutlined
+                                  className={styles.resumeCardIcon}
+                                />
+                                <div className={styles.resumeCardInfo}>
+                                  <h4 className={styles.resumeCardName}>
+                                    {resume.name}
+                                  </h4>
+                                  {resume.templateId && (
+                                    <Tag
+                                      color="blue"
+                                      className={styles.resumeCardTag}
+                                    >
+                                      {resume.templateId}
+                                    </Tag>
+                                  )}
+                                </div>
+                              </div>
+                              <div className={styles.resumeCardDetails}>
+                                <div className={styles.resumeCardDetailItem}>
+                                  <span
+                                    className={styles.resumeCardDetailLabel}
+                                  >
+                                    Sections:
+                                  </span>
+                                  <span
+                                    className={styles.resumeCardDetailValue}
+                                  >
+                                    {getSectionCount(resume.sections)}
+                                  </span>
+                                </div>
+                                <div className={styles.resumeCardDate}>
+                                  <CalendarOutlined
+                                    className={styles.resumeCardDateIcon}
+                                  />
+                                  <span className={styles.resumeCardDateText}>
+                                    {formatResumeDate(
+                                      resume.updatedAt || resume.createdAt
+                                    )}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </Card>
+                        </Col>
+                      ))}
+                    </Row>
+                  )}
+                  {!resumesLoading &&
+                    resumes.length > 0 &&
+                    pagination.count > pagination.limit && (
+                      <div className={styles.resumesPagination}>
+                        <Pagination
+                          current={1}
+                          total={pagination.count}
+                          pageSize={pagination.limit}
+                          onChange={() => fetchResumes()}
+                          showSizeChanger={false}
+                          showTotal={(total) => `Total ${total} resumes`}
+                        />
+                      </div>
+                    )}
                 </Card>
               </Col>
             </Row>

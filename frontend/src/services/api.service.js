@@ -66,8 +66,14 @@ apiClient.interceptors.response.use(
  * Resume API endpoints
  */
 const resumeAPI = {
-  // Get all resumes for current user
-  getResumes: () => apiClient.get('/api/resumes'),
+  // Get all resumes for current user (with pagination)
+  getResumes: (params = {}) => {
+    const queryParams = new URLSearchParams();
+    if (params.limit) queryParams.append('limit', params.limit);
+    if (params.lastEvaluatedKey) queryParams.append('lastEvaluatedKey', params.lastEvaluatedKey);
+    const queryString = queryParams.toString();
+    return apiClient.get(`/api/resumes${queryString ? `?${queryString}` : ''}`);
+  },
 
   // Get resume by ID
   getResume: (resumeId) => apiClient.get(`/api/resumes/${resumeId}`),

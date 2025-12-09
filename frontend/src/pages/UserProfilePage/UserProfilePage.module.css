@@ -269,6 +269,151 @@
   min-width: 100px;
 }
 
+/* Resumes Section */
+.resumesLoading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: var(--spacing-2xl);
+}
+
+.resumesEmpty {
+  padding: var(--spacing-xl) 0;
+}
+
+/* Resume Card in Profile */
+.resumeCard {
+  border-radius: var(--radius-sm);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  transition: all var(--transition-base);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.resumeCard:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.resumeCard :global(.ant-card-body) {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: var(--spacing-md);
+}
+
+.resumeCard :global(.ant-card-actions) {
+  border-top: 1px solid var(--color-border-light);
+  background: var(--color-bg-light);
+  margin: 0;
+  padding: var(--spacing-xs) 0;
+}
+
+.resumeCard :global(.ant-card-actions > li) {
+  margin: 0;
+  padding: var(--spacing-xs);
+}
+
+.resumeCard :global(.ant-card-actions .ant-btn) {
+  width: 100%;
+  border: none;
+  box-shadow: none;
+  padding: var(--spacing-xs);
+}
+
+.resumeCardContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.resumeCardHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.resumeCardIcon {
+  font-size: var(--font-size-xl);
+  color: var(--color-primary);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.resumeCardInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.resumeCardName {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--color-text-dark);
+  margin: 0 0 var(--spacing-xs) 0;
+  word-break: break-word;
+  line-height: 1.4;
+}
+
+.resumeCardTag {
+  font-size: var(--font-size-xs);
+  margin: 0;
+}
+
+.resumeCardDetails {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  margin-top: auto;
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid var(--color-border-light);
+}
+
+.resumeCardDetailItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.resumeCardDetailLabel {
+  font-size: var(--font-size-xs);
+  color: #666;
+  font-weight: 500;
+}
+
+.resumeCardDetailValue {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-dark);
+  font-weight: 600;
+}
+
+.resumeCardDate {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: var(--font-size-xs);
+  color: #666;
+}
+
+.resumeCardDateIcon {
+  font-size: var(--font-size-xs);
+  color: var(--color-primary);
+}
+
+.resumeCardDateText {
+  font-size: var(--font-size-xs);
+}
+
+.resumesPagination {
+  margin-top: var(--spacing-lg);
+  display: flex;
+  justify-content: center;
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid var(--color-border-light);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .headerContent {
@@ -314,6 +459,16 @@
 
   .userEmail {
     font-size: var(--font-size-base);
+  }
+
+  .resumeCardHeader {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .resumeCardIcon {
+    font-size: var(--font-size-lg);
   }
 }
 
