@@ -35,14 +35,24 @@ const DynamicSectionForm = () => {
     if (!sectionSchema) return
 
     if (sectionSchema.type === 'array' && itemId) {
-      const item = resumeData[sectionType]?.find(
-        item => item.tempId === itemId || item.sectionId === itemId
-      ) || sectionStorage[sectionType]?.find(
+      const storageItems = sectionStorage[sectionType] || []
+      const resumeItems = resumeData[sectionType] || []
+
+      console.log("Looking for itemId:", itemId)
+      console.log("Storage items:", storageItems)
+      console.log("Resume items:", resumeItems)
+
+      // Always get the data from storage since that's where the master copy is
+      const item = storageItems.find(
         item => item.tempId === itemId || item.sectionId === itemId
       )
-      console.log("Item inside dynamic form: ",item)
+
+      console.log("Found item:", item)
+
       if (item) {
         setFormData(item)
+      } else {
+        setFormData({})
       }
     } else if (sectionSchema.type === 'object') {
       setFormData(resumeData[sectionType] || createEmptySectionItem(sectionSchema))
@@ -50,7 +60,6 @@ const DynamicSectionForm = () => {
   }, [selectedSection, resumeData, sectionStorage, template])
 
   const handleFormChange = (newFormData) => {
-    setFormData({ ...newFormData })
     setValidationErrors([])
 
     if (!selectedSection) return
@@ -60,7 +69,9 @@ const DynamicSectionForm = () => {
 
     if (sectionSchema.type === 'array' && itemId) {
       Object.entries(newFormData).forEach(([field, value]) => {
-        updateSectionItem(type, itemId, field, value)
+        if (formData[field] !== value) {
+          updateSectionItem(type, itemId, field, value)
+        }
       })
     } else if (sectionSchema.type === 'object') {
       // Update entire section
@@ -90,13 +101,12 @@ const DynamicSectionForm = () => {
       return <Empty description="Select a section item from the left panel to edit" />
     }
 
-    console.log("Sections schema: ",sectionSchema)
-    const adaptedSchema = SchemaAdapter.toRJSF(sectionSchema?.itemSchema || {})
+      const adaptedSchema = SchemaAdapter.toRJSF(sectionSchema?.itemSchema || {})
     const uiSchema = SchemaAdapter.getUiSchema(sectionSchema?.itemSchema || {})
 
-    const items = resumeData[sectionType] || []
-    const item = items.find(item => item.tempId === itemId || item.sectionId === itemId)
-    const itemTitle = item?.position || item?.name || item?.title || item?.institution || item?.degree || `${sectionSchema.title || sectionType}`
+    const storageItems = sectionStorage[sectionType] || []
+    const item = storageItems.find(item => item.tempId === itemId || item.sectionId === itemId)
+    const itemTitle = item?.position || item?.name || item?.title || item?.institution || item?.degree || `${sectionSchema.title || sectionType} Item`
 
     return (
       <div className={styles.objectSection}>
@@ -112,7 +122,7 @@ const DynamicSectionForm = () => {
           </Button>
         </div>
         <DynamicForm
-          key={itemId} // Force re-render when itemId changes
+          key={`form-${itemId}`} 
           schema={adaptedSchema}
           uiSchema={uiSchema}
           formData={formData}

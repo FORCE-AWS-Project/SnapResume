@@ -54,7 +54,7 @@ const resumeReducer = (state, action) => {
     case ADD_SECTION_ITEM: {
       const { sectionType, item } = action.payload
       const currentItems = state.resumeData[sectionType] || []
-
+      console.log("ADD SECTION ITEMS: ",action.payload)
       return {
         ...state,
         resumeData: {
@@ -78,25 +78,37 @@ const resumeReducer = (state, action) => {
       const updateItems = state.resumeData[updateSectionType] || []
       const updateStorageItems = state.sectionStorage[updateSectionType] || []
 
+      console.log("Update items", updateItems);
+      console.log("Update storage items: ",updateStorageItems)
+
+      // Update resumeData - replace the item, don't add a duplicate
+      const updatedResumeItems = updateItems.map(item => {
+        if (item.tempId === itemId || item.sectionId === itemId) {
+          return { ...item, [field]: value }
+        }
+        return item
+      })
+
+      // Update sectionStorage - replace the item, don't add a duplicate
+      const updatedStorageItems = updateStorageItems.map(item => {
+        if (item.tempId === itemId || item.sectionId === itemId) {
+          return { ...item, [field]: value }
+        }
+        return item
+      })
+
+      console.log("Updated resume items:", updatedResumeItems)
+      console.log("Updated storage items:", updatedStorageItems)
+
       return {
         ...state,
         resumeData: {
           ...state.resumeData,
-          [updateSectionType]: updateItems.map(item => {
-            if (item.tempId === itemId || item.sectionId === itemId) {
-              return { ...item, [field]: value }
-            }
-            return item
-          }),
+          [updateSectionType]: updatedResumeItems,
         },
         sectionStorage: {
           ...state.sectionStorage,
-          [updateSectionType]: updateStorageItems.map(item => {
-            if (item.tempId === itemId || item.sectionId === itemId) {
-              return { ...item, [field]: value }
-            }
-            return item
-          }),
+          [updateSectionType]: updatedStorageItems,
         },
       }
     }
@@ -113,7 +125,7 @@ const resumeReducer = (state, action) => {
       const filteredStorageItems = storageItems.filter(item =>
         item.tempId !== deleteItemId && item.sectionId !== deleteItemId
       )
-
+      console.log("DELETE SECTION ITEM: ",action.payload)
       return {
         ...state,
         resumeData: {
@@ -131,6 +143,7 @@ const resumeReducer = (state, action) => {
 
     case TOGGLE_SECTION: {
       const { sectionType: toggleSectionType, expanded } = action.payload
+      console.log("TOGGLE SECTIONS: ",action.payload)
       return {
         ...state,
         sectionStates: {
@@ -160,6 +173,7 @@ const resumeReducer = (state, action) => {
     }
 
     case SET_SELECTED_SECTION: {
+      console.log("Set section action payload: ",action.payload)
       return {
         ...state,
         selectedSection: action.payload,
@@ -226,7 +240,6 @@ const resumeReducer = (state, action) => {
             expanded: true,
           },
         },
-        selectedSection: { type: storageSectionType, action: 'edit', itemId: storageItem.tempId },
       }
     }
 
@@ -314,8 +327,7 @@ export const ResumeProvider = ({ children }) => {
         }
       })
     }
-    console.log("Resume data: ",resumeData)
-
+  
     // Update the template object with parsed schema for future use
     const updatedTemplate = { ...template, inputDataSchema }
     dispatch({ type: SET_TEMPLATE, payload: updatedTemplate })
@@ -332,8 +344,7 @@ export const ResumeProvider = ({ children }) => {
   }, [])
 
   const addSectionItem = useCallback((sectionType, item) => {
-    console.log("Current state: ",state)
-    dispatch({ type: ADD_SECTION_ITEM, payload: { sectionType, item } })
+        dispatch({ type: ADD_SECTION_ITEM, payload: { sectionType, item } })
   }, [])
 
   const updateSectionItem = useCallback((sectionType, itemId, field, value) => {

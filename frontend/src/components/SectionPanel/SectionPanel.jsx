@@ -1,6 +1,5 @@
-import React from 'react'
 import { Card, List, Button, Space, Badge, Typography, Checkbox } from 'antd'
-import { PlusOutlined, EditOutlined, CheckOutlined, RightOutlined, DeleteOutlined } from '@ant-design/icons'
+import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import { useResume } from '../../contexts/ResumeContext'
 import { v4 as uuidv4 } from 'uuid'
 import styles from './SectionPanel.module.css'
@@ -47,7 +46,8 @@ const SectionPanel = () => {
       Object.entries(schema.itemSchema || {}).forEach(([key, field]) => {
         storageItem[key] = getDefaultValue(field)
       })
-      storageItem.tempId = uuidv4()
+      const newId = uuidv4()
+      storageItem.tempId = newId
 
       addToSectionStorage(sectionType, storageItem)
     } else {
@@ -72,7 +72,7 @@ const SectionPanel = () => {
 
   const handleSectionClick = (sectionType, schema) => {
     const storageItems = getStorageItems(sectionType)
-
+    console.log("Storage item in section panel: ",storageItems)
     if (schema.type === 'array' && storageItems.length > 0) {
       const firstItem = storageItems[0]
       selectSection(sectionType, 'edit', firstItem.tempId || firstItem.sectionId)
@@ -142,7 +142,7 @@ const SectionPanel = () => {
                 <Space>
                   <span>{schema.title || sectionType.charAt(0).toUpperCase() + sectionType.slice(1)}</span>
                   <Badge count={getStorageItems(sectionType).length} style={{ backgroundColor: '#1890ff' }} />
-                  <Badge count={count} style={{ backgroundColor: '#52c41a' }} title="In Resume" />
+                  <Badge count={schema.type==="array"? count:0} style={{ backgroundColor: '#52c41a' }} title="In Resume" />
                   {schema.required && <Badge count="*" style={{ backgroundColor: '#ff4d4f' }} />}
                 </Space>
               }
@@ -166,7 +166,7 @@ const SectionPanel = () => {
 
                 return (
                   <div
-                    key={itemId}
+                    key={`item-${sectionType}-${itemId}`}
                     className={`${styles.itemRow} ${isSelected ? styles.itemSelected : ''} ${isIncluded ? styles.itemIncluded : ''}`}
                     onClick={() => selectSection(sectionType, 'edit', itemId)}
                   >
@@ -178,7 +178,6 @@ const SectionPanel = () => {
                     <Text style={{ flex: 1, marginLeft: 8 }}>
                       {`${schema.title || sectionType} ${index + 1}`}
                     </Text>
-                    {isIncluded && <CheckOutlined style={{ color: '#52c41a', marginLeft: 8 }} />}
                     <Button
                       type="text"
                       size="small"
@@ -190,7 +189,6 @@ const SectionPanel = () => {
                       }}
                       style={{ marginLeft: 8, padding: '0 4px' }}
                     />
-                    <RightOutlined className={styles.itemArrow} />
                   </div>
                 )
               })}

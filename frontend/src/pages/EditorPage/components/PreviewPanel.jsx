@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
-import { Card, Empty, Spin, Alert } from 'antd'
+import { Card, Empty, Spin, Alert, Button, Space, Slider } from 'antd'
+import { FullscreenOutlined, FullscreenExitOutlined, ZoomInOutlined, ZoomOutOutlined } from '@ant-design/icons'
 import { TemplateRenderer } from '../../../utils/TemplateRenderer'
 import html2pdf from 'html2pdf.js'
 import styles from './PreviewPanel.module.css'
 
-export default function PreviewPanel({ data, template, zoom = 100 }) {
+export default function PreviewPanel({ data, template, zoom = 100, onZoomChange }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [pdfUrl, setPdfUrl] = useState('')
