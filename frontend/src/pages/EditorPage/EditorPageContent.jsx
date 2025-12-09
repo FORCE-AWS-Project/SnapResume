@@ -195,14 +195,6 @@ function EditorPageContent() {
         </div>
 
         <Space className={styles.headerActions} size="small">
-          <Tooltip title="Manage Sections">
-            <Button
-              icon={<UnorderedListOutlined />}
-              onClick={() => setManagerModalVisible(true)}
-            >
-              Manage
-            </Button>
-          </Tooltip>
           <Button
             type="primary"
             icon={<SaveOutlined />}

@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, Typography, Button, Empty } from 'antd'
 import { DeleteOutlined } from '@ant-design/icons'
 import DynamicForm from '../DynamicForm/DynamicForm'
 import { useResume, createEmptySectionItem } from '../../contexts/ResumeContext'
 import { SchemaAdapter } from '../../utils/SchemaAdapter'
-import { SchemaValidator } from '../../utils/SchemaValidator'
 import styles from './DynamicSectionForm.module.css'
 
 const { Title, Text } = Typography
@@ -15,10 +14,9 @@ const DynamicSectionForm = () => {
     resumeData,
     sectionStorage,
     selectedSection,
-    sectionStates,
     updateSectionItem,
     deleteSectionItem,
-    setSectionData
+    setSectionData,
   } = useResume()
 
   const [formData, setFormData] = useState({})
@@ -37,17 +35,16 @@ const DynamicSectionForm = () => {
     if (!sectionSchema) return
 
     if (sectionSchema.type === 'array' && itemId) {
-      // Find the specific item being edited from both resume and storage
       const item = resumeData[sectionType]?.find(
         item => item.tempId === itemId || item.sectionId === itemId
       ) || sectionStorage[sectionType]?.find(
         item => item.tempId === itemId || item.sectionId === itemId
       )
+      console.log("Item inside dynamic form: ",item)
       if (item) {
         setFormData(item)
       }
     } else if (sectionSchema.type === 'object') {
-      // Load the entire section data
       setFormData(resumeData[sectionType] || createEmptySectionItem(sectionSchema))
     }
   }, [selectedSection, resumeData, sectionStorage, template])
@@ -61,9 +58,6 @@ const DynamicSectionForm = () => {
     const { type, itemId } = selectedSection
     const sectionSchema = template.inputDataSchema[type]
 
-    // Store current selected section to check if it changes
-    const currentSelectedSection = selectedSection
-
     if (sectionSchema.type === 'array' && itemId) {
       Object.entries(newFormData).forEach(([field, value]) => {
         updateSectionItem(type, itemId, field, value)
@@ -72,9 +66,6 @@ const DynamicSectionForm = () => {
       // Update entire section
       setSectionData(type, newFormData)
     }
-
-    // Debug: Check if selectedSection changed after update
-    // This might be happening if the updateSectionItem triggers a selection change
   }
 
   const handleDelete = (itemId) => {
@@ -99,11 +90,10 @@ const DynamicSectionForm = () => {
       return <Empty description="Select a section item from the left panel to edit" />
     }
 
-    // Create adapted schema for the form
+    console.log("Sections schema: ",sectionSchema)
     const adaptedSchema = SchemaAdapter.toRJSF(sectionSchema?.itemSchema || {})
     const uiSchema = SchemaAdapter.getUiSchema(sectionSchema?.itemSchema || {})
 
-    // Get current item title
     const items = resumeData[sectionType] || []
     const item = items.find(item => item.tempId === itemId || item.sectionId === itemId)
     const itemTitle = item?.position || item?.name || item?.title || item?.institution || item?.degree || `${sectionSchema.title || sectionType}`
@@ -154,10 +144,7 @@ const DynamicSectionForm = () => {
     }
 
     // Create adapted schema
-    const adaptedSchema = SchemaAdapter.toRJSF({
-      type: 'object',
-      properties: sectionSchema.fields || {}
-    })
+    const adaptedSchema = SchemaAdapter.toRJSF(sectionSchema.fields);
 
     return (
       <div className={styles.objectSection}>

@@ -6,20 +6,15 @@ import ArrayFieldTemplate from '../ArrayFieldTemplate/ArrayFieldTemplate'
 
 const RJSFForm = withTheme(AntDTheme)
 
-export default function DynamicForm({ schema, uiSchema, formData, onChange, onSubmit, onError }) {
+export default function DynamicForm({ schema, uiSchema, formData, onChange, onError }) {
   const [localFormData, setLocalFormData] = useState(formData || {})
-
+  console.log("Form data: ",formData);
+  console.log("Schema inside dynamic form: ",schema)
   const handleChange = ({ formData }) => {
     setLocalFormData(formData)
 
     if (onChange) {
       onChange(formData)
-    }
-  }
-
-  const handleSubmit = ({ formData }) => {
-    if (onSubmit) {
-      onSubmit(formData)
     }
   }
 
@@ -35,7 +30,6 @@ export default function DynamicForm({ schema, uiSchema, formData, onChange, onSu
       uiSchema={uiSchema}
       formData={localFormData}
       onChange={handleChange}
-      onSubmit={handleSubmit}
       onError={handleError}
       validator={validator}
       liveValidate={false}

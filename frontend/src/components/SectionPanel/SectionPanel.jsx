@@ -16,11 +16,9 @@ const SectionPanel = () => {
     toggleSection,
     selectSection,
     selectedSection,
-    addSectionItem,
     deleteSectionItem,
     toggleSectionInResume,
     addToSectionStorage,
-    updateSectionStorage
   } = useResume()
 
   if (!template || !template.inputDataSchema) {
@@ -45,7 +43,6 @@ const SectionPanel = () => {
 
   const handleAddItem = (sectionType, schema) => {
     if (schema.type === 'array') {
-      // Create a unique empty item for storage
       const storageItem = {}
       Object.entries(schema.itemSchema || {}).forEach(([key, field]) => {
         storageItem[key] = getDefaultValue(field)
@@ -54,7 +51,6 @@ const SectionPanel = () => {
 
       addToSectionStorage(sectionType, storageItem)
     } else {
-      // For object sections, select the section for editing
       selectSection(sectionType, 'edit')
       toggleSection(sectionType, true)
     }
@@ -75,7 +71,6 @@ const SectionPanel = () => {
   }
 
   const handleSectionClick = (sectionType, schema) => {
-    const isExpanded = sectionStates[sectionType]?.expanded
     const storageItems = getStorageItems(sectionType)
 
     if (schema.type === 'array' && storageItems.length > 0) {
@@ -83,7 +78,6 @@ const SectionPanel = () => {
       selectSection(sectionType, 'edit', firstItem.tempId || firstItem.sectionId)
       toggleSection(sectionType, true)
     } else {
-      // For empty arrays or object sections, select for editing
       selectSection(sectionType, 'edit')
       toggleSection(sectionType, true)
     }
@@ -139,17 +133,6 @@ const SectionPanel = () => {
                 >
                   Add
                 </Button>
-              ) : count === 0 ? (
-                <Button
-                  type="primary"
-                  size="small"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    handleAddItem(sectionType, schema)
-                  }}
-                >
-                  Fill
-                </Button>
               ) : null,
             ]}
           >
@@ -193,7 +176,7 @@ const SectionPanel = () => {
                       onClick={(e) => e.stopPropagation()}
                     />
                     <Text style={{ flex: 1, marginLeft: 8 }}>
-                      {item.position || item.name || item.title || item.institution || item.degree || `${schema.title || sectionType} ${index + 1}`}
+                      {`${schema.title || sectionType} ${index + 1}`}
                     </Text>
                     {isIncluded && <CheckOutlined style={{ color: '#52c41a', marginLeft: 8 }} />}
                     <Button

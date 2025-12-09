@@ -207,12 +207,17 @@ const resumeReducer = (state, action) => {
     case 'ADD_SECTION_STORAGE': {
       const { sectionType: storageSectionType, item: storageItem } = action.payload
       const currentStorageItems = state.sectionStorage[storageSectionType] || []
+      const currentResumeItems = state.resumeData[storageSectionType] || []
 
       return {
         ...state,
         sectionStorage: {
           ...state.sectionStorage,
           [storageSectionType]: [...currentStorageItems, storageItem],
+        },
+        resumeData: {
+          ...state.resumeData,
+          [storageSectionType]: [...currentResumeItems, storageItem],
         },
         sectionStates: {
           ...state.sectionStates,
@@ -221,7 +226,7 @@ const resumeReducer = (state, action) => {
             expanded: true,
           },
         },
-        selectedSection: state.selectedSection ? state.selectedSection : { type: storageSectionType, action: 'edit', itemId: storageItem.tempId },
+        selectedSection: { type: storageSectionType, action: 'edit', itemId: storageItem.tempId },
       }
     }
 
@@ -294,14 +299,22 @@ export const ResumeProvider = ({ children }) => {
           required: schema.required || false,
           schema: schema,
         }
-        // Initialize empty data for each section
         if (schema.type === 'array') {
           resumeData[sectionType] = []
+        } else if (schema.type === 'object') {
+          const emptyObject = {}
+          if (schema.fields) {
+            Object.entries(schema.fields).forEach(([key, field]) => {
+              emptyObject[key] = getDefaultValue(field)
+            })
+          }
+          resumeData[sectionType] = emptyObject
         } else {
           resumeData[sectionType] = null
         }
       })
     }
+    console.log("Resume data: ",resumeData)
 
     // Update the template object with parsed schema for future use
     const updatedTemplate = { ...template, inputDataSchema }
