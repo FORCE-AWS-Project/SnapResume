@@ -61,3 +61,8 @@ body {
 a {
     transition: color var(--transition-base);
 }
+
+/* Hide submit button in RJSF */
+.rjsf button[type="submit"] {
+  display: none;
+}

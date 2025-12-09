@@ -148,9 +148,11 @@ const SectionPanel = () => {
               }
               description={
                 <div>
-                  <Text type="secondary" style={{ fontSize: '12px' }}>
-                    {count} of {getStorageItems(sectionType).length} items in resume
-                  </Text>
+                  {schema.type === "array" && 
+                    <Text type="secondary" style={{ fontSize: '12px' }}>
+                      {count} of {getStorageItems(sectionType).length} items in resume
+                    </Text>
+                  }
                 </div>
               }
             />

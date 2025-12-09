@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { withTheme } from '@rjsf/core'
 import { Theme as AntDTheme } from '@rjsf/antd'
 import validator from '@rjsf/validator-ajv8'
@@ -8,7 +7,6 @@ const RJSFForm = withTheme(AntDTheme)
 
 export default function DynamicForm({ schema, uiSchema, formData, onChange, onError }) {
 
-  console.log("Change form data: ",formData)
   const handleChange = ({ formData }) => {
     if (onChange) {
       onChange(formData)
@@ -31,6 +29,7 @@ export default function DynamicForm({ schema, uiSchema, formData, onChange, onEr
       validator={validator}
       liveValidate={false}
       showErrorList={false}
+      noHtml5Validate={true}
       templates={{
         ArrayFieldTemplate: ArrayFieldTemplate,
       }}

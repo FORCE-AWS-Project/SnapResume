@@ -2,8 +2,8 @@
     "templateId": "TPL_NEON_DREAMS_001",
     "name": "Neon Dreams",
     "category": "modern",
-    "templateFileUrl": "templates/neon-dreams-preview.html",
-    "previewImageUrl": "templates/neon-dreams-preview.png",
+    "templateFileUrl": "https://resume-snap-dev-user-uploads.s3.us-east-1.amazonaws.com/templates/neon-dreams-preview.html",
+    "previewImageUrl": "https://resume-snap-dev-user-uploads.s3.us-east-1.amazonaws.com/templates/neon-dreams-preview-image.jpg",
     "inputDataSchema": {
         "personalInfo": {
             "type": "object",
