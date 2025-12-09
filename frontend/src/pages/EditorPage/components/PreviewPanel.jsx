@@ -8,12 +8,24 @@ export default function PreviewPanel({ data, template, zoom = 100 }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [pdfUrl, setPdfUrl] = useState('')
+  const [currentPdfUrl, setCurrentPdfUrl] = useState('')
+  const [debouncedData, setDebouncedData] = useState(data)
   const previewStyle = { transform: `scale(${zoom / 100})`, transformOrigin: 'top left', transition: 'transform 0.2s ease' }
+
+  // Debounce data changes
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedData(data)
+    }, 1000) // Wait 1 second after changes before regenerating PDF
+
+    return () => clearTimeout(timer)
+  }, [data])
 
   useEffect(() => {
     const generatePDF = async () => {
-      if (!template || !template.templateFileUrl || !data) {
+      if (!template || !template.templateFileUrl || !debouncedData) {
         setPdfUrl('')
+        setCurrentPdfUrl('')
         return
       }
 
@@ -22,7 +34,7 @@ export default function PreviewPanel({ data, template, zoom = 100 }) {
 
       try {
         // Get the HTML template
-        const html = await TemplateRenderer.renderTemplate(template.templateFileUrl, data)
+        const html = await TemplateRenderer.renderTemplate(template.templateFileUrl, debouncedData)
 
         // Create a temporary container
         const tempDiv = document.createElement('div')
@@ -44,12 +56,13 @@ export default function PreviewPanel({ data, template, zoom = 100 }) {
 
         // Create URL for the PDF blob
         const url = URL.createObjectURL(pdf)
-        setPdfUrl(url)
 
-        // Cleanup previous URL if exists
-        return () => {
-          if (url) URL.revokeObjectURL(url)
+        // Revoke previous URL if it exists
+        if (pdfUrl) {
+          URL.revokeObjectURL(pdfUrl)
         }
+
+              setCurrentPdfUrl(url)
       } catch (err) {
         console.error('Failed to generate PDF:', err)
         setError(err.message)
@@ -59,7 +72,26 @@ export default function PreviewPanel({ data, template, zoom = 100 }) {
     }
 
     generatePDF()
-  }, [template, data])
+  }, [template, debouncedData])
+
+  // Update pdfUrl when loading completes and we have a new URL
+  useEffect(() => {
+    if (!loading && currentPdfUrl) {
+      setPdfUrl(currentPdfUrl)
+    }
+  }, [loading, currentPdfUrl])
+
+  // Cleanup URLs on unmount
+  useEffect(() => {
+    return () => {
+      if (pdfUrl) {
+        URL.revokeObjectURL(pdfUrl)
+      }
+      if (currentPdfUrl) {
+        URL.revokeObjectURL(currentPdfUrl)
+      }
+    }
+  }, [])
 
   return (
     <div className={styles.preview}>
@@ -68,11 +100,6 @@ export default function PreviewPanel({ data, template, zoom = 100 }) {
           <Empty description="Start filling in your information to preview your resume" />
         ) : (
           <Card className={styles.card} style={{ width: '100%', padding: 0, overflow: 'auto' }}>
-            {loading && (
-              <div style={{ textAlign: 'center', padding: '50px', height: '100%' }}>
-                <Spin size="large" />
-              </div>
-            )}
             {error && (
               <div style={{ padding: '16px' }}>
                 <Alert
@@ -82,16 +109,38 @@ export default function PreviewPanel({ data, template, zoom = 100 }) {
                 />
               </div>
             )}
-            {!loading && !error && pdfUrl && (
-              <embed
-                src={pdfUrl}
-                type="application/pdf"
-                style={{
-                  width: '100%',
-                  height: '500px',
-                  border: 'none'
-                }}
-              />
+            {!error && (
+              <div style={{ position: 'relative', width: '100%', height: '500px' }}>
+                {(pdfUrl || (loading && currentPdfUrl)) && (
+                  <embed
+                    src={loading && currentPdfUrl ? currentPdfUrl : pdfUrl}
+                    type="application/pdf"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      border: 'none'
+                    }}
+                  />
+                )}
+                {loading && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                      zIndex: 1
+                    }}
+                  >
+                    <Spin size="large" tip="Generating PDF..." />
+                  </div>
+                )}
+              </div>
             )}
           </Card>
         )}

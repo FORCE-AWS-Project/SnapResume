@@ -1,13 +1,27 @@
 import React from 'react'
-import { Card, List, Button, Space, Badge, Typography } from 'antd'
-import { PlusOutlined, EditOutlined, CheckOutlined, RightOutlined } from '@ant-design/icons'
+import { Card, List, Button, Space, Badge, Typography, Checkbox } from 'antd'
+import { PlusOutlined, EditOutlined, CheckOutlined, RightOutlined, DeleteOutlined } from '@ant-design/icons'
 import { useResume } from '../../contexts/ResumeContext'
+import { v4 as uuidv4 } from 'uuid'
 import styles from './SectionPanel.module.css'
 
 const { Text } = Typography
 
 const SectionPanel = () => {
-  const { template, resumeData, sectionStates, toggleSection, selectSection, selectedSection, addSectionItem } = useResume()
+  const {
+    template,
+    resumeData,
+    sectionStorage,
+    sectionStates,
+    toggleSection,
+    selectSection,
+    selectedSection,
+    addSectionItem,
+    deleteSectionItem,
+    toggleSectionInResume,
+    addToSectionStorage,
+    updateSectionStorage
+  } = useResume()
 
   if (!template || !template.inputDataSchema) {
     return (
@@ -29,29 +43,16 @@ const SectionPanel = () => {
     return Object.keys(items).some(key => items[key]) ? 1 : 0
   }
 
-  const getSectionIcon = (sectionType, schema) => {
-    const count = getSectionCount(sectionType, schema)
-    const isExpanded = sectionStates[sectionType]?. expanded
-    const isSelected = selectedSection?.type === sectionType
-
-    if (isSelected) {
-      return <EditOutlined style={{ color: '#1890ff' }} />
-    } else if (count > 0) {
-      return <CheckOutlined style={{ color: '#52c41a' }} />
-    } else if (isExpanded) {
-      return <EditOutlined style={{ color: '#1890ff' }} />
-    }
-    return <EditOutlined style={{ color: '#d9d9d9' }} />
-  }
-
   const handleAddItem = (sectionType, schema) => {
     if (schema.type === 'array') {
-      const emptyItem = {}
+      // Create a unique empty item for storage
+      const storageItem = {}
       Object.entries(schema.itemSchema || {}).forEach(([key, field]) => {
-        emptyItem[key] = getDefaultValue(field)
+        storageItem[key] = getDefaultValue(field)
       })
-      emptyItem.tempId = new Date().toISOString()
-      addSectionItem(sectionType, emptyItem)
+      storageItem.tempId = uuidv4()
+
+      addToSectionStorage(sectionType, storageItem)
     } else {
       // For object sections, select the section for editing
       selectSection(sectionType, 'edit')
@@ -59,13 +60,26 @@ const SectionPanel = () => {
     }
   }
 
+  const handleToggleInclude = (e, sectionType, itemId) => {
+    e.stopPropagation()
+    toggleSectionInResume(sectionType, itemId)
+  }
+
+  const isItemInResume = (sectionType, itemId) => {
+    const items = resumeData[sectionType] || []
+    return items.some(item => (item.tempId === itemId) || (item.sectionId === itemId))
+  }
+
+  const getStorageItems = (sectionType) => {
+    return sectionStorage[sectionType] || []
+  }
+
   const handleSectionClick = (sectionType, schema) => {
     const isExpanded = sectionStates[sectionType]?.expanded
-    const items = resumeData[sectionType] || []
+    const storageItems = getStorageItems(sectionType)
 
-    if (schema.type === 'array' && items.length > 0) {
-      // If array has items, select the first item and expand
-      const firstItem = items[0]
+    if (schema.type === 'array' && storageItems.length > 0) {
+      const firstItem = storageItems[0]
       selectSection(sectionType, 'edit', firstItem.tempId || firstItem.sectionId)
       toggleSection(sectionType, true)
     } else {
@@ -140,42 +154,63 @@ const SectionPanel = () => {
             ]}
           >
             <List.Item.Meta
-              avatar={getSectionIcon(sectionType, schema)}
+              avatar={<EditOutlined style={{ color: isSelected ? '#1890ff' : '#d9d9d9' }} />}
               title={
                 <Space>
                   <span>{schema.title || sectionType.charAt(0).toUpperCase() + sectionType.slice(1)}</span>
-                  {count > 0 && <Badge count={count} style={{ backgroundColor: '#52c41a' }} />}
+                  <Badge count={getStorageItems(sectionType).length} style={{ backgroundColor: '#1890ff' }} />
+                  <Badge count={count} style={{ backgroundColor: '#52c41a' }} title="In Resume" />
                   {schema.required && <Badge count="*" style={{ backgroundColor: '#ff4d4f' }} />}
                 </Space>
               }
               description={
                 <div>
                   <Text type="secondary" style={{ fontSize: '12px' }}>
-                    {schema.type === 'array'
-                      ? `${count} ${count === 1 ? 'item' : 'items'}`
-                      : count > 0 ? 'Filled' : 'Not filled'
-                    }
+                    {count} of {getStorageItems(sectionType).length} items in resume
                   </Text>
                 </div>
               }
             />
           </List.Item>
 
-          {/* Show array items when expanded */}
-          {schema.type === 'array' && isExpanded && resumeData[sectionType]?.length > 0 && (
+          {/* Show all items from storage when expanded and has items */}
+          {schema.type === 'array' && isExpanded && getStorageItems(sectionType).length > 0 && (
             <div className={styles.itemsList}>
-              {resumeData[sectionType].map((item, index) => (
-                <div
-                  key={item.tempId || item.sectionId || index}
-                  className={`${styles.itemRow} ${selectedSection?.itemId === (item.tempId || item.sectionId) ? styles.itemSelected : ''}`}
-                  onClick={() => selectSection(sectionType, 'edit', item.tempId || item.sectionId)}
-                >
-                  <Text>
-                    {item.position || item.name || item.title || item.institution || item.degree || `${schema.title || sectionType} ${index + 1}`}
-                  </Text>
-                  <RightOutlined className={styles.itemArrow} />
-                </div>
-              ))}
+              {getStorageItems(sectionType).map((item, index) => {
+                const itemId = item.tempId || item.sectionId || index
+                const isIncluded = isItemInResume(sectionType, itemId)
+                const isSelected = selectedSection?.itemId === itemId
+
+                return (
+                  <div
+                    key={itemId}
+                    className={`${styles.itemRow} ${isSelected ? styles.itemSelected : ''} ${isIncluded ? styles.itemIncluded : ''}`}
+                    onClick={() => selectSection(sectionType, 'edit', itemId)}
+                  >
+                    <Checkbox
+                      checked={isIncluded}
+                      onChange={(e) => handleToggleInclude(e, sectionType, itemId)}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                    <Text style={{ flex: 1, marginLeft: 8 }}>
+                      {item.position || item.name || item.title || item.institution || item.degree || `${schema.title || sectionType} ${index + 1}`}
+                    </Text>
+                    {isIncluded && <CheckOutlined style={{ color: '#52c41a', marginLeft: 8 }} />}
+                    <Button
+                      type="text"
+                      size="small"
+                      danger
+                      icon={<DeleteOutlined />}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        deleteSectionItem(sectionType, itemId)
+                      }}
+                      style={{ marginLeft: 8, padding: '0 4px' }}
+                    />
+                    <RightOutlined className={styles.itemArrow} />
+                  </div>
+                )
+              })}
             </div>
           )}
         </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { Card, Typography, Space, Button, Empty, Tabs, Form } from 'antd'
-import { DeleteOutlined, SaveOutlined } from '@ant-design/icons'
+import { Card, Typography, Button, Empty } from 'antd'
+import { DeleteOutlined } from '@ant-design/icons'
 import DynamicForm from '../DynamicForm/DynamicForm'
 import { useResume, createEmptySectionItem } from '../../contexts/ResumeContext'
 import { SchemaAdapter } from '../../utils/SchemaAdapter'
@@ -13,6 +13,7 @@ const DynamicSectionForm = () => {
   const {
     template,
     resumeData,
+    sectionStorage,
     selectedSection,
     sectionStates,
     updateSectionItem,
@@ -22,7 +23,6 @@ const DynamicSectionForm = () => {
 
   const [formData, setFormData] = useState({})
   const [validationErrors, setValidationErrors] = useState([])
-  const [activeKey, setActiveKey] = useState('0')
 
   useEffect(() => {
     if (!selectedSection || !template) {
@@ -37,8 +37,10 @@ const DynamicSectionForm = () => {
     if (!sectionSchema) return
 
     if (sectionSchema.type === 'array' && itemId) {
-      // Find the specific item being edited
+      // Find the specific item being edited from both resume and storage
       const item = resumeData[sectionType]?.find(
+        item => item.tempId === itemId || item.sectionId === itemId
+      ) || sectionStorage[sectionType]?.find(
         item => item.tempId === itemId || item.sectionId === itemId
       )
       if (item) {
@@ -48,20 +50,21 @@ const DynamicSectionForm = () => {
       // Load the entire section data
       setFormData(resumeData[sectionType] || createEmptySectionItem(sectionSchema))
     }
-  }, [selectedSection, resumeData, template])
+  }, [selectedSection, resumeData, sectionStorage, template])
 
   const handleFormChange = (newFormData) => {
-    setFormData(newFormData)
+    setFormData({ ...newFormData })
     setValidationErrors([])
 
     if (!selectedSection) return
 
     const { type, itemId } = selectedSection
     const sectionSchema = template.inputDataSchema[type]
-    console.log("New form data: ",sectionSchema)
-    console.log("Selected sections: ",selectedSection)
+
+    // Store current selected section to check if it changes
+    const currentSelectedSection = selectedSection
+
     if (sectionSchema.type === 'array' && itemId) {
-      // Update specific item in arra
       Object.entries(newFormData).forEach(([field, value]) => {
         updateSectionItem(type, itemId, field, value)
       })
@@ -69,6 +72,9 @@ const DynamicSectionForm = () => {
       // Update entire section
       setSectionData(type, newFormData)
     }
+
+    // Debug: Check if selectedSection changed after update
+    // This might be happening if the updateSectionItem triggers a selection change
   }
 
   const handleDelete = (itemId) => {
@@ -81,96 +87,56 @@ const DynamicSectionForm = () => {
     }
   }
 
-  const handleSave = () => {
-    if (!selectedSection) return
-
-    const { type: sectionType } = selectedSection
-    const sectionSchema = template.inputDataSchema[sectionType]
-
-    if (sectionSchema) {
-      // Validate form data
-      const validation = SchemaValidator.validate(formData, { [sectionType]: sectionSchema })
-      if (!validation.valid) {
-        setValidationErrors(validation.errors)
-        return
-      }
-    }
-
-    // Data is already being updated in real-time via handleFormChange
-    // Just show success message
-    // TODO: Show success notification
-  }
-
   const renderArraySection = () => {
     if (!selectedSection) {
-      return <Empty description="Select a section to edit" />
+      return <Empty description="Select a section item from the left panel to edit" />
     }
 
-    const { type: sectionType } = selectedSection
+    const { type: sectionType, itemId } = selectedSection
     const sectionSchema = template.inputDataSchema[sectionType]
-    const items = resumeData[sectionType] || []
 
-    if (items.length === 0) {
-      return (
-        <Empty
-          description={`No ${sectionSchema.title || sectionType} items yet`}
-          image={Empty.PRESENTED_IMAGE_SIMPLE}
-        >
-          <Text type="secondary">Use the "Add" button in the sections panel to create items</Text>
-        </Empty>
-      )
+    if (!sectionSchema || !itemId) {
+      return <Empty description="Select a section item from the left panel to edit" />
     }
 
     // Create adapted schema for the form
     const adaptedSchema = SchemaAdapter.toRJSF(sectionSchema?.itemSchema || {})
     const uiSchema = SchemaAdapter.getUiSchema(sectionSchema?.itemSchema || {})
 
-    return (
-      <div>
-        <div className={styles.header}>
-          <Title level={4}>{sectionSchema.title || sectionType}</Title>
-          <Text type="secondary">{items.length} item{items.length !== 1 ? 's' : ''}</Text>
-        </div>
+    // Get current item title
+    const items = resumeData[sectionType] || []
+    const item = items.find(item => item.tempId === itemId || item.sectionId === itemId)
+    const itemTitle = item?.position || item?.name || item?.title || item?.institution || item?.degree || `${sectionSchema.title || sectionType}`
 
-        <Tabs
-          activeKey={activeKey}
-          onChange={setActiveKey}
-          type="editable-card"
-          hideAdd
-          items={items.map((item, index) => ({
-            key: item.tempId || item.sectionId || index.toString(),
-            label: `${sectionSchema.title || sectionType} ${index + 1}`,
-            children: (
-              <div>
-                <div className={styles.tabActions}>
-                  <Button
-                    type="text"
-                    danger
-                    icon={<DeleteOutlined />}
-                    onClick={() => handleDelete(item.tempId || item.sectionId)}
-                  >
-                    Delete Item
-                  </Button>
-                </div>
-                <DynamicForm
-                  schema={adaptedSchema}
-                  uiSchema={uiSchema}
-                  formData={formData}
-                  onChange={handleFormChange}
-                  liveValidate={false}
-                  showErrorList={false}
-                />
-                {validationErrors.length > 0 && (
-                  <div className={styles.validationErrors}>
-                    {validationErrors.map((error, idx) => (
-                      <div key={idx} className={styles.error}>{error}</div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )
-          }))}
+    return (
+      <div className={styles.objectSection}>
+        <div className={styles.header}>
+          <Title level={4}>{itemTitle}</Title>
+          <Button
+            type="text"
+            danger
+            icon={<DeleteOutlined />}
+            onClick={() => handleDelete(itemId)}
+          >
+            Delete
+          </Button>
+        </div>
+        <DynamicForm
+          key={itemId} // Force re-render when itemId changes
+          schema={adaptedSchema}
+          uiSchema={uiSchema}
+          formData={formData}
+          onChange={handleFormChange}
+          liveValidate={false}
+          showErrorList={false}
         />
+        {validationErrors.length > 0 && (
+          <div className={styles.validationErrors}>
+            {validationErrors.map((error, idx) => (
+              <div key={idx} className={styles.error}>{error}</div>
+            ))}
+          </div>
+        )}
       </div>
     )
   }
@@ -221,16 +187,20 @@ const DynamicSectionForm = () => {
 
   if (!template) {
     return (
-      <Card className={styles.container}>
-        <Empty description="Select a template to start editing" />
+      <Card className={styles.container} style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Empty description="Select a template to start editing" />
+        </div>
       </Card>
     )
   }
 
   if (!selectedSection) {
     return (
-      <Card className={styles.container}>
-        <Empty description="Select a section from the left panel to edit" />
+      <Card className={styles.container} style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Empty description="Select a section from the left panel to edit" />
+        </div>
       </Card>
     )
   }
@@ -240,15 +210,17 @@ const DynamicSectionForm = () => {
 
   if (!sectionSchema) {
     return (
-      <Card className={styles.container}>
-        <Empty description="Section not found in template" />
+      <Card className={styles.container} style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Empty description="Section not found in template" />
+        </div>
       </Card>
     )
   }
 
   return (
-    <Card className={styles.container} styles={{ body: { padding: 0 } }}>
-      <div className={styles.formContainer}>
+    <Card className={styles.container} style={{ height: '100%', overflow: 'auto', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '16px' }}>
         {sectionSchema.type === 'array' ? renderArraySection() : renderObjectSection()}
       </div>
     </Card>

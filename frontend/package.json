@@ -30,7 +30,8 @@
     "react-pdf": "^10.2.0",
     "react-router-dom": "^7.9.6",
     "react-to-pdf": "^2.0.3",
-    "routes": "^2.1.0"
+    "routes": "^2.1.0",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

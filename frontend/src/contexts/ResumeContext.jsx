@@ -16,6 +16,7 @@ const SET_SELECTED_SECTION = 'SET_SELECTED_SECTION'
 const initialState = {
   template: null,
   resumeData: {},
+  sectionStorage: {},
   sectionStates: {},
   selectedSection: null,
   loading: false,
@@ -25,20 +26,22 @@ const initialState = {
 // Reducer
 const resumeReducer = (state, action) => {
   switch (action.type) {
-    case SET_TEMPLATE:
+    case SET_TEMPLATE: {
       return {
         ...state,
         template: action.payload,
         loading: false,
       }
+    }
 
-    case SET_RESUME_DATA:
+    case SET_RESUME_DATA: {
       return {
         ...state,
         resumeData: action.payload,
       }
+    }
 
-    case SET_SECTION_DATA:
+    case SET_SECTION_DATA: {
       return {
         ...state,
         resumeData: {
@@ -46,8 +49,9 @@ const resumeReducer = (state, action) => {
           [action.sectionType]: action.data,
         },
       }
+    }
 
-    case ADD_SECTION_ITEM:
+    case ADD_SECTION_ITEM: {
       const { sectionType, item } = action.payload
       const currentItems = state.resumeData[sectionType] || []
 
@@ -64,12 +68,16 @@ const resumeReducer = (state, action) => {
             expanded: true,
           },
         },
-        selectedSection: { type: sectionType, action: 'edit', itemId: item.tempId },
+        // Only select the new item if no section is currently selected
+        selectedSection: state.selectedSection ? state.selectedSection : { type: sectionType, action: 'edit', itemId: item.tempId },
       }
+    }
 
-    case UPDATE_SECTION_ITEM:
+    case UPDATE_SECTION_ITEM: {
       const { sectionType: updateSectionType, itemId, field, value } = action.payload
       const updateItems = state.resumeData[updateSectionType] || []
+      const updateStorageItems = state.sectionStorage[updateSectionType] || []
+
       return {
         ...state,
         resumeData: {
@@ -81,25 +89,47 @@ const resumeReducer = (state, action) => {
             return item
           }),
         },
+        sectionStorage: {
+          ...state.sectionStorage,
+          [updateSectionType]: updateStorageItems.map(item => {
+            if (item.tempId === itemId || item.sectionId === itemId) {
+              return { ...item, [field]: value }
+            }
+            return item
+          }),
+        },
       }
+    }
 
-    case DELETE_SECTION_ITEM:
+    case DELETE_SECTION_ITEM: {
       const { sectionType: deleteSectionType, itemId: deleteItemId } = action.payload
-      const deleteItems = state.resumeData[deleteSectionType] || []
-      const filteredItems = deleteItems.filter(item =>
+
+      const resumeItems = state.resumeData[deleteSectionType] || []
+      const filteredResumeItems = resumeItems.filter(item =>
         item.tempId !== deleteItemId && item.sectionId !== deleteItemId
       )
+
+      const storageItems = state.sectionStorage[deleteSectionType] || []
+      const filteredStorageItems = storageItems.filter(item =>
+        item.tempId !== deleteItemId && item.sectionId !== deleteItemId
+      )
+
       return {
         ...state,
         resumeData: {
           ...state.resumeData,
-          [deleteSectionType]: filteredItems,
+          [deleteSectionType]: filteredResumeItems,
+        },
+        sectionStorage: {
+          ...state.sectionStorage,
+          [deleteSectionType]: filteredStorageItems,
         },
         // If we deleted the last item and are currently editing it, deselect
         selectedSection: state.selectedSection?.itemId === deleteItemId ? null : state.selectedSection,
       }
+    }
 
-    case TOGGLE_SECTION:
+    case TOGGLE_SECTION: {
       const { sectionType: toggleSectionType, expanded } = action.payload
       return {
         ...state,
@@ -113,24 +143,115 @@ const resumeReducer = (state, action) => {
         // If collapsing current section, deselect it
         selectedSection: !expanded && state.selectedSection?.type === toggleSectionType ? null : state.selectedSection,
       }
+    }
 
-    case SET_LOADING:
+    case SET_LOADING: {
       return {
         ...state,
         loading: action.payload,
       }
+    }
 
-    case SET_SAVING:
+    case SET_SAVING: {
       return {
         ...state,
         saving: action.payload,
       }
+    }
 
-    case SET_SELECTED_SECTION:
+    case SET_SELECTED_SECTION: {
       return {
         ...state,
         selectedSection: action.payload,
       }
+    }
+
+    case 'TOGGLE_SECTION_IN_RESUME': {
+      const { sectionType, itemId } = action.payload
+      const currentItems = state.resumeData[sectionType] || []
+      const storageItems = state.sectionStorage[sectionType] || []
+
+      const itemToToggle = storageItems.find(item =>
+        (item.tempId === itemId) || (item.sectionId === itemId)
+      )
+
+      if (!itemToToggle) return state
+
+      const isCurrentlyIncluded = currentItems.some(item =>
+        (item.tempId === itemId) || (item.sectionId === itemId)
+      )
+
+      if (isCurrentlyIncluded) {
+        const newItems = currentItems.filter(item =>
+          (item.tempId !== itemId) && (item.sectionId !== itemId)
+        )
+
+        return {
+          ...state,
+          resumeData: {
+            ...state.resumeData,
+            [sectionType]: newItems,
+          },
+        }
+      } else {
+        return {
+          ...state,
+          resumeData: {
+            ...state.resumeData,
+            [sectionType]: [...currentItems, itemToToggle],
+          },
+        }
+      }
+    }
+
+    case 'ADD_SECTION_STORAGE': {
+      const { sectionType: storageSectionType, item: storageItem } = action.payload
+      const currentStorageItems = state.sectionStorage[storageSectionType] || []
+
+      return {
+        ...state,
+        sectionStorage: {
+          ...state.sectionStorage,
+          [storageSectionType]: [...currentStorageItems, storageItem],
+        },
+        sectionStates: {
+          ...state.sectionStates,
+          [storageSectionType]: {
+            ...state.sectionStates[storageSectionType],
+            expanded: true,
+          },
+        },
+        selectedSection: state.selectedSection ? state.selectedSection : { type: storageSectionType, action: 'edit', itemId: storageItem.tempId },
+      }
+    }
+
+    case 'UPDATE_SECTION_STORAGE': {
+      const { sectionType: updateStorageSectionType, itemId: updateStorageItemId, field: updateStorageField, value: updateStorageValue } = action.payload
+      const updateStorageItems = state.sectionStorage[updateStorageSectionType] || []
+
+      return {
+        ...state,
+        sectionStorage: {
+          ...state.sectionStorage,
+          [updateStorageSectionType]: updateStorageItems.map(item => {
+            if (item.tempId === updateStorageItemId || item.sectionId === updateStorageItemId) {
+              return { ...item, [updateStorageField]: updateStorageValue }
+            }
+            return item
+          }),
+        },
+        // Also update resumeData if the item is included
+        resumeData: {
+          ...state.resumeData,
+          [updateStorageSectionType]: (state.resumeData[updateStorageSectionType] || []).map(item => {
+            if (item.tempId === updateStorageItemId || item.sectionId === updateStorageItemId) {
+              return { ...item, [updateStorageField]: updateStorageValue }
+            }
+            return item
+          }),
+        },
+      }
+    }
 
     default:
       return state
@@ -226,6 +347,18 @@ export const ResumeProvider = ({ children }) => {
     dispatch({ type: SET_SAVING, payload: saving })
   }, [])
 
+  const toggleSectionInResume = useCallback((sectionType, itemId) => {
+    dispatch({ type: 'TOGGLE_SECTION_IN_RESUME', payload: { sectionType, itemId } })
+  }, [])
+
+  const addToSectionStorage = useCallback((sectionType, item) => {
+    dispatch({ type: 'ADD_SECTION_STORAGE', payload: { sectionType, item } })
+  }, [])
+
+  const updateSectionStorage = useCallback((sectionType, itemId, field, value) => {
+    dispatch({ type: 'UPDATE_SECTION_STORAGE', payload: { sectionType, itemId, field, value } })
+  }, [])
+
   const value = {
     ...state,
     setTemplate,
@@ -238,6 +371,9 @@ export const ResumeProvider = ({ children }) => {
     selectSection,
     setLoading,
     setSaving,
+    toggleSectionInResume,
+    addToSectionStorage,
+    updateSectionStorage,
   }
 
   return <ResumeContext.Provider value={value}>{children}</ResumeContext.Provider>
