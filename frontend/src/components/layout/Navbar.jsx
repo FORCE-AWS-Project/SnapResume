@@ -1,6 +1,6 @@
 ﻿import { useNavigate } from 'react-router-dom'
 import { Button, Space, Dropdown, Avatar, Spin } from 'antd'
-import { UserOutlined, LogoutOutlined } from '@ant-design/icons'
+import { UserOutlined, LogoutOutlined, ProfileOutlined } from '@ant-design/icons'
 import { useAuth } from '../../context/AuthContext'
 import styles from './Navbar.module.css'
 
@@ -13,12 +13,29 @@ export default function Navbar() {
     navigate('/')
   }
 
+  const handleMenuClick = ({ key }) => {
+    if (key === 'profile') {
+      navigate('/profile')
+    } else if (key === 'logout') {
+      handleLogout()
+    }
+  }
+
   const userMenuItems = [
     {
-      key: 'profile',
+      key: 'user-info',
       icon: <UserOutlined />,
-      label: user?.name || user?.email || 'Profile',
-      disabled: true
+      label: user?.name || user?.email || 'User',
+      disabled: true,
+      style: { cursor: 'default' }
+    },
+    {
+      type: 'divider'
+    },
+    {
+      key: 'profile',
+      icon: <ProfileOutlined />,
+      label: 'My Profile'
     },
     {
       type: 'divider'
@@ -27,7 +44,6 @@ export default function Navbar() {
       key: 'logout',
       icon: <LogoutOutlined />,
       label: 'Logout',
-      onClick: handleLogout,
       danger: true
     }
   ]
@@ -61,9 +77,14 @@ export default function Navbar() {
           <a href="/about" onClick={(e) => { e.preventDefault(); navigate('/about') }}>About</a>
           
           {isAuthenticated ? (
-            <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
+            <Dropdown 
+              menu={{ items: userMenuItems, onClick: handleMenuClick }} 
+              placement="bottomRight"
+              trigger={['click']}
+            >
               <Avatar 
                 icon={<UserOutlined />} 
+                className={styles.userAvatar}
                 style={{ 
                   backgroundColor: '#d4a574',
                   cursor: 'pointer',

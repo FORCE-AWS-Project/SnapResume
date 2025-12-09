@@ -1,13 +1,30 @@
 import React, { createContext, useState, useCallback, useEffect } from 'react';
 import CognitoService from '../services/cognito.service';
+import API from '../services/api.service';
 
 export const AuthContext = createContext({});
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [userProfile, setUserProfile] = useState(null);
   const [tokens, setTokens] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Fetch user profile from API
+  const fetchUserProfile = useCallback(async () => {
+    try {
+      const response = await API.user.getMe();
+      if (response.data?.success && response.data?.data) {
+        setUserProfile(response.data.data);
+        return response.data.data;
+      }
+    } catch (err) {
+      console.error('Failed to fetch user profile:', err);
+      // Don't throw - user might not have profile yet
+    }
+    return null;
+  }, []);
 
   // Check if user is already logged in on mount
   useEffect(() => {
@@ -34,6 +51,9 @@ export const AuthProvider = ({ children }) => {
             name: name
           });
           setTokens(currentTokens);
+          
+          // Fetch full user profile from API
+          await fetchUserProfile();
         }
       } catch (err) {
         console.error('Auth check failed:', err);
@@ -49,7 +69,7 @@ export const AuthProvider = ({ children }) => {
     }, 100);
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [fetchUserProfile]);
 
   const login = useCallback(async (email, password) => {
     setLoading(true);
@@ -66,6 +86,10 @@ export const AuthProvider = ({ children }) => {
         accessToken: result.accessToken,
         refreshToken: result.refreshToken
       });
+      
+      // Fetch full user profile from API after login
+      await fetchUserProfile();
+      
       return result;
     } catch (err) {
       const errorMessage = err.message || 'Login failed';
@@ -74,7 +98,7 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [fetchUserProfile]);
 
   const signup = useCallback(async (email, password) => {
     setLoading(true);
@@ -110,6 +134,7 @@ export const AuthProvider = ({ children }) => {
     try {
       CognitoService.signOut();
       setUser(null);
+      setUserProfile(null);
       setTokens(null);
       setError(null);
     } catch (err) {
@@ -164,6 +189,7 @@ export const AuthProvider = ({ children }) => {
 
   const value = {
     user,
+    userProfile,
     tokens,
     loading,
     error,
@@ -174,6 +200,7 @@ export const AuthProvider = ({ children }) => {
     changePassword,
     forgotPassword,
     resetPassword,
+    fetchUserProfile,
     isAuthenticated: !!user && !!tokens
   };
 

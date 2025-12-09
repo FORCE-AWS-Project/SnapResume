@@ -66,8 +66,14 @@ apiClient.interceptors.response.use(
  * Resume API endpoints
  */
 const resumeAPI = {
-  // Get all resumes for current user
-  getResumes: () => apiClient.get('/api/resumes'),
+  // Get all resumes for current user (with pagination)
+  getResumes: (params = {}) => {
+    const queryParams = new URLSearchParams();
+    if (params.limit) queryParams.append('limit', params.limit);
+    if (params.lastEvaluatedKey) queryParams.append('lastEvaluatedKey', params.lastEvaluatedKey);
+    const queryString = queryParams.toString();
+    return apiClient.get(`/api/resumes${queryString ? `?${queryString}` : ''}`);
+  },
 
   // Get resume by ID
   getResume: (resumeId) => apiClient.get(`/api/resumes/${resumeId}`),
@@ -95,11 +101,14 @@ const resumeAPI = {
  * User API endpoints
  */
 const userAPI = {
-  // Get current user profile
-  getProfile: () => apiClient.get('/api/users/profile'),
+  // Get current user profile (GET /api/users/me)
+  getProfile: () => apiClient.get('/api/users/me'),
+  
+  // Alias for getProfile - get authenticated user's profile
+  getMe: () => apiClient.get('/api/users/me'),
 
-  // Update user profile
-  updateProfile: (data) => apiClient.put('/api/users/profile', data),
+  // Update user profile (PUT /api/users/me)
+  updateProfile: (data) => apiClient.put('/api/users/me', data),
 
   // Upload profile picture
   uploadProfilePicture: (file) => {
