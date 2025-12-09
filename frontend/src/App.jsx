@@ -7,6 +7,7 @@ import PricingPage from './pages/PricingPage/PricingPage'
 import AboutPage from './pages/AboutPage/AboutPage'
 import Auth from './pages/Auth/Auth'
 import EditorPage from './pages/EditorPage/EditorPage'
+import ToastProvider from './components/ToastProvider/ToastProvider'
 
 function App() {
   const theme = {
@@ -29,6 +30,7 @@ function App() {
           <Route path="/editor" element={<EditorPage />} />
         </Routes>
       </Router>
+      <ToastProvider />
     </ConfigProvider>
   )
 }

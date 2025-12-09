@@ -10,11 +10,26 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@ant-design/icons": "^6.1.0",
+    "@react-pdf/renderer": "^4.3.1",
+    "@rjsf/antd": "^6.1.2",
+    "@rjsf/core": "^6.1.2",
+    "@rjsf/utils": "^6.1.2",
+    "@rjsf/validator-ajv8": "^6.1.2",
+    "ajv": "^8.17.1",
     "antd": "^5.28.1",
     "dayjs": "^1.11.19",
+    "handlebars": "^4.7.8",
+    "html2canvas": "^1.4.1",
+    "html2pdf.js": "^0.12.1",
+    "jspdf": "^3.0.4",
+    "pdfjs-dist": "^5.4.449",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "react-hot-toast": "^2.6.0",
+    "react-pdf": "^10.2.0",
     "react-router-dom": "^7.9.6",
+    "react-to-pdf": "^2.0.3",
     "routes": "^2.1.0"
   },
   "devDependencies": {

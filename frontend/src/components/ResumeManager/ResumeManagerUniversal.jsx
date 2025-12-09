@@ -6,8 +6,9 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { Modal, Button } from 'antd'
 import { useResumeManagerContext } from './context/ResumeManagerContext'
+import { useResume } from '../../contexts/ResumeContext'
 import SectionsList from './SectionsList'
-import ResumePreviewPanel from './ResumePreviewPanel'
+import PreviewPanel from '../../pages/EditorPage/components/PreviewPanel'
 import styles from './ResumeManagerUniversal.module.css'
 
 export function ResumeManagerUniversal({
@@ -19,6 +20,7 @@ export function ResumeManagerUniversal({
   mode = 'auto' // 'auto', 'modal', 'extension'
 }) {
   const context = useResumeManagerContext()
+  const { template } = useResume()
   const [resumeData, setResumeData] = useState(externalResumeData || {})
   const [selectedSection, setSelectedSection] = useState(null)
   const [zoom, setZoom] = useState(100)
@@ -32,12 +34,12 @@ export function ResumeManagerUniversal({
   const parseResumeSections = useCallback((data) => {
     const availableSections = []
 
-    if (data.personalInfo?.fullName) {
+    if (data.personalInfo?.name || data.personalInfo?.fullName) {
       availableSections.push({
         id: 'personal',
         title: 'Personal Information',
         icon: '??',
-        completed: !!data.personalInfo.fullName,
+        completed: !!(data.personalInfo.name || data.personalInfo.fullName),
         count: 1,
         data: data.personalInfo
       })
@@ -264,7 +266,7 @@ export function ResumeManagerUniversal({
             </div>
 
             <div className={styles.previewContainer}>
-              <ResumePreviewPanel data={resumeData} zoom={zoom} />
+              <PreviewPanel data={resumeData} template={template} zoom={zoom} />
             </div>
           </div>
         </div>
@@ -292,7 +294,7 @@ export function ResumeManagerUniversal({
       onCancel={onClose}
       width="90vw"
       style={{ maxWidth: '1600px' }}
-      bodyStyle={{ padding: 0, height: '80vh' }}
+      styles={{ body: { padding: 0, height: '80vh' } }}
       footer={[
         <Button key="cancel" onClick={onClose}>
           Cancel
@@ -330,29 +332,8 @@ export function ResumeManagerUniversal({
 
         {/* Right Panel */}
         <div className={styles.rightPanel}>
-          <div className={styles.previewHeader}>
-            <h3 className={styles.previewTitle}>Preview</h3>
-            <div className={styles.previewControls}>
-              <button
-                className={styles.zoomBtn}
-                onClick={() => handleZoom(zoom - 10)}
-                disabled={zoom <= 50}
-              >
-                ?
-              </button>
-              <span className={styles.zoomLevel}>{zoom}%</span>
-              <button
-                className={styles.zoomBtn}
-                onClick={() => handleZoom(zoom + 10)}
-                disabled={zoom >= 200}
-              >
-                +
-              </button>
-            </div>
-          </div>
-
           <div className={styles.previewContainer}>
-            <ResumePreviewPanel data={resumeData} zoom={zoom} />
+            <PreviewPanel data={resumeData} template={template} zoom={zoom} />
           </div>
         </div>
       </div>

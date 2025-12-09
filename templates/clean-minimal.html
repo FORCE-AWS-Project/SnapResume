@@ -6,13 +6,7 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap');
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
+        .clean-minimal-resume-container {
             font-family: 'Lato', sans-serif;
             line-height: 1.5;
             color: #333;
@@ -20,6 +14,12 @@
             padding: 30px;
             max-width: 750px;
             margin: 0 auto;
+        }
+
+        .clean-minimal-resume-container * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         .header {
@@ -234,6 +234,7 @@
     </style>
 </head>
 <body>
+    <div class="clean-minimal-resume-container">
     <!-- Header -->
     <div class="header">
         <div class="name">{{personalInfo.name}}</div>
@@ -399,5 +400,6 @@
         {{/each}}
     </div>
     {{/if}}
+    </div>
 </body>
 </html>

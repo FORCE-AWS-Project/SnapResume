@@ -6,13 +6,7 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
+        .modern-professional-resume-container {
             font-family: 'Inter', sans-serif;
             line-height: 1.4;
             color: #2c3e50;
@@ -20,6 +14,12 @@
             padding: 40px;
             max-width: 800px;
             margin: 0 auto;
+        }
+
+        .modern-professional-resume-container * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         .header {
@@ -208,6 +208,7 @@
     </style>
 </head>
 <body>
+    <div class="modern-professional-resume-container">
     <!-- Header -->
     <div class="header">
         <div class="name">{{personalInfo.name}}</div>
@@ -375,5 +376,6 @@
         {{/each}}
     </div>
     {{/if}}
+    </div>
 </body>
 </html>
