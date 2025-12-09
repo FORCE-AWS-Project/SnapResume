@@ -95,11 +95,14 @@ const resumeAPI = {
  * User API endpoints
  */
 const userAPI = {
-  // Get current user profile
-  getProfile: () => apiClient.get('/api/users/profile'),
+  // Get current user profile (GET /api/users/me)
+  getProfile: () => apiClient.get('/api/users/me'),
+  
+  // Alias for getProfile - get authenticated user's profile
+  getMe: () => apiClient.get('/api/users/me'),
 
-  // Update user profile
-  updateProfile: (data) => apiClient.put('/api/users/profile', data),
+  // Update user profile (PUT /api/users/me)
+  updateProfile: (data) => apiClient.put('/api/users/me', data),
 
   // Upload profile picture
   uploadProfilePicture: (file) => {

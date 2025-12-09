@@ -8,6 +8,7 @@ import PricingPage from './pages/PricingPage/PricingPage'
 import AboutPage from './pages/AboutPage/AboutPage'
 import Auth from './pages/Auth/Auth'
 import EditorPage from './pages/EditorPage/EditorPage'
+import UserProfilePage from './pages/UserProfilePage/UserProfilePage'
 
 function App() {
   const theme = {
@@ -29,6 +30,7 @@ function App() {
             <Route path="/templates" element={<TemplatesPage />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/editor" element={<EditorPage />} />
+            <Route path="/profile" element={<UserProfilePage />} />
           </Routes>
         </Router>
       </AuthProvider>
