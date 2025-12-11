@@ -67,13 +67,17 @@ export class RecommendationService {
           role: 'user',
           content: [
             {
+              type: 'text',
               text: prompt
             }
-          ],
-        },
+          ]
+        }
       ],
-      max_tokens: BedrockConfig.MAX_TOKENS,
-      temperature: BedrockConfig.TEMPERATURE
+      inferenceConfig: {
+        maxNewTokens: BedrockConfig.MAX_TOKENS,
+        temperature: BedrockConfig.TEMPERATURE,
+        topP: 0.9,
+      },
     };
 
     const command = new InvokeModelCommand({
@@ -87,7 +91,7 @@ export class RecommendationService {
     const response = await bedrockClient.send(command);
 
     const responseBody = JSON.parse(new TextDecoder().decode(response.body));
-    const analysisText = responseBody.content[0].text;
+    const analysisText = responseBody.results[0].outputText;
 
     // Parse the JSON response from Claude
     const analysisJson = this.extractJsonFromResponse(analysisText);

@@ -22,7 +22,7 @@ export const Limits = {
 } as const;
 
 export const BedrockConfig = {
-  MODEL_ID: 'amazon.nova-2-lite-v1:0',
+  MODEL_ID: 'amazon.nova-pro-v1:0',
   MAX_TOKENS: 4000,
   TEMPERATURE: 0.7,
   MIN_MATCH_SCORE: 60,
