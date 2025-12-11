@@ -123,11 +123,23 @@
   border-radius: var(--radius-md);
 }
 
+/* Tabs Section */
+.tabsSection {
+  max-width: 1200px;
+  margin: var(--spacing-2xl) auto;
+  width: 100%;
+}
+
 /* Templates Grid */
 .templatesGrid {
   max-width: 1200px;
   margin: 0 auto;
   width: 100%;
+  padding: 0 var(--spacing-lg);
+}
+
+.gridHeader {
+  margin-bottom: var(--spacing-xl);
 }
 
 .resultsTitle {
@@ -135,6 +147,12 @@
   color: var(--color-text-dark);
   margin-bottom: var(--spacing-lg);
   font-weight: 600;
+}
+
+.count {
+  color: #999;
+  font-size: var(--font-size-base);
+  margin-left: var(--spacing-sm);
 }
 
 .templateCard {
@@ -167,13 +185,32 @@
 .cardContent {
   flex: 1;
   position: relative;
+  padding: var(--spacing-lg);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  margin-bottom: var(--spacing-sm);
+  gap: var(--spacing-sm);
 }
 
 .templateName {
   font-size: var(--font-size-lg);
   color: var(--color-text-dark);
-  margin-bottom: var(--spacing-sm);
+  margin: 0;
   font-weight: 600;
+}
+
+.categoryTag {
+  background: rgba(212, 165, 116, 0.15);
+  color: var(--color-primary);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  white-space: nowrap;
 }
 
 .templateDescription {
@@ -183,10 +220,11 @@
   line-height: 1.5;
 }
 
-.features {
+.tagsContainer {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-md);
 }
 
 .featureTag {
@@ -197,6 +235,83 @@
   border-radius: var(--radius-sm);
   font-size: var(--font-size-xs);
   font-weight: 500;
+}
+
+.useBtn {
+  width: 100%;
+  margin-top: auto;
+}
+
+/* My Resumes Section */
+.myResumesSection {
+  padding: 0 var(--spacing-lg);
+}
+
+.myResumesHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-2xl);
+  gap: var(--spacing-lg);
+}
+
+.sectionTitle {
+  font-size: var(--font-size-2xl);
+  color: var(--color-text-dark);
+  margin: 0 0 var(--spacing-xs) 0;
+  font-weight: 600;
+}
+
+.sectionSubtitle {
+  color: #666;
+  margin: 0;
+  font-size: var(--font-size-sm);
+}
+
+.resumeCard {
+  transition: all var(--transition-base);
+  overflow: hidden;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.resumeCard:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+.resumePreview {
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.resumeCardContent {
+  flex: 1;
+  padding: var(--spacing-lg);
+}
+
+.resumeName {
+  font-size: var(--font-size-lg);
+  color: var(--color-text-dark);
+  margin: 0 0 var(--spacing-xs) 0;
+  font-weight: 600;
+}
+
+.resumeTemplate {
+  color: var(--color-primary);
+  font-size: var(--font-size-sm);
+  margin: 0 0 var(--spacing-xs) 0;
+  font-weight: 500;
+}
+
+.resumeMeta {
+  color: #999;
+  font-size: var(--font-size-xs);
+  margin: 0;
 }
 
 .noResults {
@@ -222,5 +337,15 @@
 
   .subtitle {
     font-size: var(--font-size-base);
+  }
+
+  .myResumesHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .templatesGrid,
+  .myResumesSection {
+    padding: 0;
   }
 }

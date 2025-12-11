@@ -2,28 +2,35 @@
   "manifest_version": 3,
   "name": "SnapResume Manager",
   "version": "1.0.0",
-  "description": "Manage your resume sections with AI-powered organization",
+  "description": "AI-powered resume matcher for job applications",
+  
   "permissions": [
     "storage",
     "tabs",
-    "scripting"
+    "scripting",
+    "activeTab",
+    "runtime"
   ],
+  
   "host_permissions": [
     "https://snapresume.com/*",
-    "http://localhost/*"
+    "http://localhost/*",
+    "http://localhost:3005/*"
   ],
   "action": {
     "default_popup": "popup/popup.html",
-    "default_title": "Open Resume Manager",
+    "default_title": "SnapResume Manager",
     "default_icon": {
       "16": "images/Logo.png",
       "48": "images/Logo.png",
       "128": "images/Logo.png"
     }
   },
+  
   "background": {
     "service_worker": "background/background.js"
   },
+  
   "content_scripts": [
     {
       "matches": [

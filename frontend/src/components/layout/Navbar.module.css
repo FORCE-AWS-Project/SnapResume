@@ -56,6 +56,14 @@
   color: var(--color-primary);
 }
 
+.userAvatar {
+  transition: transform var(--transition-base);
+}
+
+.userAvatar:hover {
+  transform: scale(1.1);
+}
+
 @media (max-width: 768px) {
   .navbar {
     padding: var(--spacing-md);

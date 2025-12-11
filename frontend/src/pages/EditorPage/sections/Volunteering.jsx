@@ -135,10 +135,14 @@ export default function Volunteering({ data, onChange }) {
                                     <Checkbox
                                         checked={vol.current}
                                         onChange={(e) => {
-                                            updateVolunteering(index, 'current', e.target.checked)
-                                            if (e.target.checked) {
-                                                updateVolunteering(index, 'endDate', null)
+                                            const isChecked = e.target.checked
+                                            const updated = [...volData]
+                                            updated[index] = {
+                                                ...updated[index],
+                                                current: isChecked,
+                                                endDate: isChecked ? null : updated[index].endDate
                                             }
+                                            onChange(updated)
                                         }}
                                     >
                                         Current
