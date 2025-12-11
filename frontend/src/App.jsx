@@ -35,7 +35,10 @@ function App() {
           </Routes>
         </Router>
       </AuthProvider>
+<<<<<<< HEAD
       <ToastProvider />
+=======
+>>>>>>> b0f1001cd035118a7ce032d1259f0e60eb4629d4
     </ConfigProvider>
   )
 }
