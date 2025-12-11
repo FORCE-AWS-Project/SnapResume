@@ -30,36 +30,46 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        console.log("Checking authentication...");
         const currentUser = await CognitoService.getCurrentUser();
-        const currentTokens = await CognitoService.getTokens();
-        
-        if (currentUser && currentTokens) {
-          const name = currentTokens.idToken ? 
-            (() => {
-              try {
-                const payload = JSON.parse(atob(currentTokens.idToken.split('.')[1]));
-                return payload.name || currentUser.getUsername().split('@')[0];
-              } catch {
-                return currentUser.getUsername().split('@')[0];
-              }
-            })() 
-            : currentUser.getUsername().split('@')[0];
-            
-          setUser({
-            email: currentUser.getUsername(),
-            userId: currentTokens.user?.userId,
-            name: name
-          });
-          setTokens(currentTokens);
-          
-          // Fetch full user profile from API
-          await fetchUserProfile();
+        console.log("Current user from Cognito:", currentUser ? "Found" : "Not found");
+
+        if (currentUser) {
+          const currentTokens = await CognitoService.getTokens();
+          console.log("Current tokens:", currentTokens ? "Valid" : "Invalid/Missing");
+
+          if (currentTokens) {
+            const name = currentTokens.idToken ?
+              (() => {
+                try {
+                  const payload = JSON.parse(atob(currentTokens.idToken.split('.')[1]));
+                  return payload.name || currentUser.getUsername().split('@')[0];
+                } catch {
+                  return currentUser.getUsername().split('@')[0];
+                }
+              })()
+              : currentUser.getUsername().split('@')[0];
+
+            setUser({
+              email: currentUser.getUsername(),
+              userId: currentTokens.user?.userId || currentUser.getUsername(),
+              name: name
+            });
+            setTokens(currentTokens);
+
+            // Fetch full user profile from API
+            await fetchUserProfile();
+          } else {
+            console.warn("User exists but tokens are missing/invalid");
+            // Attempt refresh?
+          }
         }
       } catch (err) {
         console.error('Auth check failed:', err);
         // Don't set error on startup - user might not be logged in yet
       } finally {
         setLoading(false);
+        console.log("Auth check complete. Loading: false");
       }
     };
 
@@ -70,6 +80,19 @@ export const AuthProvider = ({ children }) => {
 
     return () => clearTimeout(timer);
   }, [fetchUserProfile]);
+
+  // Sync auth state across tabs
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key && e.key.startsWith('CognitoIdentityServiceProvider')) {
+        // Reload if Cognito storage changes (e.g. login/logout in another tab)
+        window.location.reload();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   const login = useCallback(async (email, password) => {
     setLoading(true);
@@ -94,7 +117,7 @@ export const AuthProvider = ({ children }) => {
 
       // Fetch full user profile from API after login
       await fetchUserProfile();
-      
+
       return result;
     } catch (err) {
       const errorMessage = err.message || 'Login failed';

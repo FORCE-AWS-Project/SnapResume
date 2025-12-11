@@ -1,5 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { ConfigProvider } from 'antd'
+import { AuthProvider } from './context/AuthContext'
+import { ResumeProvider } from './contexts/ResumeContext'
 import LandingPage from './pages/LandingPage/LandingPage'
 import FeaturesPage from './pages/FeaturesPage/FeaturesPage'
 import TemplatesPage from './pages/TemplatesPage/TemplatesPage'
