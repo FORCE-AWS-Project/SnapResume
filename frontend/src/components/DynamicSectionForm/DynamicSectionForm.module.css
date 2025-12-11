@@ -1,0 +1,154 @@
+.container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.formContainer {
+  height: 100%;
+  overflow-y: auto;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.header h4 {
+  margin: 0;
+}
+
+.tabActions {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 10;
+}
+
+.objectSection {
+  padding: 16px 24px;
+}
+
+/* Tabs styling */
+.container :global(.ant-tabs-nav-wrap) {
+  background-color: #fafafa;
+  padding: 8px 16px 0;
+  margin: 0;
+}
+
+.container :global(.ant-tabs-content) {
+  padding: 16px 24px;
+  max-height: calc(100vh - 300px);
+  overflow-y: auto;
+}
+
+.container :global(.ant-tabs-tab) {
+  margin-right: 4px;
+  padding: 8px 12px;
+  background-color: #fff;
+  border: 1px solid #d9d9d9;
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+}
+
+.container :global(.ant-tabs-tab-active) {
+  background-color: #fff;
+  border-color: #1890ff;
+}
+
+/* Form styling */
+.container :global(.ant-form) {
+  max-width: 100%;
+}
+
+.container :global(.ant-form-item) {
+  margin-bottom: 16px;
+}
+
+.container :global(.ant-row) {
+  margin: 0 -8px;
+}
+
+.container :global(.ant-col) {
+  padding: 0 8px;
+}
+
+/* Validation errors */
+.validationErrors {
+  margin-top: 16px;
+  padding: 12px;
+  background-color: #fff2f0;
+  border: 1px solid #ffccc7;
+  border-radius: 6px;
+}
+
+.error {
+  color: #ff4d4f;
+  font-size: 12px;
+  line-height: 1.5;
+  margin-bottom: 4px;
+}
+
+.error:last-child {
+  margin-bottom: 0;
+}
+
+/* Array items styling */
+.container :global(.ant-list-item) {
+  padding: 12px 16px;
+  border: 1px solid #f0f0f0;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.container :global(.ant-list-item:hover) {
+  border-color: #d9d9d9;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Empty state */
+.container :global(.ant-empty) {
+  margin: 60px 0;
+}
+
+.container :global(.ant-empty-description) {
+  color: #999;
+}
+
+/* Field styling */
+.container :global(.ant-input),
+.container :global(.ant-input-number),
+.container :global(.ant-picker),
+.container :global(.ant-select-selector) {
+  border-radius: 6px;
+}
+
+.container :global(.ant-input:focus),
+.container :global(.ant-input-number:focus),
+.container :global(.ant-picker:focus),
+.container :global(.ant-select-focused .ant-select-selector) {
+  border-color: #1890ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+
+/* Textarea styling */
+.container :global(.ant-input[data-type="textarea"]) {
+  min-height: 100px;
+  resize: vertical;
+}
+
+/* Array item actions */
+.arrayItemActions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+  padding: 0 4px;
+}
+
+.arrayItemActions button {
+  margin-left: 8px;
+}

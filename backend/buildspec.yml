@@ -1,0 +1,45 @@
+version: 0.2
+
+env:
+  variables:
+    NODE_ENV: production
+    NODE_VERSION: "22.x"
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 22.x
+    commands:
+      - echo Installing dependencies...
+      - npm ci
+
+  pre_build:
+    commands:
+      - npm install -g typescript
+      - tsc --version
+
+  build:
+    commands:
+      - echo Compiling TypeScript...
+      - npm run build
+      - ls -la dist/
+      - cp package.json package-lock.json dist/
+      - cd dist
+      - npm ci --omit=dev
+      - ls -la
+      - zip -r ../lambda-deployment.zip .
+      - cd ..
+      - ls -la lambda-deployment.zip
+
+  post_build:
+    commands:
+      - aws lambda update-function-code --function-name $LAMBDA_FUNCTION_NAME --zip-file fileb://lambda-deployment.zip
+      - aws lambda wait function-updated --function-name $LAMBDA_FUNCTION_NAME
+
+artifacts:
+  files:
+    - lambda-deployment.zip
+
+cache:
+  paths:
+    - node_modules/**/*

@@ -1,5 +1,5 @@
-﻿# Dependencies
-/node_modules
+CLAUDE.md
+node_modules
 
 # Build/Distribution
 # Thư mục chứa kết quả build của Vite/Webpack
@@ -39,6 +39,6 @@ Thumbs.db
 *.sln
 *.sw?
 
-# ❌ Custom Exclusion (Theo yêu cầu của bạn)
-# Loại trừ toàn bộ thư mục 'src' và mọi thứ bên trong nó
-/src/
+*.zip
+*.sw?
+*.zip

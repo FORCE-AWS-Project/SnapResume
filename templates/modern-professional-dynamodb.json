@@ -1,0 +1,38 @@
+{
+  "PK": {
+    "S": "TEMPLATE#TPL_MODERN_001"
+  },
+  "SK": {
+    "S": "METADATA"
+  },
+  "GSI1PK": {
+    "S": "CATEGORY#professional"
+  },
+  "GSI1SK": {
+    "S": "NAME#Modern Professional"
+  },
+  "templateId": {
+    "S": "TPL_MODERN_001"
+  },
+  "name": {
+    "S": "Modern Professional"
+  },
+  "category": {
+    "S": "professional"
+  },
+  "templateFileUrl": {
+    "S": "https://resume-snap-dev-user-uploads.s3.us-east-1.amazonaws.com/templates/modern-professional.html"
+  },
+  "previewImageUrl": {
+    "S": "https://via.placeholder.com/800x600/3498db/ffffff?text=Modern%20Professional"
+  },
+  "inputDataSchema": {
+    "S": "{\"personalInfo\":{\"type\":\"object\",\"required\":true,\"fields\":{\"name\":{\"type\":\"string\",\"title\":\"Full Name\"},\"email\":{\"type\":\"string\",\"title\":\"Email Address\"},\"phone\":{\"type\":\"string\",\"title\":\"Phone Number\"},\"location\":{\"type\":\"string\",\"title\":\"Location\"},\"linkedin\":{\"type\":\"link\",\"title\":\"LinkedIn URL\"},\"github\":{\"type\":\"link\",\"title\":\"GitHub URL\"},\"portfolio\":{\"type\":\"link\",\"title\":\"Portfolio URL\"},\"summary\":{\"type\":\"text\",\"title\":\"Professional Summary\"}}},\"experience\":{\"type\":\"array\",\"title\":\"Work Experience\",\"minItems\":0,\"maxItems\":10,\"itemSchema\":{\"sectionId\":{\"type\":\"string\",\"title\":\"Section ID\"},\"company\":{\"type\":\"string\",\"title\":\"Company Name\"},\"position\":{\"type\":\"string\",\"title\":\"Job Title\"},\"location\":{\"type\":\"string\",\"title\":\"Location\"},\"startDate\":{\"type\":\"date\",\"title\":\"Start Date\"},\"endDate\":{\"type\":\"date\",\"title\":\"End Date\"},\"current\":{\"type\":\"boolean\",\"title\":\"Currently Working Here\"},\"description\":{\"type\":\"text\",\"title\":\"Job Description\"},\"achievements\":{\"type\":\"array\",\"title\":\"Key Achievements\",\"items\":{\"type\":\"string\"}},\"technologies\":{\"type\":\"array\",\"title\":\"Technologies Used\",\"items\":{\"type\":\"string\"}},\"tags\":{\"type\":\"array\",\"title\":\"Tags for AI Matching\",\"items\":{\"type\":\"string\"}}}},\"education\":{\"type\":\"array\",\"title\":\"Education\",\"minItems\":0,\"maxItems\":5,\"itemSchema\":{\"sectionId\":{\"type\":\"string\",\"title\":\"Section ID\"},\"institution\":{\"type\":\"string\",\"title\":\"Institution Name\"},\"degree\":{\"type\":\"string\",\"title\":\"Degree\"},\"field\":{\"type\":\"string\",\"title\":\"Field of Study\"},\"location\":{\"type\":\"string\",\"title\":\"Location\"},\"startDate\":{\"type\":\"date\",\"title\":\"Start Date\"},\"endDate\":{\"type\":\"date\",\"title\":\"End Date\"},\"gpa\":{\"type\":\"string\",\"title\":\"GPA\"},\"achievements\":{\"type\":\"array\",\"title\":\"Honors & Awards\",\"items\":{\"type\":\"string\"}},\"tags\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}}},\"skills\":{\"type\":\"array\",\"title\":\"Skills\",\"minItems\":0,\"maxItems\":10,\"itemSchema\":{\"sectionId\":{\"type\":\"string\",\"title\":\"Section ID\"},\"category\":{\"type\":\"string\",\"title\":\"Skill Category\"},\"skillsList\":{\"type\":\"array\",\"title\":\"Skills\",\"items\":{\"type\":\"string\"}},\"tags\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}}},\"projects\":{\"type\":\"array\",\"title\":\"Projects\",\"minItems\":0,\"maxItems\":10,\"itemSchema\":{\"sectionId\":{\"type\":\"string\",\"title\":\"Section ID\"},\"name\":{\"type\":\"string\",\"title\":\"Project Name\"},\"description\":{\"type\":\"text\",\"title\":\"Description\"},\"url\":{\"type\":\"link\",\"title\":\"Project URL\"},\"technologies\":{\"type\":\"array\",\"title\":\"Technologies\",\"items\":{\"type\":\"string\"}},\"achievements\":{\"type\":\"array\",\"title\":\"Key Achievements\",\"items\":{\"type\":\"string\"}},\"startDate\":{\"type\":\"date\",\"title\":\"Start Date\"},\"endDate\":{\"type\":\"date\",\"title\":\"End Date\"},\"tags\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}}},\"certifications\":{\"type\":\"array\",\"title\":\"Certifications\",\"minItems\":0,\"maxItems\":10,\"itemSchema\":{\"sectionId\":{\"type\":\"string\",\"title\":\"Section ID\"},\"name\":{\"type\":\"string\",\"title\":\"Certification Name\"},\"issuer\":{\"type\":\"string\",\"title\":\"Issuing Organization\"},\"date\":{\"type\":\"date\",\"title\":\"Date Obtained\"},\"expiryDate\":{\"type\":\"date\",\"title\":\"Expiry Date\"},\"credentialId\":{\"type\":\"string\",\"title\":\"Credential ID\"},\"credentialUrl\":{\"type\":\"link\",\"title\":\"Credential URL\"},\"tags\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}}}}"
+  },
+  "createdAt": {
+    "S": "2024-12-03T00:00:00.000Z"
+  },
+  "updatedAt": {
+    "S": "2024-12-03T00:00:00.000Z"
+  }
+}

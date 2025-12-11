@@ -1,0 +1,110 @@
+.container {
+  padding: var(--spacing-lg) 0;
+  width: 100%;
+}
+
+.heading {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--color-text-dark);
+  margin-bottom: var(--spacing-sm);
+}
+
+.subtitle {
+  font-size: var(--font-size-sm);
+  color: #999;
+  margin-bottom: var(--spacing-lg);
+  text-align: center;
+}
+
+.input {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  border-color: #e0e0e0 !important;
+  color: #000000 !important;
+  height: 45px;
+  font-size: var(--font-size-base);
+  border-radius: var(--radius-sm) !important;
+}
+
+.input::placeholder {
+  color: var(--color-text-muted) !important;
+}
+
+.input:focus,
+.input:hover {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  border-color: var(--color-primary) !important;
+}
+
+.rememberContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-lg);
+}
+
+.termsContainer {
+  margin-bottom: var(--spacing-lg);
+}
+
+.rememberContainer :global(.ant-checkbox-wrapper),
+.termsContainer :global(.ant-checkbox-wrapper) {
+  color: #333 !important;
+  font-size: var(--font-size-sm);
+}
+
+.link {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color var(--transition-base);
+  font-size: var(--font-size-sm);
+}
+
+.link:hover {
+  color: #e8c4a0;
+}
+
+.submitBtn {
+  height: 44px;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  background: #000 !important;
+  border: none !important;
+}
+
+.submitBtn:hover {
+  background: #333 !important;
+}
+
+.divider {
+  text-align: center;
+  color: #999;
+  font-size: var(--font-size-sm);
+  margin: var(--spacing-lg) 0;
+  position: relative;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: calc(50% - 40px);
+  height: 1px;
+  background: #e0e0e0;
+}
+
+.divider::before {
+  left: 0;
+}
+
+.divider::after {
+  right: 0;
+}
+
+.switchText {
+  text-align: center;
+  color: #666;
+  font-size: var(--font-size-sm);
+  margin-top: var(--spacing-lg);
+}

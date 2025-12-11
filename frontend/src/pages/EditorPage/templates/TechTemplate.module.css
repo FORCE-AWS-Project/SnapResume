@@ -1,0 +1,165 @@
+.template {
+    background: #1e1e1e;
+    color: #d4d4d4;
+    padding: 40px;
+    min-height: 1100px;
+    font-family: 'Courier New', monospace
+}
+
+.header {
+    border: 2px solid #722ed1;
+    padding: 24px;
+    margin-bottom: 24px;
+    background: #252526
+}
+
+.nameBlock {
+    margin-bottom: 16px
+}
+
+.nameWrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px
+}
+
+.bracket {
+    font-size: 32px;
+    color: #722ed1;
+    font-weight: 700
+}
+
+.name {
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0;
+    color: #fff;
+    font-family: 'Courier New', monospace
+}
+
+.roleTitle {
+    font-size: 14px;
+    color: #6a9955;
+    margin: 8px 0 0 44px;
+    font-style: italic
+}
+
+.contactGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-top: 16px
+}
+
+.contactItem {
+    font-size: 13px;
+    color: #9cdcfe;
+    display: flex;
+    align-items: center;
+    gap: 8px
+}
+
+.contactItem a {
+    color: #4ec9b0;
+    text-decoration: none
+}
+
+.contactItem a:hover {
+    text-decoration: underline
+}
+
+.summary {
+    background: #252526;
+    padding: 20px;
+    margin-bottom: 24px;
+    border-left: 4px solid#722ed1
+}
+
+.commentLine {
+    font-size: 14px;
+    color: #6a9955;
+    margin-bottom: 12px;
+    font-weight: 700
+}
+
+.summaryText {
+    margin: 0;
+    color: #d4d4d4;
+    line-height: 1.7;
+    font-size: 14px
+}
+
+.content {
+    background: #1e1e1e
+}
+
+.section {
+    background: #252526;
+    padding: 20px;
+    margin-bottom: 24px;
+    border-left: 4px solid #722ed1;
+    page-break-inside: avoid
+}
+
+.sectionTitle {
+    font-size: 16px;
+    font-weight: 700;
+    color: #722ed1;
+    margin: 0 0 16px 0;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #722ed1
+}
+
+.item {
+    margin-bottom: 16px;
+    page-break-inside: avoid
+}
+
+.itemHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px
+}
+
+.itemTitle {
+    font-size: 16px;
+    color: #ffeb3b;
+    margin: 0 0 4px 0;
+    font-weight: 600
+}
+
+.itemSubtitle {
+    color: #81d4fa;
+    font-size: 14px;
+    margin: 0 0 4px 0
+}
+
+.itemDate {
+    color: #ffb74d;
+    font-size: 13px;
+    font-style: italic;
+    white-space: nowrap;
+    margin-left: 16px
+}
+
+.itemDetail {
+    color: #e1bee7;
+    font-size: 13px;
+    margin: 4px 0
+}
+
+.bulletList {
+    margin: 8px 0 0 0;
+    padding-left: 20px;
+    list-style-type: disc
+}
+
+.bulletList li {
+    color: #e0e0e0;
+    font-size: 14px;
+    line-height: 1.7;
+    margin-bottom: 4px
+}
