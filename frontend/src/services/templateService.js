@@ -2,12 +2,12 @@ import api from './api.js';
 
 const templateService = {
   getTemplates: async (category = null) => {
-    const endpoint = category ? `/templates?category=${category}` : '/templates';
-    return api.get(endpoint);
+    const endpoint = category ? `/api/templates?category=${category}` : '/api/templates';
+    return api.get(endpoint, { useAuth: false });
   },
 
   getTemplateById: async (templateId) => {
-    return api.get(`/templates/${templateId}`);
+    return api.get(`/api/templates/${templateId}`, { useAuth: false });
   },
 
   getTemplateFile: async (templateUrl) => {

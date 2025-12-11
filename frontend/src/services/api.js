@@ -56,11 +56,19 @@ const handleResponse = async (response) => {
 
 const apiRequest = async (endpoint, options = {}) => {
   const url = `${API_BASE_URL}${endpoint}`;
+  const { useAuth = true, ...restOptions } = options;
 
   const config = {
-    headers: getAuthHeaders(),
-    ...options,
+    headers: { 'Content-Type': 'application/json' },
+    ...restOptions,
   };
+
+  if (useAuth) {
+    config.headers = {
+      ...config.headers,
+      ...getAuthHeaders()
+    };
+  }
 
   try {
     const response = await fetch(url, config);

@@ -1,15 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Layout, Button, Space, Dropdown, InputNumber, Tooltip, message, Spin } from 'antd'
+import { Layout, Button, Space, Dropdown, Tooltip, Spin } from 'antd'
 import {
   SaveOutlined,
   SettingOutlined,
   BackwardOutlined,
   PrinterOutlined,
-  UnorderedListOutlined
 } from '@ant-design/icons'
 import PreviewPanel from './components/PreviewPanel'
-import { ResumeManagerUniversal } from '../../components/ResumeManager/ResumeManagerUniversal'
 import { useResume } from '../../contexts/ResumeContext'
 import TemplateSelectionModal from '../../components/TemplateSelectionModal/TemplateSelectionModal'
 import SectionPanel from '../../components/SectionPanel/SectionPanel'
@@ -26,7 +24,6 @@ function EditorPageContent() {
   const navigate = useNavigate()
   const [zoom, setZoom] = useState(100)
   const [resumeName, setResumeName] = useState('My Resume')
-  const [managerModalVisible, setManagerModalVisible] = useState(false)
   const [templateModalVisible, setTemplateModalVisible] = useState(false)
 
   const {
@@ -127,17 +124,6 @@ function EditorPageContent() {
     }
   }
 
-  const handleDownload = async () => {
-    if (!template || !resumeData) {
-      toast.error('No data to download')
-      return
-    }
-
-  }
-
-  const handlePrint = () => {
-    window.print()
-  }
 
   const handleZoom = (value) => {
     setZoom(Math.min(Math.max(value, 50), 200))
@@ -203,9 +189,6 @@ function EditorPageContent() {
           >
             Save
           </Button>
-          <Button icon={<PrinterOutlined />} onClick={handlePrint}>
-            Print
-          </Button>
           <Dropdown
             menu={{ items: zoomMenuItems, onClick: (e) => handleZoom(parseInt(e.key)) }}
           >
@@ -240,15 +223,6 @@ function EditorPageContent() {
         onCancel={handleTemplateModalCancel}
       />
 
-      {/* Resume Manager Modal */}
-      <ResumeManagerUniversal
-        visible={managerModalVisible}
-        onClose={() => setManagerModalVisible(false)}
-        resumeData={resumeData}
-        onUpdateData={() => {}} // Handled by context now
-        onSave={handleSave}
-        mode="modal"
-      />
     </Layout>
   )
 }

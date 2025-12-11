@@ -86,7 +86,12 @@ export const AuthProvider = ({ children }) => {
         accessToken: result.accessToken,
         refreshToken: result.refreshToken
       });
-      
+
+      // Store tokens in localStorage
+      localStorage.setItem('cognitoIdToken', result.idToken);
+      localStorage.setItem('cognitoAccessToken', result.accessToken);
+      localStorage.setItem('cognitoRefreshToken', result.refreshToken);
+
       // Fetch full user profile from API after login
       await fetchUserProfile();
       
@@ -137,6 +142,11 @@ export const AuthProvider = ({ children }) => {
       setUserProfile(null);
       setTokens(null);
       setError(null);
+
+      // Clear tokens from localStorage
+      localStorage.removeItem('cognitoIdToken');
+      localStorage.removeItem('cognitoAccessToken');
+      localStorage.removeItem('cognitoRefreshToken');
     } catch (err) {
       console.error('Logout error:', err);
     }
