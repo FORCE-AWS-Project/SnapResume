@@ -9,6 +9,7 @@ import AboutPage from './pages/AboutPage/AboutPage'
 import Auth from './pages/Auth/Auth'
 import EditorPage from './pages/EditorPage/EditorPage'
 import UserProfilePage from './pages/UserProfilePage/UserProfilePage'
+import ToastProvider from './components/ToastProvider/ToastProvider'
 
 function App() {
   const theme = {
@@ -34,6 +35,7 @@ function App() {
           </Routes>
         </Router>
       </AuthProvider>
+      <ToastProvider />
     </ConfigProvider>
   )
 }
