@@ -385,7 +385,7 @@ export function ResumeManagerUniversal({
             <h3 className={styles.panelTitle}>Sections</h3>
             <span className={styles.sectionCount}>{sections.length} sections</span>
           </div>
-  
+
           <SectionsList
             sections={sections}
             selectedSection={selectedSection}
@@ -394,17 +394,17 @@ export function ResumeManagerUniversal({
             onSectionDelete={handleDeleteSection}
           />
         </div>
-  
+
         {/* Divider */}
         <div className={styles.panelDivider}></div>
-  
+
         {/* Right Panel */}
         <div className={styles.rightPanel}>
           {/* Preview top container */}
           <div className={styles.previewContainer}>
             <PreviewPanel data={resumeData} template={template} zoom={zoom} />
           </div>
-  
+
           {/* Preview header */}
           <div className={styles.previewHeader}>
             <h3 className={styles.previewTitle}>Preview</h3>
@@ -426,10 +426,10 @@ export function ResumeManagerUniversal({
               </button>
             </div>
           </div>
-  
+
           {/* Resume Preview Panel */}
           <div className={styles.previewContainer}>
-            <ResumePreviewPanel
+            <PreviewPanel
               data={resumeData}
               zoom={zoom}
               sectionOrder={sections.map((s) => s.id)}
