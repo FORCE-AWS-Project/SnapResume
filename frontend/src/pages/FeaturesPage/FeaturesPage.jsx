@@ -1,7 +1,7 @@
 ﻿import { useNavigate } from 'react-router-dom'
 import { Row, Col, Card, Button, Tabs, Space, Divider } from 'antd'
-import {
-  CheckCircleOutlined,
+import { 
+  CheckCircleOutlined, 
   BgColorsOutlined,
   FileTextOutlined,
   ThunderboltOutlined,
@@ -35,13 +35,13 @@ export default function FeaturesPage() {
     {
       id: 2,
       icon: RobotOutlined,
-      title: 'AI-Powered Search',
-      description: 'Highlight any text to instantly find relevant sections from your resumes using advanced AI recommendations.',
+      title: 'AI-Powered Content',
+      description: 'Let AI help you write powerful resume content that impresses recruiters and passes ATS systems.',
       details: [
-        'Smart resume recommendations',
-        'Context-aware search',
-        'Instant section matching',
-        'Job description analysis'
+        'Smart content suggestions',
+        'Job-specific recommendations',
+        'Grammar and spelling check',
+        'Keyword optimization'
       ],
       image: '🤖'
     },
@@ -231,7 +231,7 @@ export default function FeaturesPage() {
   return (
     <div className={styles.container}>
       <Navbar />
-
+      
       <main className={styles.main}>
         {/* Hero Section */}
         <section className={styles.heroSection}>
@@ -290,17 +290,17 @@ export default function FeaturesPage() {
               Join thousands of professionals who've successfully landed their dream jobs
             </p>
             <Space size="large">
-              <Button
-                type="primary"
+              <Button 
+                type="primary" 
                 size="large"
                 onClick={() => navigate('/templates')}
               >
                 Get Started Free
               </Button>
-              <Button
-                size="large"
+              <Button 
+                size="large" 
                 onClick={() => navigate('/pricing')}
-              >
+                >
                 View Pricing
               </Button>
             </Space>

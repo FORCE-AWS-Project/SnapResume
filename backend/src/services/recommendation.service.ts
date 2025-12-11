@@ -46,6 +46,7 @@ export class RecommendationService {
 
     const recommendations = await this.analyzeWithBedrock(
       jobDescription,
+      resume,
       groupedSections
     );
 
@@ -57,23 +58,21 @@ export class RecommendationService {
    */
   private static async analyzeWithBedrock(
     jobDescription: string,
+    resume: any,
     sections: Record<string, Section[]>
   ): Promise<RecommendationResponse> {
     const prompt = this.buildPrompt(jobDescription, sections);
 
     const payload = {
+      anthropic_version: 'bedrock-2023-05-31',
+      max_tokens: BedrockConfig.MAX_TOKENS,
+      temperature: BedrockConfig.TEMPERATURE,
       messages: [
         {
           role: 'user',
-          content: [
-            {
-              text: prompt
-            }
-          ],
+          content: prompt,
         },
       ],
-      max_tokens: BedrockConfig.MAX_TOKENS,
-      temperature: BedrockConfig.TEMPERATURE
     };
 
     const command = new InvokeModelCommand({

@@ -1,8 +1,7 @@
 ﻿import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Input, Row, Col, Card, Button, Badge, Space, Select, Empty, Tabs, Spin, message } from 'antd'
-import { SearchOutlined, CheckCircleOutlined, FileTextOutlined, DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons'
-import { useAuth } from '../../context/AuthContext'
+import { Input, Row, Col, Card, Button, Badge, Space, Select, Empty } from 'antd'
+import { SearchOutlined, CheckCircleOutlined, FileTextOutlined } from '@ant-design/icons'
 import Navbar from '../../components/layout/Navbar'
 import Footer from '../../components/layout/Footer'
 import styles from './TemplatesPage.module.css'
@@ -14,7 +13,7 @@ const TEMPLATES = [
     name: 'Modern Blue',
     category: 'Modern',
     description: 'Clean and professional template with blue accent',
-    color: '#e6f7ff',
+    color: '#e6f7ff', // Lighter background for preview
     accent: '#1890ff',
     features: ['ATS-Optimized', 'Modern Design', 'One Page'],
     thumbnail: '🎨',
@@ -88,30 +87,8 @@ const CATEGORIES = [
 
 export default function TemplatesPage() {
   const navigate = useNavigate()
-  const { isAuthenticated } = useAuth()
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedFilter, setSelectedFilter] = useState('all')
-  
-  // Mock user resumes - in real app, fetch from backend
-  const [userResumes, setUserResumes] = useState([
-    {
-      id: 1,
-      name: 'Software Engineer Resume',
-      templateId: 5,
-      templateName: 'Tech Developer',
-      createdAt: '2024-01-15',
-      updatedAt: '2024-01-20'
-    },
-    {
-      id: 2,
-      name: 'Product Manager Resume',
-      templateId: 4,
-      templateName: 'Executive Pro',
-      createdAt: '2024-01-10',
-      updatedAt: '2024-01-18'
-    }
-  ])
-  const [loadingResumes, setLoadingResumes] = useState(false)
 
   // 2. USEMEMO: Optimizes filtering performance
   const filteredTemplates = useMemo(() => {
@@ -136,220 +113,6 @@ export default function TemplatesPage() {
 
   const handleSelectTemplate = (template) => {
     navigate(`/editor?templateId=${template.id}&templateName=${encodeURIComponent(template.name)}`)
-  }
-
-  const handleCreateNew = () => {
-    navigate(`/editor?templateId=1&templateName=Modern Blue`)
-  }
-
-  const handleEditResume = (resume) => {
-    navigate(`/editor?resumeId=${resume.id}&templateId=${resume.templateId}`)
-  }
-
-  const handleDeleteResume = (resumeId) => {
-    setLoadingResumes(true)
-    // Simulate API call
-    setTimeout(() => {
-      setUserResumes(userResumes.filter(r => r.id !== resumeId))
-      message.success('Resume deleted successfully')
-      setLoadingResumes(false)
-    }, 500)
-  }
-
-  const tabItems = [
-    {
-      key: 'templates',
-      label: 'Browse Templates',
-      children: (
-        <>
-          {/* Search & Filter Section */}
-          <section className={styles.filterSection}>
-            <div className={styles.filterContainer}>
-              <Row gutter={[16, 16]} align="middle">
-                <Col xs={24} md={16}>
-                  <Input
-                    placeholder="Search by name, category, or features..."
-                    prefix={<SearchOutlined className={styles.searchIcon} />}
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    size="large"
-                    allowClear
-                    className={styles.searchInput}
-                  />
-                </Col>
-                <Col xs={24} md={8}>
-                  <Select
-                    placeholder="Filter by category"
-                    value={selectedFilter}
-                    onChange={setSelectedFilter}
-                    options={CATEGORIES}
-                    size="large"
-                    className={styles.filterSelect}
-                    style={{ width: '100%' }}
-                  />
-                </Col>
-              </Row>
-            </div>
-          </section>
-
-          {/* Templates Grid */}
-          <section className={styles.templatesGrid}>
-            <div className={styles.gridHeader}>
-              <h2 className={styles.resultsTitle}>
-                {filteredTemplates.length > 0 ? 'Available Templates' : 'No Templates Found'} 
-                <span className={styles.count}>({filteredTemplates.length})</span>
-              </h2>
-            </div>
-            
-            {filteredTemplates.length > 0 ? (
-              <Row gutter={[24, 24]}>
-                {filteredTemplates.map((template) => (
-                  <Col xs={24} sm={12} lg={8} key={template.id}>
-                    <Badge.Ribbon 
-                      text="Popular" 
-                      color="#ff4d4f" 
-                      style={{ display: template.isPopular ? 'block' : 'none' }}
-                    >
-                      <Card
-                        hoverable
-                        className={styles.templateCard}
-                        onClick={() => handleSelectTemplate(template)}
-                        cover={
-                          <div
-                            className={styles.templatePreview}
-                            style={{ backgroundColor: template.color, borderColor: template.accent }}
-                          >
-                            <div className={styles.thumbnailIcon} style={{ color: template.accent }}>
-                              {template.thumbnail}
-                            </div>
-                          </div>
-                        }
-                      >
-                        <div className={styles.cardContent}>
-                          <div className={styles.cardHeader}>
-                            <h3 className={styles.templateName}>{template.name}</h3>
-                            <span className={styles.categoryTag}>{template.category}</span>
-                          </div>
-                          <p className={styles.templateDescription}>
-                            {template.description}
-                          </p>
-                          <div className={styles.tagsContainer}>
-                            {template.features.map((feature, idx) => (
-                              <span key={idx} className={styles.featureTag}>
-                                {feature}
-                              </span>
-                            ))}
-                          </div>
-                          <Button type="primary" block className={styles.useBtn}>
-                             Use Template
-                          </Button>
-                        </div>
-                      </Card>
-                    </Badge.Ribbon>
-                  </Col>
-                ))}
-              </Row>
-            ) : (
-               <Empty description="No templates match your search criteria" />
-            )}
-          </section>
-        </>
-      )
-    }
-  ];
-
-  // Add "My Resumes" tab only if authenticated
-  if (isAuthenticated) {
-    tabItems.unshift({
-      key: 'myresumes',
-      label: `My Resumes (${userResumes.length})`,
-      children: (
-        <section className={styles.myResumesSection}>
-          <div className={styles.myResumesHeader}>
-            <div>
-              <h2 className={styles.sectionTitle}>Your Resumes</h2>
-              <p className={styles.sectionSubtitle}>Manage and edit your created resumes</p>
-            </div>
-            <Button 
-              type="primary" 
-              icon={<PlusOutlined />}
-              size="large"
-              onClick={handleCreateNew}
-            >
-              Create New
-            </Button>
-          </div>
-
-          {loadingResumes ? (
-            <Spin size="large" style={{ display: 'flex', justifyContent: 'center', padding: '50px' }} />
-          ) : userResumes.length > 0 ? (
-            <Row gutter={[24, 24]}>
-              {userResumes.map((resume) => (
-                <Col xs={24} sm={12} lg={8} key={resume.id}>
-                  <Card
-                    hoverable
-                    className={styles.resumeCard}
-                    cover={
-                      <div
-                        className={styles.resumePreview}
-                        style={{ 
-                          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          minHeight: '150px'
-                        }}
-                      >
-                        <div style={{ fontSize: '48px', color: 'white' }}>📄</div>
-                      </div>
-                    }
-                  >
-                    <div className={styles.resumeCardContent}>
-                      <h3 className={styles.resumeName}>{resume.name}</h3>
-                      <p className={styles.resumeTemplate}>{resume.templateName}</p>
-                      <p className={styles.resumeMeta}>
-                        Updated: {new Date(resume.updatedAt).toLocaleDateString()}
-                      </p>
-                      <Space style={{ width: '100%', marginTop: '12px' }}>
-                        <Button 
-                          type="primary" 
-                          icon={<EditOutlined />}
-                          block
-                          onClick={() => handleEditResume(resume)}
-                        >
-                          Edit
-                        </Button>
-                        <Button 
-                          danger 
-                          icon={<DeleteOutlined />}
-                          onClick={() => handleDeleteResume(resume.id)}
-                        >
-                          Delete
-                        </Button>
-                      </Space>
-                    </div>
-                  </Card>
-                </Col>
-              ))}
-            </Row>
-          ) : (
-            <Empty 
-              description="No Resumes Yet"
-              style={{ marginTop: '50px' }}
-            >
-              <Button 
-                type="primary" 
-                icon={<PlusOutlined />}
-                size="large"
-                onClick={handleCreateNew}
-              >
-                Create Your First Resume
-              </Button>
-            </Empty>
-          )}
-        </section>
-      )
-    });
   }
 
   return (
@@ -389,14 +152,96 @@ export default function TemplatesPage() {
           </div>
         </section>
 
-        {/* Tabs Section */}
-        <section className={styles.tabsSection}>
-          <Tabs 
-            items={tabItems}
-            defaultActiveKey={isAuthenticated ? 'myresumes' : 'templates'}
-            size="large"
-            style={{ background: 'white', padding: '20px', borderRadius: '8px' }}
-          />
+        {/* Search & Filter Section */}
+        <section className={styles.filterSection}>
+          <div className={styles.filterContainer}>
+            <Row gutter={[16, 16]} align="middle">
+              <Col xs={24} md={16}>
+                <Input
+                  placeholder="Search by name, category, or features..."
+                  prefix={<SearchOutlined className={styles.searchIcon} />}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  size="large"
+                  allowClear
+                  className={styles.searchInput}
+                />
+              </Col>
+              <Col xs={24} md={8}>
+                <Select
+                  placeholder="Filter by category"
+                  value={selectedFilter}
+                  onChange={setSelectedFilter}
+                  options={CATEGORIES}
+                  size="large"
+                  className={styles.filterSelect}
+                  style={{ width: '100%' }}
+                />
+              </Col>
+            </Row>
+          </div>
+        </section>
+
+        {/* Templates Grid */}
+        <section className={styles.templatesGrid}>
+          <div className={styles.gridHeader}>
+            <h2 className={styles.resultsTitle}>
+              {filteredTemplates.length > 0 ? 'Available Templates' : 'No Templates Found'} 
+              <span className={styles.count}>({filteredTemplates.length})</span>
+            </h2>
+          </div>
+          
+          {filteredTemplates.length > 0 ? (
+            <Row gutter={[24, 24]}>
+              {filteredTemplates.map((template) => (
+                <Col xs={24} sm={12} lg={8} key={template.id}>
+                  <Badge.Ribbon 
+                    text="Popular" 
+                    color="#ff4d4f" 
+                    style={{ display: template.isPopular ? 'block' : 'none' }}
+                  >
+                    <Card
+                      hoverable
+                      className={styles.templateCard}
+                      onClick={() => handleSelectTemplate(template)}
+                      cover={
+                        <div
+                          className={styles.templatePreview}
+                          style={{ backgroundColor: template.color, borderColor: template.accent }}
+                        >
+                          <div className={styles.thumbnailIcon} style={{ color: template.accent }}>
+                            {template.thumbnail}
+                          </div>
+                        </div>
+                      }
+                    >
+                      <div className={styles.cardContent}>
+                        <div className={styles.cardHeader}>
+                          <h3 className={styles.templateName}>{template.name}</h3>
+                          <span className={styles.categoryTag}>{template.category}</span>
+                        </div>
+                        <p className={styles.templateDescription}>
+                          {template.description}
+                        </p>
+                        <div className={styles.tagsContainer}>
+                          {template.features.map((feature, idx) => (
+                            <span key={idx} className={styles.featureTag}>
+                              {feature}
+                            </span>
+                          ))}
+                        </div>
+                        <Button type="primary" block className={styles.useBtn}>
+                           Use Template
+                        </Button>
+                      </div>
+                    </Card>
+                  </Badge.Ribbon>
+                </Col>
+              ))}
+            </Row>
+          ) : (
+             <Empty description="No templates match your search criteria" />
+          )}
         </section>
       </main>
 
