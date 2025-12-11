@@ -10,10 +10,13 @@ class ApiError extends Error {
 }
 
 const getAuthHeaders = () => {
-  const tokens = JSON.parse(localStorage.getItem('amplifyCredentials') || '{}');
+  // Get tokens from localStorage
+  const idToken = localStorage.getItem('cognitoIdToken');
+  const accessToken = localStorage.getItem('cognitoAccessToken');
+
   return {
     'Content-Type': 'application/json',
-    ...(tokens.idToken && { Authorization: `Bearer ${tokens.idToken.jwtToken}` }),
+    ...(idToken && { Authorization: `Bearer ${idToken}` }),
   };
 };
 

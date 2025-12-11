@@ -30,30 +30,59 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const currentUser = await CognitoService.getCurrentUser();
-        const currentTokens = await CognitoService.getTokens();
-        
-        if (currentUser && currentTokens) {
-          const name = currentTokens.idToken ? 
-            (() => {
-              try {
-                const payload = JSON.parse(atob(currentTokens.idToken.split('.')[1]));
-                return payload.name || currentUser.getUsername().split('@')[0];
-              } catch {
-                return currentUser.getUsername().split('@')[0];
-              }
-            })() 
-            : currentUser.getUsername().split('@')[0];
-            
+        // First check localStorage for tokens
+        const storedIdToken = localStorage.getItem('cognitoIdToken');
+        const storedAccessToken = localStorage.getItem('cognitoAccessToken');
+
+        if (storedIdToken && storedAccessToken) {
+          // Parse token to get user info
+          const payload = JSON.parse(atob(storedIdToken.split('.')[1]));
+
           setUser({
-            email: currentUser.getUsername(),
-            userId: currentTokens.user?.userId,
-            name: name
+            email: payload.email,
+            userId: payload.sub,
+            name: payload.name || payload.email?.split('@')[0] || 'Unknown'
           });
-          setTokens(currentTokens);
-          
+          setTokens({
+            idToken: storedIdToken,
+            accessToken: storedAccessToken,
+            refreshToken: localStorage.getItem('cognitoRefreshToken')
+          });
+
           // Fetch full user profile from API
           await fetchUserProfile();
+        } else {
+          // Fall back to Cognito service
+          const currentUser = await CognitoService.getCurrentUser();
+          const currentTokens = await CognitoService.getTokens();
+
+          if (currentUser && currentTokens) {
+            const name = currentTokens.idToken ?
+              (() => {
+                try {
+                  const payload = JSON.parse(atob(currentTokens.idToken.split('.')[1]));
+                  return payload.name || currentUser.getUsername().split('@')[0];
+                } catch {
+                  return currentUser.getUsername().split('@')[0];
+                }
+              })()
+              : currentUser.getUsername().split('@')[0];
+
+            setUser({
+              email: currentUser.getUsername(),
+              userId: payload.sub,
+              name: name
+            });
+            setTokens(currentTokens);
+
+            // Store tokens in localStorage
+            localStorage.setItem('cognitoIdToken', currentTokens.idToken);
+            localStorage.setItem('cognitoAccessToken', currentTokens.accessToken);
+            localStorage.setItem('cognitoRefreshToken', currentTokens.refreshToken);
+
+            // Fetch full user profile from API
+            await fetchUserProfile();
+          }
         }
       } catch (err) {
         console.error('Auth check failed:', err);
@@ -86,6 +115,11 @@ export const AuthProvider = ({ children }) => {
         accessToken: result.accessToken,
         refreshToken: result.refreshToken
       });
+
+      // Store tokens in localStorage
+      localStorage.setItem('cognitoIdToken', result.idToken);
+      localStorage.setItem('cognitoAccessToken', result.accessToken);
+      localStorage.setItem('cognitoRefreshToken', result.refreshToken);
       
       // Fetch full user profile from API after login
       await fetchUserProfile();
@@ -137,6 +171,11 @@ export const AuthProvider = ({ children }) => {
       setUserProfile(null);
       setTokens(null);
       setError(null);
+
+      // Clear tokens from localStorage
+      localStorage.removeItem('cognitoIdToken');
+      localStorage.removeItem('cognitoAccessToken');
+      localStorage.removeItem('cognitoRefreshToken');
     } catch (err) {
       console.error('Logout error:', err);
     }

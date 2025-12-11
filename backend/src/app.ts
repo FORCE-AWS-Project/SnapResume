@@ -53,10 +53,7 @@ app.get('/api-docs.json', (_, res) => {
 // Public routes (no auth required)
 const publicPaths = [
   '/templates',
-  '/api-docs',
-  '/resumes',
-  '/sections',
-  '/recommendations'
+  '/api-docs'
 ];
 
 // Apply authentication middleware conditionally
