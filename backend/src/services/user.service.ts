@@ -1,46 +1,29 @@
 /**
  * User Service
- * Business logic for user operations using separated DynamoDB tables
+ * Business logic for user operations using DynamoDB
  */
 
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import {
-  DynamoDBDocumentClient,
-  GetCommand,
-  PutCommand,
-  UpdateCommand,
-  QueryCommand,
-} from '@aws-sdk/lib-dynamodb';
-import { ReturnValue } from '@aws-sdk/client-dynamodb';
-import { AWS_CONFIG } from '../constants';
+import { DynamoDBUtil } from '../utils/dynamodb.util';
+import { TableNames } from '../constants';
 import { UserProfile, UpdateUserProfileRequest } from '../models';
 
-// Initialize DynamoDB client
-const client = new DynamoDBClient({ region: AWS_CONFIG.REGION });
-const docClient = DynamoDBDocumentClient.from(client);
-
 export class UserService {
-  private static readonly USERS_TABLE = process.env.DYNAMODB_USERS_TABLE;
-
   /**
-   * Get user profile from separated users table
+   * Get user profile from DynamoDB main table using PK/SK pattern
    */
   static async getUserProfile(userId: string): Promise<UserProfile | null> {
-    if (!this.USERS_TABLE) {
+    if (!TableNames.USERS) {
       throw new Error('DYNAMODB_USERS_TABLE environment variable not set');
     }
 
     try {
-      const command = new GetCommand({
-        TableName: this.USERS_TABLE,
-        Key: {
-          userId: userId,
-        }
+      const userItem = await DynamoDBUtil.getItem(TableNames.USERS, {
+        PK: `USER#${userId}`,
+        SK: 'PROFILE'
       });
 
-      const result = await docClient.send(command);
-      if (result.Item) {
-        return this.formatUserProfile(result.Item);
+      if (userItem) {
+        return this.formatUserProfile(userItem);
       }
 
       return null;
@@ -51,13 +34,13 @@ export class UserService {
   }
 
   /**
-   * Create or update user profile in separated users table
+   * Create or update user profile in DynamoDB
    */
   static async updateUserProfile(
     userId: string,
     data: UpdateUserProfileRequest
   ): Promise<{ userId: string; updatedAt: string }> {
-    if (!this.USERS_TABLE) {
+    if (!TableNames.USERS) {
       throw new Error('DYNAMODB_USERS_TABLE environment variable not set');
     }
 
@@ -71,30 +54,25 @@ export class UserService {
 
       if (!existingUser) {
         const newUser = {
+          PK: `USER#${userId}`,
+          SK: 'PROFILE',
           userId,
-          email: personalInfo?.email,
-          createdAt: now,
-          updatedAt: now,
+          email: personalInfo?.email || '',
           personalInfo: {
             name: personalInfo?.name || '',
             email: personalInfo?.email || '',
             phone: personalInfo?.phone || '',
             location: personalInfo?.location || '',
           },
+          createdAt: now,
+          updatedAt: now,
           metadata: {
             signUpDate: now,
             status: 'active'
           }
         };
 
-        await docClient.send(new PutCommand({
-          TableName: this.USERS_TABLE,
-          Item: {
-            ...newUser,
-            email: newUser.email // Ensure email is used as sort key
-          },
-          ConditionExpression: 'attribute_not_exists(userId)' // Prevent overwriting
-        }));
+        await DynamoDBUtil.putItem(TableNames.USERS, newUser);
 
         return {
           userId,
@@ -103,31 +81,22 @@ export class UserService {
       }
 
       // Update existing user profile
-      const updateExpression = 'set personalInfo = :personalInfo, updatedAt = :updatedAt';
-      const expressionAttributeValues = {
-        ':personalInfo': {
+      const updates = {
+        'personalInfo': {
           ...existingUser.personalInfo,
           ...personalInfo,
         },
-        ':updatedAt': now,
+        'updatedAt': now
       };
 
-      const updateParams = {
-        TableName: this.USERS_TABLE,
-        Key: {
-          userId: userId,
-          email: existingUser.email
-        },
-        UpdateExpression: updateExpression,
-        ExpressionAttributeValues: expressionAttributeValues,
-        ReturnValues: ReturnValue.ALL_NEW
-      };
-
-      const result = await docClient.send(new UpdateCommand(updateParams));
+      await DynamoDBUtil.updateItem(TableNames.USERS, {
+        PK: `USER#${userId}`,
+        SK: 'PROFILE'
+      }, updates);
 
       return {
         userId,
-        updatedAt: result.Attributes?.updatedAt || now,
+        updatedAt: now,
       };
     } catch (error) {
       console.error('Error updating user profile:', error);
@@ -139,27 +108,26 @@ export class UserService {
    * Create user from Cognito post-confirmation trigger
    */
   static async createUserFromCognito(userId: string, email: string, name?: string): Promise<void> {
-    if (!this.USERS_TABLE) {
+    if (!TableNames.USERS) {
       throw new Error('DYNAMODB_USERS_TABLE environment variable not set');
     }
 
     const now = new Date().toISOString();
 
     const newUser = {
+      PK: `USER#${userId}`,
+      SK: 'PROFILE',
       userId,
       email,
-      createdAt: now,
-      updatedAt: now,
       personalInfo: {
         name: name || '',
         email: email,
         phone: '',
         location: '',
-        linkedin: '',
-        github: '',
-        portfolio: '',
         summary: '',
       },
+      createdAt: now,
+      updatedAt: now,
       metadata: {
         signUpDate: now,
         signUpMethod: 'cognito',
@@ -169,20 +137,18 @@ export class UserService {
     };
 
     try {
-      await docClient.send(new PutCommand({
-        TableName: this.USERS_TABLE,
-        Item: newUser,
-        ConditionExpression: 'attribute_not_exists(userId)'
-      }));
-
-      console.log('User created successfully from Cognito:', userId);
-    } catch (error: any) {
-      if (error.name === 'ConditionalCheckFailedException') {
+      // Check if user already exists first
+      const existingUser = await this.getUserProfile(userId);
+      if (existingUser) {
         console.log('User already exists:', userId);
-      } else {
-        console.error('Error creating user from Cognito:', error);
-        throw error;
+        return;
       }
+
+      await DynamoDBUtil.putItem(TableNames.USERS, newUser);
+      console.log('User created successfully from Cognito:', userId);
+    } catch (error) {
+      console.error('Error creating user from Cognito:', error);
+      throw error;
     }
   }
 
@@ -197,35 +163,5 @@ export class UserService {
       createdAt: userItem.createdAt,
       updatedAt: userItem.updatedAt,
     };
-  }
-
-  /**
-   * Get user by email (for admin functions)
-   */
-  static async getUserByEmail(email: string): Promise<UserProfile | null> {
-    if (!this.USERS_TABLE) {
-      throw new Error('DYNAMODB_USERS_TABLE environment variable not set');
-    }
-
-    try {
-      const params = {
-        TableName: this.USERS_TABLE,
-        IndexName: 'EmailIndex', // Assuming email index exists
-        KeyConditionExpression: 'email = :email',
-        ExpressionAttributeValues: {
-          ':email': email
-        }
-      };
-
-      const result = await docClient.send(new QueryCommand(params));
-      if (result.Items && result.Items.length > 0) {
-        return this.formatUserProfile(result.Items[0]);
-      }
-
-      return null;
-    } catch (error) {
-      console.error('Error getting user by email:', error);
-      return null;
-    }
   }
 }
