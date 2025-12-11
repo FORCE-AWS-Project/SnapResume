@@ -54,9 +54,6 @@ app.get('/api-docs.json', (_, res) => {
 const publicPaths = [
   '/templates',
   '/api-docs',
-  '/resumes',
-  '/sections',
-  '/recommendations'
 ];
 
 // Apply authentication middleware conditionally

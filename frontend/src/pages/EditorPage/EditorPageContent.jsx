@@ -24,7 +24,6 @@ function EditorPageContent() {
   const navigate = useNavigate()
   const [zoom, setZoom] = useState(100)
   const [resumeName, setResumeName] = useState('My Resume')
-  const [managerModalVisible, setManagerModalVisible] = useState(false)
   const [templateModalVisible, setTemplateModalVisible] = useState(false)
 
   const {
@@ -126,10 +125,6 @@ function EditorPageContent() {
   }
 
 
-  const handlePrint = () => {
-    window.print()
-  }
-
   const handleZoom = (value) => {
     setZoom(Math.min(Math.max(value, 50), 200))
   }
@@ -193,9 +188,6 @@ function EditorPageContent() {
             loading={saving}
           >
             Save
-          </Button>
-          <Button icon={<PrinterOutlined />} onClick={handlePrint}>
-            Print
           </Button>
           <Dropdown
             menu={{ items: zoomMenuItems, onClick: (e) => handleZoom(parseInt(e.key)) }}

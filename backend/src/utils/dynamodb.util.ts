@@ -24,7 +24,6 @@ import {
   BatchGetCommandOutput,
   BatchWriteCommand,
   BatchWriteCommandInput,
-  BatchWriteCommandOutput,
   TransactWriteCommand,
 } from '@aws-sdk/lib-dynamodb';
 import { AWS_CONFIG } from '../constants';

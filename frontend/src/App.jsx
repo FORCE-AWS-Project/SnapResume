@@ -7,7 +7,8 @@ import PricingPage from './pages/PricingPage/PricingPage'
 import AboutPage from './pages/AboutPage/AboutPage'
 import Auth from './pages/Auth/Auth'
 import EditorPage from './pages/EditorPage/EditorPage'
-// import ToastProvider from './components/ToastProvider/ToastProvider'
+import UserProfilePage from './pages/UserProfilePage/UserProfilePage'
+import ToastProvider from './components/ToastProvider/ToastProvider'
 
 function App() {
   const theme = {
@@ -19,17 +20,23 @@ function App() {
 
   return (
     <ConfigProvider theme={theme}>
-        <Router>
-          <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/features" element={<FeaturesPage />} />
-            <Route path="/pricing" element={<PricingPage />} />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="/templates" element={<TemplatesPage />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/editor" element={<EditorPage />} />
-          </Routes>
-        </Router>
+      <AuthProvider>
+        <ResumeProvider>
+          <Router>
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/features" element={<FeaturesPage />} />
+              <Route path="/pricing" element={<PricingPage />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/templates" element={<TemplatesPage />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/editor" element={<EditorPage />} />
+              <Route path="/profile" element={<UserProfilePage />} />
+            </Routes>
+          </Router>
+        </ResumeProvider>
+      </AuthProvider>
+      <ToastProvider />
     </ConfigProvider>
   )
 }

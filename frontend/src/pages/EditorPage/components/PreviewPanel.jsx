@@ -1,6 +1,5 @@
-import { useState, useEffect, useRef } from 'react'
-import { Card, Empty, Spin, Alert, Button, Space, Slider } from 'antd'
-import { FullscreenOutlined, FullscreenExitOutlined, ZoomInOutlined, ZoomOutOutlined } from '@ant-design/icons'
+import { useState, useEffect } from 'react'
+import { Card, Empty, Spin, Alert } from 'antd'
 import { TemplateRenderer } from '../../../utils/TemplateRenderer'
 import html2pdf from 'html2pdf.js'
 import styles from './PreviewPanel.module.css'

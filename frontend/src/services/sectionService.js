@@ -11,23 +11,23 @@ const sectionService = {
     if (filters.offset) params.append('offset', filters.offset);
 
     const endpoint = `/api/sections${params.toString() ? `?${params.toString()}` : ''}`;
-    return api.get(endpoint);
+    return api.get(endpoint, { useAuth: true });
   },
 
   getSection: async (sectionId) => {
-    return api.get(`/api/sections/${sectionId}`);
+    return api.get(`/api/sections/${sectionId}`, { useAuth: true });
   },
 
   createSection: async (sectionData) => {
-    return api.post('/api/sections', sectionData);
+    return api.post('/api/sections', sectionData, { useAuth: true });
   },
 
   updateSection: async (sectionId, sectionData) => {
-    return api.put(`/api/sections/${sectionId}`, sectionData);
+    return api.put(`/api/sections/${sectionId}`, sectionData, { useAuth: true });
   },
 
   deleteSection: async (sectionId) => {
-    return api.delete(`/api/sections/${sectionId}`);
+    return api.delete(`/api/sections/${sectionId}`, { useAuth: true });
   },
 };
 
