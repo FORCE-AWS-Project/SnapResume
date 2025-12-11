@@ -44,9 +44,10 @@ interface DynamoDBQueryResult<T> {
 
 // Initialize DynamoDB client
 const client = new DynamoDBClient({ region: AWS_CONFIG.REGION, credentials:{
-  accessKeyId: AWS_CONFIG.ACCESS_KEY,
-  secretAccessKey: AWS_CONFIG.SECRET_ACCESS_KEY
+  accessKeyId: process.env.ACCESS_KEY,
+  secretAccessKey: process.env.SECRET_ACCESS_KEY
 } });
+
 const docClient = DynamoDBDocumentClient.from(client);
 
 export class DynamoDBUtil {

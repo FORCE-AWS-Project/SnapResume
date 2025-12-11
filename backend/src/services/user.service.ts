@@ -31,35 +31,16 @@ export class UserService {
     }
 
     try {
-      // First try to get user by primary key
       const command = new GetCommand({
         TableName: this.USERS_TABLE,
         Key: {
           userId: userId,
-          email: userId // Fallback using userId as sort key
         }
       });
 
       const result = await docClient.send(command);
       if (result.Item) {
         return this.formatUserProfile(result.Item);
-      }
-
-      // If not found, try to query by email (more reliable)
-      const queryCommand = new QueryCommand({
-        TableName: this.USERS_TABLE,
-        IndexName: 'EmailIndex', // Assuming email index exists
-        KeyConditionExpression: 'email = :email',
-        FilterExpression: 'userId = :userId',
-        ExpressionAttributeValues: {
-          ':email': `placeholder@${userId}`, // Placeholder - we need email
-          ':userId': userId
-        }
-      });
-
-      const queryResult = await docClient.send(queryCommand);
-      if (queryResult.Items && queryResult.Items.length > 0) {
-        return this.formatUserProfile(queryResult.Items[0]);
       }
 
       return null;

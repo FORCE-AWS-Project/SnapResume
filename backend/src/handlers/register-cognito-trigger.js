@@ -8,7 +8,7 @@ const client = new DynamoDBClient({
 const docClient = DynamoDBDocumentClient.from(client);
 
 // Table name from environment variable
-const TABLE_NAME = process.env.USERS_TABLE_NAME || 'resume-snap-dev-main';
+const TABLE_NAME = 'resume-snap-dev-users';
 
 /**
  * Cognito Post-Confirmation Trigger Handler

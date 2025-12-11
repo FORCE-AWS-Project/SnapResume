@@ -17,7 +17,9 @@ export function ResumeManagerUniversal({
   resumeData: externalResumeData,
   onUpdateData: externalOnUpdateData,
   onSave,
-  mode = 'auto' // 'auto', 'modal', 'extension'
+  mode = 'auto', // 'auto', 'modal', 'extension'
+  sectionOrder,
+  onOrderChange
 }) {
   const context = useResumeManagerContext()
   const { template } = useResume()
@@ -30,7 +32,7 @@ export function ResumeManagerUniversal({
   // Determine if running in extension or web app
   const isExtensionMode = mode === 'extension' || (mode === 'auto' && context?.isExtension)
 
-  // Parse resume data into displayable sections - moved before usage
+  // Parse resume data into displayable sections
   const parseResumeSections = useCallback((data) => {
     const availableSections = []
 
@@ -45,11 +47,12 @@ export function ResumeManagerUniversal({
       })
     }
 
+
     if (data.experience && data.experience.length > 0) {
       availableSections.push({
         id: 'experience',
         title: 'Work Experience',
-        icon: '??',
+        icon: '💼',
         completed: true,
         count: data.experience.length,
         data: data.experience
@@ -60,20 +63,20 @@ export function ResumeManagerUniversal({
       availableSections.push({
         id: 'education',
         title: 'Education',
-        icon: '??',
+        icon: '🎓',
         completed: true,
         count: data.education.length,
         data: data.education
       })
     }
 
-    if (data.skills && data.skills.length > 0) {
+    if (data.skills && (data.skills.categories?.length > 0 || Array.isArray(data.skills))) {
       availableSections.push({
         id: 'skills',
         title: 'Skills',
-        icon: '?',
+        icon: '⚡',
         completed: true,
-        count: data.skills.length,
+        count: Array.isArray(data.skills) ? data.skills.length : data.skills.categories.length,
         data: data.skills
       })
     }
@@ -82,7 +85,7 @@ export function ResumeManagerUniversal({
       availableSections.push({
         id: 'certifications',
         title: 'Certifications',
-        icon: '??',
+        icon: '📜',
         completed: true,
         count: data.certifications.length,
         data: data.certifications
@@ -93,10 +96,58 @@ export function ResumeManagerUniversal({
       availableSections.push({
         id: 'projects',
         title: 'Projects',
-        icon: '??',
+        icon: '🚀',
         completed: true,
         count: data.projects.length,
         data: data.projects
+      })
+    }
+
+    if (data.languages && data.languages.length > 0) {
+      availableSections.push({
+        id: 'languages',
+        title: 'Languages',
+        icon: '🗣️',
+        completed: true,
+        count: data.languages.length,
+        data: data.languages
+      })
+    }
+
+    if (data.volunteering && data.volunteering.length > 0) {
+      availableSections.push({
+        id: 'volunteering',
+        title: 'Volunteering',
+        icon: '🤝',
+        completed: true,
+        count: data.volunteering.length,
+        data: data.volunteering
+      })
+    }
+
+    if (data.publications && data.publications.length > 0) {
+      availableSections.push({
+        id: 'publications',
+        title: 'Publications',
+        icon: '📚',
+        completed: true,
+        count: data.publications.length,
+        data: data.publications
+      })
+    }
+
+    // Sort sections based on sectionOrder if available
+    if (sectionOrder && sectionOrder.length > 0) {
+      availableSections.sort((a, b) => {
+        const indexA = sectionOrder.indexOf(a.id)
+        const indexB = sectionOrder.indexOf(b.id)
+        // If both are in the order list, sort by index
+        if (indexA !== -1 && indexB !== -1) return indexA - indexB
+        // If only A is in list, it comes first
+        if (indexA !== -1) return -1
+        if (indexB !== -1) return 1
+        // Keep original order for others
+        return 0
       })
     }
 
@@ -104,7 +155,7 @@ export function ResumeManagerUniversal({
     if (availableSections.length > 0 && !selectedSection) {
       setSelectedSection(availableSections[0].id)
     }
-  }, [selectedSection])
+  }, [selectedSection, sectionOrder])
 
   // Load resume data from storage on mount
   useEffect(() => {
@@ -161,9 +212,7 @@ export function ResumeManagerUniversal({
 
     const newResumeData = { ...resumeData }
     switch (sectionId) {
-      case 'personal':
-        newResumeData.personalInfo = {}
-        break
+
       case 'experience':
         newResumeData.experience = []
         break
@@ -178,6 +227,15 @@ export function ResumeManagerUniversal({
         break
       case 'projects':
         newResumeData.projects = []
+        break
+      case 'languages':
+        newResumeData.languages = []
+        break
+      case 'volunteering':
+        newResumeData.volunteering = []
+        break
+      case 'publications':
+        newResumeData.publications = []
         break
       default:
         break
@@ -209,6 +267,11 @@ export function ResumeManagerUniversal({
     // Call external handlers
     if (externalOnUpdateData) {
       externalOnUpdateData(resumeData)
+    }
+
+    // Update section order on save
+    if (onOrderChange && sections.length > 0) {
+      onOrderChange(sections.map(s => s.id))
     }
 
     if (onSave) {
@@ -252,7 +315,7 @@ export function ResumeManagerUniversal({
                   onClick={() => handleZoom(zoom - 10)}
                   disabled={zoom <= 50}
                 >
-                  ?
+                  -
                 </button>
                 <span className={styles.zoomLevel}>{zoom}%</span>
                 <button
@@ -267,6 +330,11 @@ export function ResumeManagerUniversal({
 
             <div className={styles.previewContainer}>
               <PreviewPanel data={resumeData} template={template} zoom={zoom} />
+              <ResumePreviewPanel
+                data={resumeData}
+                zoom={zoom}
+                sectionOrder={sections.map(s => s.id)}
+              />
             </div>
           </div>
         </div>
@@ -293,8 +361,8 @@ export function ResumeManagerUniversal({
       open={visible}
       onCancel={onClose}
       width="90vw"
-      style={{ maxWidth: '1600px' }}
-      styles={{ body: { padding: 0, height: '80vh' } }}
+      style={{ maxWidth: "1600px" }}
+      styles={{ body: { padding: 0, height: "80vh" } }}
       footer={[
         <Button key="cancel" onClick={onClose}>
           Cancel
@@ -306,7 +374,7 @@ export function ResumeManagerUniversal({
           disabled={!hasChanges}
         >
           Save Changes
-        </Button>
+        </Button>,
       ]}
       className={styles.modal}
     >
@@ -317,7 +385,7 @@ export function ResumeManagerUniversal({
             <h3 className={styles.panelTitle}>Sections</h3>
             <span className={styles.sectionCount}>{sections.length} sections</span>
           </div>
-
+  
           <SectionsList
             sections={sections}
             selectedSection={selectedSection}
@@ -326,19 +394,49 @@ export function ResumeManagerUniversal({
             onSectionDelete={handleDeleteSection}
           />
         </div>
-
+  
         {/* Divider */}
         <div className={styles.panelDivider}></div>
-
+  
         {/* Right Panel */}
         <div className={styles.rightPanel}>
+          {/* Preview top container */}
           <div className={styles.previewContainer}>
             <PreviewPanel data={resumeData} template={template} zoom={zoom} />
+          </div>
+  
+          {/* Preview header */}
+          <div className={styles.previewHeader}>
+            <h3 className={styles.previewTitle}>Preview</h3>
+            <div className={styles.previewControls}>
+              <button
+                className={styles.zoomBtn}
+                onClick={() => handleZoom(zoom - 10)}
+                disabled={zoom <= 50}
+              >
+                -
+              </button>
+              <span className={styles.zoomLevel}>{zoom}%</span>
+              <button
+                className={styles.zoomBtn}
+                onClick={() => handleZoom(zoom + 10)}
+                disabled={zoom >= 200}
+              >
+                +
+              </button>
+            </div>
+          </div>
+  
+          {/* Resume Preview Panel */}
+          <div className={styles.previewContainer}>
+            <ResumePreviewPanel
+              data={resumeData}
+              zoom={zoom}
+              sectionOrder={sections.map((s) => s.id)}
+            />
           </div>
         </div>
       </div>
     </Modal>
-  )
+  );
 }
-
-export default ResumeManagerUniversal

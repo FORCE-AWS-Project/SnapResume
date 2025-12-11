@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Card, Input, Button, Space, DatePicker, Checkbox, Tooltip } from 'antd'
+import { Card, Input, Button, Space, DatePicker, Checkbox, Tooltip, Select } from 'antd'
 import { PlusOutlined, DeleteOutlined, DragOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import styles from './FormSection.module.css'
@@ -119,11 +119,16 @@ export default function Experience({ data, onChange }) {
                                     addonBefore="Location"
                                     style={{ width: '60%' }}
                                 />
-                                <Input
-                                    placeholder="Remote/Hybrid/On-site"
+                                <Select
+                                    placeholder="Type"
                                     value={exp.locationType}
-                                    onChange={(e) => updateExperience(index, 'locationType', e.target.value)}
+                                    onChange={(value) => updateExperience(index, 'locationType', value)}
                                     style={{ width: '40%' }}
+                                    options={[
+                                        { value: 'On-site', label: 'On-site' },
+                                        { value: 'Remote', label: 'Remote' },
+                                        { value: 'Hybrid', label: 'Hybrid' },
+                                    ]}
                                 />
                             </Space.Compact>
 
@@ -146,10 +151,14 @@ export default function Experience({ data, onChange }) {
                                 <Checkbox
                                     checked={exp.current}
                                     onChange={(e) => {
-                                        updateExperience(index, 'current', e.target.checked)
-                                        if (e.target.checked) {
-                                            updateExperience(index, 'endDate', null)
+                                        const isChecked = e.target.checked
+                                        const updated = [...expData]
+                                        updated[index] = {
+                                            ...updated[index],
+                                            current: isChecked,
+                                            endDate: isChecked ? null : updated[index].endDate
                                         }
+                                        onChange(updated)
                                     }}
                                 >
                                     Current
