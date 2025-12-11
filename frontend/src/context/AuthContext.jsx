@@ -57,6 +57,9 @@ export const AuthProvider = ({ children }) => {
             });
             setTokens(currentTokens);
 
+            // Set token in API Client
+            API.client.setAuthToken(currentTokens.accessToken);
+
             // Fetch full user profile from API
             await fetchUserProfile();
           } else {
@@ -109,6 +112,9 @@ export const AuthProvider = ({ children }) => {
         accessToken: result.accessToken,
         refreshToken: result.refreshToken
       });
+
+      // Set token in API Client
+      API.client.setAuthToken(result.accessToken);
 
       // Store tokens in localStorage
       localStorage.setItem('cognitoIdToken', result.idToken);
@@ -165,6 +171,9 @@ export const AuthProvider = ({ children }) => {
       setUserProfile(null);
       setTokens(null);
       setError(null);
+
+      // Clear token from API Client
+      API.client.setAuthToken(null);
 
       // Clear tokens from localStorage
       localStorage.removeItem('cognitoIdToken');

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: sans-serif; padding: 20px; color: #333; }
+        .header { border-bottom: 2px solid #1890ff; padding-bottom: 10px; margin-bottom: 20px; }
+        .name { font-size: 24px; font-weight: bold; color: #1890ff; }
+        .contact { font-size: 12px; color: #666; }
+        .section { margin-bottom: 15px; }
+        .section-title { font-size: 16px; font-weight: bold; color: #333; border-bottom: 1px solid #eee; margin-bottom: 10px; }
+        .item { margin-bottom: 10px; }
+        .item-title { font-weight: bold; }
+        .item-subtitle { font-style: italic; font-size: 14px; }
+        .item-date { float: right; font-size: 12px; color: #999; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="name">{{personalInfo.firstName}} {{personalInfo.lastName}}</div>
+        <div class="contact">{{personalInfo.email}} | {{personalInfo.phone}}</div>
+        <div class="contact">{{personalInfo.address}} | {{personalInfo.linkedin}}</div>
+        <div>{{personalInfo.summary}}</div>
+    </div>
+
+    <!-- Experience -->
+    <div class="section">
+        <div class="section-title">Experience</div>
+        {{#experience}}
+        <div class="item">
+            <div class="item-title">{{title}} <span class="item-date">{{startDate}} - {{endDate}}</span></div>
+            <div class="item-subtitle">{{company}}</div>
+            <div>{{description}}</div>
+        </div>
+        {{/experience}}
+    </div>
+
+    <!-- Education -->
+    <div class="section">
+        <div class="section-title">Education</div>
+        {{#education}}
+        <div class="item">
+            <div class="item-title">{{degree}} <span class="item-date">{{startDate}} - {{endDate}}</span></div>
+            <div class="item-subtitle">{{school}}</div>
+        </div>
+        {{/education}}
+    </div>
+
+    <!-- Skills -->
+    <div class="section">
+        <div class="section-title">Skills</div>
+        <div>{{skills}}</div>
+    </div>
+</body>
+</html>

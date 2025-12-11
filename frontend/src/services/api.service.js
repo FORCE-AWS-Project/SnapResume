@@ -11,6 +11,15 @@ const apiClient = axios.create({
   }
 });
 
+// Allow setting auth token directly
+apiClient.setAuthToken = (token) => {
+  if (token) {
+    apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  } else {
+    delete apiClient.defaults.headers.common['Authorization'];
+  }
+};
+
 /**
  * Add authorization header to requests
  */
@@ -109,7 +118,7 @@ const resumeAPI = {
 const userAPI = {
   // Get current user profile (GET /api/users/me)
   getProfile: () => apiClient.get('/api/users/me'),
-  
+
   // Alias for getProfile - get authenticated user's profile
   getMe: () => apiClient.get('/api/users/me'),
 

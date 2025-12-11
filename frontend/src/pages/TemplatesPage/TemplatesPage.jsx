@@ -17,7 +17,8 @@ const TEMPLATES = [
     accent: '#1890ff',
     features: ['ATS-Optimized', 'Modern Design', 'One Page'],
     thumbnail: '🎨',
-    isPopular: true
+    isPopular: true,
+    templateFileUrl: '/templates/modern.html'
   },
   {
     id: 2,
@@ -93,20 +94,20 @@ export default function TemplatesPage() {
   // 2. USEMEMO: Optimizes filtering performance
   const filteredTemplates = useMemo(() => {
     const lowerQuery = searchQuery.toLowerCase().trim()
-    
+
     if (!lowerQuery && selectedFilter === 'all') {
       return TEMPLATES
     }
-    
+
     return TEMPLATES.filter(template => {
-      const matchesSearch = !lowerQuery || 
+      const matchesSearch = !lowerQuery ||
         template.name.toLowerCase().includes(lowerQuery) ||
         template.description.toLowerCase().includes(lowerQuery) ||
         template.category.toLowerCase().includes(lowerQuery) ||
         template.features.some(feature => feature.toLowerCase().includes(lowerQuery))
-      
+
       const matchesFilter = selectedFilter === 'all' || template.category === selectedFilter
-      
+
       return matchesSearch && matchesFilter
     })
   }, [searchQuery, selectedFilter])
@@ -118,7 +119,7 @@ export default function TemplatesPage() {
   return (
     <div className={styles.container}>
       <Navbar />
-      
+
       <main className={styles.main}>
         {/* Hero Section */}
         <section className={styles.hero}>
@@ -186,18 +187,18 @@ export default function TemplatesPage() {
         <section className={styles.templatesGrid}>
           <div className={styles.gridHeader}>
             <h2 className={styles.resultsTitle}>
-              {filteredTemplates.length > 0 ? 'Available Templates' : 'No Templates Found'} 
+              {filteredTemplates.length > 0 ? 'Available Templates' : 'No Templates Found'}
               <span className={styles.count}>({filteredTemplates.length})</span>
             </h2>
           </div>
-          
+
           {filteredTemplates.length > 0 ? (
             <Row gutter={[24, 24]}>
               {filteredTemplates.map((template) => (
                 <Col xs={24} sm={12} lg={8} key={template.id}>
-                  <Badge.Ribbon 
-                    text="Popular" 
-                    color="#ff4d4f" 
+                  <Badge.Ribbon
+                    text="Popular"
+                    color="#ff4d4f"
                     style={{ display: template.isPopular ? 'block' : 'none' }}
                   >
                     <Card
@@ -231,7 +232,7 @@ export default function TemplatesPage() {
                           ))}
                         </div>
                         <Button type="primary" block className={styles.useBtn}>
-                           Use Template
+                          Use Template
                         </Button>
                       </div>
                     </Card>
@@ -240,7 +241,7 @@ export default function TemplatesPage() {
               ))}
             </Row>
           ) : (
-             <Empty description="No templates match your search criteria" />
+            <Empty description="No templates match your search criteria" />
           )}
         </section>
       </main>

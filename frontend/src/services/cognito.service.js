@@ -191,7 +191,13 @@ class CognitoService {
    */
   static async getTokens() {
     try {
-      const cognitoUser = await this.getCurrentUser();
+      if (!userPool) {
+        // Try to re-initialize if possible or check env
+        console.warn('Cognito User Pool not initialized during getTokens');
+        return null;
+      }
+
+      const cognitoUser = userPool.getCurrentUser();
       if (!cognitoUser) {
         return null;
       }
