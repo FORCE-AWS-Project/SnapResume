@@ -16,7 +16,7 @@ export default function LoginForm({ onSuccess, onSwitchTab }) {
       message.success('Login successful!')
       // Auto-navigate to templates page
       setTimeout(() => {
-        navigate('/editor')
+        navigate('/templates')
       }, 500)
       onSuccess()
     } catch (err) {

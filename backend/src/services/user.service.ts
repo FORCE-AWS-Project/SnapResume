@@ -17,11 +17,12 @@ export class UserService {
     }
 
     try {
+      console.log("User id: ",userId)
       const userItem = await DynamoDBUtil.getItem(TableNames.USERS, {
         PK: `USER#${userId}`,
         SK: 'PROFILE'
       });
-
+      console.log("Useritem: ",userItem)
       if (userItem) {
         return this.formatUserProfile(userItem);
       }
