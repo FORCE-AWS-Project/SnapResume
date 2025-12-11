@@ -1,19 +1,27 @@
 import { CognitoUserPool, CognitoUser, AuthenticationDetails, CognitoRefreshToken } from 'amazon-cognito-identity-js';
 
 const COGNITO_CONFIG = {
-  UserPoolId: 'us-east-1_ZXcNvnl3C',
-  ClientId: '1u0fu46op9q3qhlr5fjgm5f8dn',
-  Region: 'us-east-1'
+  UserPoolId: import.meta.env.VITE_COGNITO_USER_POOL_ID,
+  ClientId: import.meta.env.VITE_COGNITO_CLIENT_ID,
+  Region: import.meta.env.VITE_AWS_REGION
 };
 
 // Initialize Cognito User Pool
 let userPool = null;
 
 try {
-  userPool = new CognitoUserPool({
-    UserPoolId: COGNITO_CONFIG.UserPoolId,
-    ClientId: COGNITO_CONFIG.ClientId
-  });
+  if (COGNITO_CONFIG.UserPoolId && COGNITO_CONFIG.ClientId) {
+    userPool = new CognitoUserPool({
+      UserPoolId: COGNITO_CONFIG.UserPoolId,
+      ClientId: COGNITO_CONFIG.ClientId
+    });
+  } else {
+    console.warn('Cognito configuration missing. Please ensure .env file exists and server has been restarted.', {
+      UserPoolId: COGNITO_CONFIG.UserPoolId ? 'Set' : 'Missing',
+      ClientId: COGNITO_CONFIG.ClientId ? 'Set' : 'Missing',
+      Region: COGNITO_CONFIG.Region
+    });
+  }
 } catch (error) {
   console.error('Failed to initialize Cognito User Pool:', error);
 }
