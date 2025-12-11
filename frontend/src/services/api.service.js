@@ -18,17 +18,20 @@ apiClient.interceptors.request.use(
   async (config) => {
     try {
       const tokens = await CognitoService.getTokens();
-      if (tokens && tokens.accessToken) {
+
+      if (tokens?.accessToken) {
         config.headers.Authorization = `Bearer ${tokens.accessToken}`;
       }
+
     } catch (error) {
-      console.error('Error getting tokens:', error);
-      // Continue without token - backend will handle 401
+      console.error("Error getting tokens:", error);
     }
+
     return config;
   },
   (error) => Promise.reject(error)
 );
+
 
 /**
  * Handle token refresh on 401 response
@@ -36,31 +39,34 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
+
     const originalRequest = error.config;
 
-    // Only retry on 401 and if not already retried
-    if (error.response?.status === 401 && !originalRequest._retry && originalRequest.url !== '/api/auth/login') {
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      originalRequest.url !== "/api/auth/login"
+    ) {
       originalRequest._retry = true;
 
       try {
         const tokens = await CognitoService.getTokens();
-        if (tokens && tokens.refreshToken) {
-          const newTokens = await CognitoService.refreshTokens(tokens.refreshToken);
-          originalRequest.headers.Authorization = `Bearer ${newTokens.accessToken}`;
-          return apiClient(originalRequest);
-        }
-      } catch (refreshError) {
-        console.error('Token refresh failed:', refreshError);
-        // Redirect to login
-        if (typeof window !== 'undefined') {
-          window.location.href = '/auth?tab=login';
-        }
+        const newTokens = await CognitoService.refreshTokens(tokens.refreshToken);
+
+        originalRequest.headers.Authorization = `Bearer ${newTokens.accessToken}`;
+
+        return apiClient(originalRequest);
+
+      } catch (err) {
+        console.error("Token refresh failed:", err);
+        window.location.href = "/auth?tab=login";
       }
     }
 
     return Promise.reject(error);
   }
 );
+
 
 /**
  * Resume API endpoints
