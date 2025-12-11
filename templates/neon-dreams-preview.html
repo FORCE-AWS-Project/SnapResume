@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Dreams Resume</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif;">
+    <div style="max-width: 800px; margin: 40px auto; padding: 40px; background: #f8f8f8; border: 1px solid #ddd;">
+        <!-- Personal Info Section -->
+        <div style="text-align: center; margin-bottom: 40px; padding-bottom: 30px; border-bottom: 2px solid #333;">
+            <h1 style="margin: 0 0 10px 0; font-size: 36px; color: #333;">{{personalInfo.name}}</h1>
+            <div style="font-size: 18px; color: #666; margin-bottom: 10px;">{{personalInfo.title}}</div>
+            <div style="display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; font-size: 14px; color: #666;">
+                <span>{{personalInfo.email}}</span>
+                <span>{{personalInfo.phone}}</span>
+                <span>{{personalInfo.location}}</span>
+            </div>
+        </div>
+
+        <!-- Summary Section -->
+        <div style="margin-bottom: 30px;">
+            {{personalInfo.summary}}
+        </div>
+
+        <!-- Experience Section -->
+        <div style="margin-bottom: 30px;">
+            <h2 style="font-size: 24px; margin-bottom: 20px; color: #333; border-bottom: 2px solid #333; padding-bottom: 5px;">Experience</h2>
+            {{#each experience}}
+            <div style="margin-bottom: 25px; padding: 20px; background: white; border: 1px solid #ddd; border-radius: 5px;">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+                    <div style="flex: 1;">
+                        <div style="font-size: 18px; font-weight: bold; color: #333;">{{position}}</div>
+                        <div style="font-size: 16px; color: #666;">{{company}} • {{location}}</div>
+                    </div>
+                    <div style="font-size: 14px; color: #999; white-space: nowrap; margin-left: 20px;">
+                        {{startDate}} - {{#if current}}Present{{else}}{{endDate}}{{/if}}
+                    </div>
+                </div>
+                <div style="color: #555; line-height: 1.6;">{{description}}</div>
+                {{#if technologies}}
+                <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 15px;">
+                    {{#each technologies}}
+                    <span style="padding: 4px 12px; background: #e8e8e8; border-radius: 15px; font-size: 12px; color: #333;">{{this}}</span>
+                    {{/each}}
+                </div>
+                {{/if}}
+            </div>
+            {{/each}}
+        </div>
+
+        <!-- Projects Section -->
+        <div style="margin-bottom: 30px;">
+            <h2 style="font-size: 24px; margin-bottom: 20px; color: #333; border-bottom: 2px solid #333; padding-bottom: 5px;">Projects</h2>
+            {{#each projects}}
+            <div style="margin-bottom: 25px; padding: 20px; background: white; border: 1px solid #ddd; border-radius: 5px;">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+                    <div style="flex: 1;">
+                        <div style="font-size: 18px; font-weight: bold; color: #333;">{{name}}</div>
+                        <div style="font-size: 16px; color: #666;">{{#if url}}{{url}}{{else}}Personal Project{{/if}}</div>
+                    </div>
+                    <div style="font-size: 14px; color: #999; white-space: nowrap; margin-left: 20px;">
+                        {{#if startDate}}{{startDate}}{{/if}}
+                        {{#if endDate}} - {{endDate}}{{/if}}
+                    </div>
+                </div>
+                <div style="color: #555; line-height: 1.6;">{{description}}</div>
+                {{#if technologies}}
+                <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 15px;">
+                    {{#each technologies}}
+                    <span style="padding: 4px 12px; background: #e8e8e8; border-radius: 15px; font-size: 12px; color: #333;">{{this}}</span>
+                    {{/each}}
+                </div>
+                {{/if}}
+            </div>
+            {{/each}}
+        </div>
+
+        <!-- Education Section -->
+        <div style="margin-bottom: 30px;">
+            <h2 style="font-size: 24px; margin-bottom: 20px; color: #333; border-bottom: 2px solid #333; padding-bottom: 5px;">Education</h2>
+            {{#each education}}
+            <div style="margin-bottom: 25px; padding: 20px; background: white; border: 1px solid #ddd; border-radius: 5px;">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+                    <div style="flex: 1;">
+                        <div style="font-size: 18px; font-weight: bold; color: #333;">{{degree}}</div>
+                        <div style="font-size: 16px; color: #666;">{{institution}} • {{location}}</div>
+                        {{#if field}}<div style="font-size: 16px; color: #666;">{{field}}</div>{{/if}}
+                    </div>
+                    <div style="font-size: 14px; color: #999; white-space: nowrap; margin-left: 20px;">
+                        {{startDate}} - {{endDate}}
+                    </div>
+                </div>
+                {{#if gpa}}<div style="color: #555;">GPA: {{gpa}}</div>{{/if}}
+            </div>
+            {{/each}}
+        </div>
+    </div>
+</body>
+</html>

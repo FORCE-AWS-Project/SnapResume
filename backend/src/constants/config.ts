@@ -46,4 +46,6 @@ export const AWS_CONFIG = {
   S3_BUCKET: process.env.S3_BUCKET || '',
   COGNITO_USER_POOL_ID: process.env.COGNITO_USER_POOL_ID || '',
   COGNITO_CLIENT_ID: process.env.COGNITO_CLIENT_ID || '',
+  ACCESS_KEY: process.env.ACCESS_KEY || "",
+  SECRET_ACCESS_KEY: process.env.SECRET_ACCESS_KEY || ""
 } as const;

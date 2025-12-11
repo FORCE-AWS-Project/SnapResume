@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Resume - John Anderson</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400;600;700&display=swap');
+
+        .clean-minimal-resume-container {
+            font-family: 'Source Sans Pro', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: white;
+            padding: 50px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .clean-minimal-resume-container * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .header {
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .name {
+            font-size: 32px;
+            font-weight: 700;
+            color: #000;
+            margin-bottom: 10px;
+            letter-spacing: -0.5px;
+        }
+
+        .contact {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .contact span {
+            margin: 0 15px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: #000;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-bottom: 2px solid #000;
+            display: inline-block;
+            padding-bottom: 5px;
+        }
+
+        .summary {
+            font-size: 15px;
+            line-height: 1.7;
+            color: #444;
+            max-width: 700px;
+            margin: 0 auto 40px;
+        }
+
+        .item {
+            margin-bottom: 30px;
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .item-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #000;
+            margin-bottom: 4px;
+        }
+
+        .item-subtitle {
+            font-size: 14px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .item-location {
+            font-size: 13px;
+            color: #666;
+            font-style: italic;
+        }
+
+        .item-date {
+            font-size: 13px;
+            color: #666;
+            font-weight: 600;
+            white-space: nowrap;
+            margin-left: 20px;
+        }
+
+        .item-description {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #444;
+            margin-top: 10px;
+        }
+
+        .item-list {
+            margin-top: 10px;
+            padding-left: 20px;
+        }
+
+        .item-list li {
+            font-size: 14px;
+            margin-bottom: 5px;
+            line-height: 1.5;
+            color: #444;
+        }
+
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .skill-category {
+            margin-bottom: 20px;
+        }
+
+        .skill-category h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #000;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .skill-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .skill-item {
+            font-size: 13px;
+            background: #f5f5f5;
+            padding: 4px 12px;
+            border-radius: 4px;
+            color: #333;
+        }
+
+        .project-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #000;
+            margin-bottom: 8px;
+        }
+
+        .project-link {
+            color: #0066cc;
+            text-decoration: none;
+        }
+
+        .project-link:hover {
+            text-decoration: underline;
+        }
+
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .tech-tag {
+            font-size: 12px;
+            background: #f0f0f0;
+            color: #555;
+            padding: 3px 10px;
+            border-radius: 4px;
+        }
+
+        .certification-list {
+            margin-top: 20px;
+        }
+
+        .certification-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .certification-info {
+            flex: 1;
+        }
+
+        .certification-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #000;
+            margin-bottom: 5px;
+        }
+
+        .certification-issuer {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 3px;
+        }
+
+        .certification-meta {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .certification-date {
+            font-size: 13px;
+            color: #666;
+            font-weight: 500;
+            text-align: right;
+        }
+
+        @media print {
+            .clean-minimal-resume-container {
+                padding: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="clean-minimal-resume-container">
+        <div class="header">
+            <div class="name">John Anderson</div>
+            <div class="contact">
+                <span>Email: john.anderson@email.com</span>
+                <span>Phone: +1 (555) 123-4567</span>
+                <span>Location: San Francisco, CA</span>
+            </div>
+        </div>
+
+        <div class="summary">
+            Experienced software engineer with 8+ years in full-stack development, specializing in cloud-native applications, microservices architecture, and leading cross-functional teams to deliver innovative solutions.
+        </div>
+
+        <div class="section">
+            <div class="section-title">Experience</div>
+
+            <div class="item">
+                <div class="item-header">
+                    <div>
+                        <div class="item-title">Senior Software Engineer</div>
+                        <div class="item-subtitle">TechCorp Solutions</div>
+                        <div class="item-location">San Francisco, CA</div>
+                    </div>
+                    <div class="item-date">Jan 2021 - Dec 2024</div>
+                </div>
+                <div class="item-description">
+                    Led development of enterprise microservices platform serving 10M+ users with 99.99% uptime. Mentored team of 5 engineers and drove technical strategy.
+                </div>
+                <ul class="item-list">
+                    <li>Reduced API latency by 60% through optimization and caching strategies</li>
+                    <li>Architected and implemented CI/CD pipeline reducing deployment time by 80%</li>
+                    <li>Led migration from monolith to microservices, improving scalability by 300%</li>
+                    <li>Implemented comprehensive testing suite, increasing code coverage to 95%</li>
+                </ul>
+            </div>
+
+            <div class="item">
+                <div class="item-header">
+                    <div>
+                        <div class="item-title">Full Stack Developer</div>
+                        <div class="item-subtitle">Digital Innovations Inc</div>
+                        <div class="item-location">Austin, TX</div>
+                    </div>
+                    <div class="item-date">Mar 2019 - Dec 2020</div>
+                </div>
+                <div class="item-description">
+                    Developed and maintained multiple web applications using modern JavaScript frameworks. Collaborated with product teams to define and implement new features.
+                </div>
+                <ul class="item-list">
+                    <li>Built real-time collaboration features using WebSockets</li>
+                    <li>Improved application performance by 40% through code optimization</li>
+                    <li>Integrated third-party APIs, enhancing platform capabilities</li>
+                </ul>
+            </div>
+
+            <div class="item">
+                <div class="item-header">
+                    <div>
+                        <div class="item-title">Junior Developer</div>
+                        <div class="item-subtitle">StartUp Labs</div>
+                        <div class="item-location">Remote</div>
+                    </div>
+                    <div class="item-date">Jun 2017 - Feb 2019</div>
+                </div>
+                <div class="item-description">
+                    Contributed to the development of MVP products for various clients. Gained experience in agile methodologies and rapid prototyping.
+                </div>
+                <ul class="item-list">
+                    <li>Launched 3 MVP products within 6 months</li>
+                    <li>Implemented responsive design improving mobile engagement by 50%</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Education</div>
+
+            <div class="item">
+                <div class="item-header">
+                    <div>
+                        <div class="item-title">Bachelor of Science</div>
+                        <div class="item-subtitle">University of California, Berkeley - Computer Science</div>
+                        <div class="item-location">Berkeley, CA | GPA: 3.85</div>
+                    </div>
+                    <div class="item-date">Sep 2013 - May 2017</div>
+                </div>
+                <ul class="item-list">
+                    <li>Dean's List all semesters</li>
+                    <li>Computer Science Honor Society member</li>
+                    <li>Teaching Assistant for Data Structures and Algorithms</li>
+                    <li>Winner of 2016 Hackathon with AI-powered learning platform</li>
+                </ul>
+            </div>
+
+            <div class="item">
+                <div class="item-header">
+                    <div>
+                        <div class="item-title">Professional Certificate</div>
+                        <div class="item-subtitle">Google Career Certificates - Cloud Architecture</div>
+                        <div class="item-location">Online</div>
+                    </div>
+                    <div class="item-date">Jun 2020 - Sep 2020</div>
+                </div>
+                <ul class="item-list">
+                    <li>Completed with distinction</li>
+                    <li>Built and deployed scalable cloud solutions as final project</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Skills</div>
+            <div class="skills-grid">
+                <div class="skill-category">
+                    <h4>Programming Languages</h4>
+                    <div class="skill-list">
+                        <span class="skill-item">JavaScript</span>
+                        <span class="skill-item">TypeScript</span>
+                        <span class="skill-item">Python</span>
+                        <span class="skill-item">Java</span>
+                        <span class="skill-item">Go</span>
+                        <span class="skill-item">SQL</span>
+                    </div>
+                </div>
+                <div class="skill-category">
+                    <h4>Frontend Development</h4>
+                    <div class="skill-list">
+                        <span class="skill-item">React</span>
+                        <span class="skill-item">Vue.js</span>
+                        <span class="skill-item">Angular</span>
+                        <span class="skill-item">HTML5</span>
+                        <span class="skill-item">CSS3</span>
+                        <span class="skill-item">SASS</span>
+                        <span class="skill-item">Next.js</span>
+                    </div>
+                </div>
+                <div class="skill-category">
+                    <h4>Backend Development</h4>
+                    <div class="skill-list">
+                        <span class="skill-item">Node.js</span>
+                        <span class="skill-item">Express</span>
+                        <span class="skill-item">Django</span>
+                        <span class="skill-item">Flask</span>
+                        <span class="skill-item">GraphQL</span>
+                        <span class="skill-item">REST APIs</span>
+                    </div>
+                </div>
+                <div class="skill-category">
+                    <h4>Cloud & DevOps</h4>
+                    <div class="skill-list">
+                        <span class="skill-item">AWS</span>
+                        <span class="skill-item">Google Cloud</span>
+                        <span class="skill-item">Azure</span>
+                        <span class="skill-item">Docker</span>
+                        <span class="skill-item">Kubernetes</span>
+                        <span class="skill-item">Terraform</span>
+                    </div>
+                </div>
+                <div class="skill-category">
+                    <h4>Databases</h4>
+                    <div class="skill-list">
+                        <span class="skill-item">PostgreSQL</span>
+                        <span class="skill-item">MySQL</span>
+                        <span class="skill-item">MongoDB</span>
+                        <span class="skill-item">Redis</span>
+                        <span class="skill-item">ElasticSearch</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Projects</div>
+
+            <div class="item">
+                <div class="project-title">
+                    <a href="https://github.com/johnanderson/ecommerce-platform" class="project-link">E-Commerce Platform</a>
+                </div>
+                <div class="item-date">Jan 2023 - Jun 2023</div>
+                <div class="item-description">
+                    Built a scalable e-commerce platform with real-time inventory management, payment processing, recommendation engine, and admin dashboard. Implemented microservices architecture for high availability.
+                </div>
+                <div class="tech-stack">
+                    <span class="tech-tag">React</span>
+                    <span class="tech-tag">Node.js</span>
+                    <span class="tech-tag">MongoDB</span>
+                    <span class="tech-tag">Redis</span>
+                    <span class="tech-tag">Stripe API</span>
+                    <span class="tech-tag">Docker</span>
+                    <span class="tech-tag">AWS</span>
+                </div>
+                <ul class="item-list">
+                    <li>10K+ daily active users</li>
+                    <li>99.9% uptime over 12 months</li>
+                    <li>Processing $2M+ in transactions monthly</li>
+                </ul>
+            </div>
+
+            <div class="item">
+                <div class="project-title">
+                    <a href="https://task-ai.app" class="project-link">AI Task Manager</a>
+                </div>
+                <div class="item-date">Sep 2022 - Feb 2023</div>
+                <div class="item-description">
+                    Developed an intelligent task management application with AI-powered prioritization, natural language processing for task creation, and predictive analytics for deadline management.
+                </div>
+                <div class="tech-stack">
+                    <span class="tech-tag">Vue.js</span>
+                    <span class="tech-tag">Python</span>
+                    <span class="tech-tag">FastAPI</span>
+                    <span class="tech-tag">PostgreSQL</span>
+                    <span class="tech-tag">OpenAI API</span>
+                    <span class="tech-tag">TensorFlow</span>
+                </div>
+                <ul class="item-list">
+                    <li>Featured on Product Hunt as #1 Product of the Day</li>
+                    <li>50K+ users within first month</li>
+                    <li>95% user satisfaction rating</li>
+                </ul>
+            </div>
+
+            <div class="item">
+                <div class="project-title">
+                    <a href="https://collab-space.io" class="project-link">Real-Time Collaboration Tool</a>
+                </div>
+                <div class="item-date">Jul 2021 - Dec 2021</div>
+                <div class="item-description">
+                    Created a real-time collaborative whiteboard application with video conferencing, screen sharing, and persistent sessions. Optimized for low-latency communication.
+                </div>
+                <div class="tech-stack">
+                    <span class="tech-tag">WebRTC</span>
+                    <span class="tech-tag">Socket.io</span>
+                    <span class="tech-tag">React</span>
+                    <span class="tech-tag">Canvas API</span>
+                    <span class="tech-tag">Redis</span>
+                </div>
+                <ul class="item-list">
+                    <li>Sub-100ms latency for real-time updates</li>
+                    <li>Supports 100+ concurrent users per session</li>
+                    <li>Used by 500+ educational institutions</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Certifications</div>
+            <div class="certification-list">
+
+                <div class="certification-item">
+                    <div class="certification-info">
+                        <div class="certification-title">
+                            <a href="https://aws.amazon.com/verification" class="project-link">AWS Solutions Architect Professional</a>
+                        </div>
+                        <div class="certification-issuer">Amazon Web Services</div>
+                        <div class="certification-meta">ID: AWS-SAP-123456</div>
+                    </div>
+                    <div class="certification-date">Jun 2022 - Expires: Jun 2025</div>
+                </div>
+
+                <div class="certification-item">
+                    <div class="certification-info">
+                        <div class="certification-title">
+                            <a href="https://cloud.google.com/certification" class="project-link">Google Cloud Professional Developer</a>
+                        </div>
+                        <div class="certification-issuer">Google Cloud Platform</div>
+                        <div class="certification-meta">ID: GCP-PD-789012</div>
+                    </div>
+                    <div class="certification-date">Sep 2021 - Expires: Sep 2024</div>
+                </div>
+
+                <div class="certification-item">
+                    <div class="certification-info">
+                        <div class="certification-title">
+                            <a href="https://www.cncf.io/certification/cka/" class="project-link">Certified Kubernetes Administrator</a>
+                        </div>
+                        <div class="certification-issuer">Cloud Native Computing Foundation</div>
+                        <div class="certification-meta">ID: CKA-345678</div>
+                    </div>
+                    <div class="certification-date">Mar 2021 - Expires: Mar 2024</div>
+                </div>
+
+                <div class="certification-item">
+                    <div class="certification-info">
+                        <div class="certification-title">
+                            <a href="https://university.mongodb.com/certifications" class="project-link">MongoDB Certified Developer</a>
+                        </div>
+                        <div class="certification-issuer">MongoDB University</div>
+                    </div>
+                    <div class="certification-date">Nov 2020</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

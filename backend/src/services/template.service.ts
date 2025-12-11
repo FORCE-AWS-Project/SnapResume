@@ -26,9 +26,7 @@ export class TemplateService {
         },
       });
     } else {
-      // For listing all templates, we need a known list
-      // In production, you'd scan or have a dedicated GSI
-      const knownTemplateIds = ['TPL_MODERN_001', 'TPL_CLASSIC_001', 'TPL_MINIMAL_001'];
+      const knownTemplateIds = ['TPL_MODERN_001', 'TPL_NEON_DREAMS_001', 'TPL_MINIMAL_001'];
 
       const items: Template[] = [];
       for (const templateId of knownTemplateIds) {

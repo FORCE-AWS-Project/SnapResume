@@ -1,4 +1,4 @@
-﻿import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { Spin, Result, Button } from 'antd'
 import { useState, useEffect } from 'react'
@@ -17,11 +17,10 @@ import {
 import FormPanel from './components/FormPanel'
 import PreviewPanel from './components/PreviewPanel'
 import { ResumeManagerProvider } from '../../components/ResumeManager/context/ResumeManagerContext'
-import { ResumeManagerUniversal } from '../../components/ResumeManager/ResumeManagerUniversal'
+import { ResumeProvider } from '../../contexts/ResumeContext'
+import EditorPageContent from './EditorPageContent'
 import styles from './EditorPage.module.css'
 import html2pdf from 'html2pdf.js'
-
-const { Header, Content } = Layout
 
 export default function EditorPage() {
   const navigate = useNavigate()

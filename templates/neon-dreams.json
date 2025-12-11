@@ -1,0 +1,165 @@
+{
+    "templateId": "TPL_NEON_DREAMS_001",
+    "name": "Neon Dreams",
+    "category": "modern",
+    "templateFileUrl": "https://resume-snap-dev-user-uploads.s3.us-east-1.amazonaws.com/templates/neon-dreams-preview.html",
+    "previewImageUrl": "https://resume-snap-dev-user-uploads.s3.us-east-1.amazonaws.com/templates/neon-dreams-preview-image.jpg",
+    "inputDataSchema": {
+        "personalInfo": {
+            "type": "object",
+            "required": true,
+            "fields": {
+                "name": {
+                    "type": "string",
+                    "title": "Full Name"
+                },
+                "title": {
+                    "type": "string",
+                    "title": "Professional Title"
+                },
+                "email": {
+                    "type": "string",
+                    "title": "Email Address"
+                },
+                "phone": {
+                    "type": "string",
+                    "title": "Phone Number"
+                },
+                "location": {
+                    "type": "string",
+                    "title": "Location"
+                },
+                "summary": {
+                    "type": "text",
+                    "title": "Professional Summary"
+                }
+            }
+        },
+        "experience": {
+            "type": "array",
+            "title": "Work Experience",
+            "minItems": 0,
+            "maxItems": 10,
+            "itemSchema": {
+                "sectionId": {
+                    "type": "string",
+                    "title": "Section ID"
+                },
+                "position": {
+                    "type": "string",
+                    "title": "Job Title"
+                },
+                "company": {
+                    "type": "string",
+                    "title": "Company Name"
+                },
+                "location": {
+                    "type": "string",
+                    "title": "Location"
+                },
+                "startDate": {
+                    "type": "date",
+                    "title": "Start Date"
+                },
+                "endDate": {
+                    "type": "date",
+                    "title": "End Date"
+                },
+                "current": {
+                    "type": "boolean",
+                    "title": "Currently Working Here"
+                },
+                "description": {
+                    "type": "text",
+                    "title": "Job Description"
+                },
+                "technologies": {
+                    "type": "array",
+                    "title": "Technologies Used",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "projects": {
+            "type": "array",
+            "title": "Projects",
+            "minItems": 0,
+            "maxItems": 10,
+            "itemSchema": {
+                "sectionId": {
+                    "type": "string",
+                    "title": "Section ID"
+                },
+                "name": {
+                    "type": "string",
+                    "title": "Project Name"
+                },
+                "description": {
+                    "type": "text",
+                    "title": "Description"
+                },
+                "url": {
+                    "type": "string",
+                    "title": "Project URL"
+                },
+                "technologies": {
+                    "type": "array",
+                    "title": "Technologies",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "startDate": {
+                    "type": "date",
+                    "title": "Start Date"
+                },
+                "endDate": {
+                    "type": "date",
+                    "title": "End Date"
+                }
+            }
+        },
+        "education": {
+            "type": "array",
+            "title": "Education",
+            "minItems": 0,
+            "maxItems": 5,
+            "itemSchema": {
+                "sectionId": {
+                    "type": "string",
+                    "title": "Section ID"
+                },
+                "institution": {
+                    "type": "string",
+                    "title": "Institution Name"
+                },
+                "degree": {
+                    "type": "string",
+                    "title": "Degree"
+                },
+                "field": {
+                    "type": "string",
+                    "title": "Field of Study"
+                },
+                "location": {
+                    "type": "string",
+                    "title": "Location"
+                },
+                "startDate": {
+                    "type": "date",
+                    "title": "Start Date"
+                },
+                "endDate": {
+                    "type": "date",
+                    "title": "End Date"
+                },
+                "gpa": {
+                    "type": "string",
+                    "title": "GPA"
+                }
+            }
+        }
+    }
+}

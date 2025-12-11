@@ -8,6 +8,7 @@ import PricingPage from './pages/PricingPage/PricingPage'
 import AboutPage from './pages/AboutPage/AboutPage'
 import Auth from './pages/Auth/Auth'
 import EditorPage from './pages/EditorPage/EditorPage'
+import ToastProvider from './components/ToastProvider/ToastProvider'
 import UserProfilePage from './pages/UserProfilePage/UserProfilePage'
 
 function App() {
