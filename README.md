@@ -16,7 +16,7 @@ SnapResume is a modern, cloud-native application designed to help users create p
 ## 🛠️ Tech Stack
 
 ### Frontend
-*   **Framework**: React 19 + Vite
+*   **Framework**: React 18 + Vite
 *   **UI Library**: Ant Design
 *   **Routing**: React Router v7
 *   **State/Utils**: Axios, Day.js, HTML2PDF
