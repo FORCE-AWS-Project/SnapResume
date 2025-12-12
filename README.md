@@ -84,7 +84,7 @@ npm run dev
 **Backend Development**
 ```bash
 cd backend
-npm run dev
+npm run watch
 ```
 
 ## ☁️ Infrastructure & Deployment
